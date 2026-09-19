@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Admin Dashboard | Iris AI</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<link rel="stylesheet"
+href="dashboard.css">
+
+</head>
+
+<body>
+<main class="main">
+
+<div class="container-fluid">
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            <i class="fa-solid fa-eye"></i>
+        </div>
+
+        <div class="logo-text">
+
+            <h4>Iris AI</h4>
+
+            <small>Recognition System</small>
+
+        </div>
+
+    </div>
+
+    <ul class="menu">
+
+        <li class="active">
+
+            <a href="dashboard.html">
+
+                <i class="fa-solid fa-gauge-high"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="register.html">
+
+                <i class="fa-solid fa-user-plus"></i>
+
+                <span>Register Employee</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="camera.html">
+
+                <i class="fa-solid fa-camera"></i>
+
+                <span>Live Scan</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="report.html">
+
+                <i class="fa-solid fa-file-lines"></i>
+
+                <span>Reports</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="#">
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                <span>Analytics</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="about.html">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+                <span>About</span>
+
+            </a>
+
+        </li>
+
+    </ul>
+
+    <div class="sidebar-footer">
+
+        <div class="version">
+
+            <strong>AI Iris Recognition</strong>
+
+            <small>Version 2.0</small>
+
+        </div>
+
+    </div>
+
+</aside>
+
+    <header class="topbar">
+
+    <div class="left">
+
+        <button id="toggleSidebar">
+
+            <i class="fa-solid fa-bars"></i>
+
+        </button>
+
+        <div>
+
+            <h2 class="page-title">
+
+                AI Iris Dashboard
+
+            </h2>
+
+            <small class="page-subtitle">
+
+                Employee Recognition & Analytics
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <div class="right">
+
+        <div class="search-box">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+                type="text"
+                id="searchEmployee"
+                placeholder="Search Employee...">
+
+        </div>
+
+        <button class="icon-btn" title="Notifications">
+
+            <i class="fa-regular fa-bell"></i>
+
+        </button>
+
+        <div class="profile">
+
+            <img
+                src="images/admin.png"
+                alt="Admin">
+
+            <div>
+
+                <strong>Administrator</strong>
+
+                <small id="todayDate"></small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+<div class="row g-4 mb-4">
+
+    <!-- Total Employees -->
+
+    <div class="col-xl-3 col-lg-6">
+
+        <div class="stat-card employee-card">
+
+            <div class="card-left">
+
+                <div class="card-icon">
+
+                    <i class="fa-solid fa-users"></i>
+
+                </div>
+
+                <div class="card-content">
+
+                    <span>Total Employees</span>
+
+                    <h2 id="totalUsers">0</h2>
+
+                    <small>Registered Employees</small>
+
+                </div>
+
+            </div>
+
+            <div class="card-arrow">
+
+                <i class="fa-solid fa-arrow-trend-up"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Total Scans -->
+
+    <div class="col-xl-3 col-lg-6">
+
+        <div class="stat-card scan-card">
+
+            <div class="card-left">
+
+                <div class="card-icon">
+
+                    <i class="fa-solid fa-camera"></i>
+
+                </div>
+
+                <div class="card-content">
+
+                    <span>Total Scans</span>
+
+                    <h2 id="totalScans">0</h2>
+
+                    <small>Recognition History</small>
+
+                </div>
+
+            </div>
+
+            <div class="card-arrow">
+
+                <i class="fa-solid fa-eye"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Accuracy -->
+
+    <div class="col-xl-3 col-lg-6">
+
+        <div class="stat-card accuracy-card">
+
+            <div class="card-left">
+
+                <div class="card-icon">
+
+                    <i class="fa-solid fa-shield-check"></i>
+
+                </div>
+
+                <div class="card-content">
+
+                    <span>Accuracy</span>
+
+                    <h2 id="verifiedUsers">0%</h2>
+
+                    <small>Recognition Accuracy</small>
+
+                </div>
+
+            </div>
+
+            <div class="card-arrow">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Not Matched -->
+
+    <div class="col-xl-3 col-lg-6">
+
+        <div class="stat-card failed-card">
+
+            <div class="card-left">
+
+                <div class="card-icon">
+
+                    <i class="fa-solid fa-circle-xmark"></i>
+
+                </div>
+
+                <div class="card-content">
+
+                    <span>Not Matched</span>
+
+                    <h2 id="notMatched">0</h2>
+
+                    <small>Verification Failed</small>
+
+                </div>
+
+            </div>
+
+            <div class="card-arrow">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ================= QUICK ACTIONS ================= -->
+
+<div class="row mt-4 mb-4">
+
+    <div class="col-lg-12">
+
+        <div class="quick-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h5 class="mb-1">
+
+                        <i class="fa-solid fa-bolt text-warning"></i>
+
+                        Quick Actions
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Frequently used system modules
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="row g-4">
+
+                <!-- Register -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="register.html" class="quick-btn">
+
+                        <div class="quick-icon bg-primary">
+
+                            <i class="fa-solid fa-user-plus"></i>
+
+                        </div>
+
+                        <h6>Register Employee</h6>
+
+                        <small>Add New Employee</small>
+
+                    </a>
+
+                </div>
+
+                <!-- Scan -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="camera.html" class="quick-btn">
+
+                        <div class="quick-icon bg-success">
+
+                            <i class="fa-solid fa-camera"></i>
+
+                        </div>
+
+                        <h6>Start Scan</h6>
+
+                        <small>Verify Iris</small>
+
+                    </a>
+
+                </div>
+
+                <!-- Reports -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="report.html" class="quick-btn">
+
+                        <div class="quick-icon bg-warning">
+
+                            <i class="fa-solid fa-file-lines"></i>
+
+                        </div>
+
+                        <h6>Reports</h6>
+
+                        <small>View Reports</small>
+
+                    </a>
+
+                </div>
+
+                <!-- About -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <a href="about.html" class="quick-btn">
+
+                        <div class="quick-icon bg-danger">
+
+                            <i class="fa-solid fa-circle-info"></i>
+
+                        </div>
+
+                        <h6>About System</h6>
+
+                        <small>Technology Details</small>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ================= REPORT ANALYTICS ================= -->
+
+<div class="row mt-4">
+
+    <div class="col-lg-12">
+
+        <div class="chart-card">
+
+            <div class="card-header-custom d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="mb-0">
+
+                        <i class="fa-solid fa-chart-column text-primary"></i>
+
+                        Monthly Scan Reports
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Monthly employee verification statistics
+
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary">
+
+                    Live Data
+
+                </span>
+
+            </div>
+
+            <canvas id="reportChart" height="95"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= RECENT SCANS ================= -->
+
+<div class="row mt-4">
+
+    <!-- Recent Scans -->
+
+    <div class="col-lg-8">
+
+        <div class="table-card">
+
+            <div class="table-header d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5>
+
+                        <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+
+                        Recent Iris Scans
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Latest employee verification history
+
+                    </small>
+
+                </div>
+
+                <button class="btn btn-primary btn-sm">
+
+                    <i class="fa-solid fa-rotate"></i>
+
+                    Refresh
+
+                </button>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Report ID</th>
+
+                            <th>Employee</th>
+
+                            <th>Date</th>
+
+                            <th>Similarity</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="scanTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Recent Activity -->
+
+    <div class="col-lg-4">
+
+        <div class="activity-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <h5>
+
+                    <i class="fa-solid fa-bolt text-warning"></i>
+
+                    Recent Activity
+
+                </h5>
+
+                <span class="badge bg-success">
+
+                    Live
+
+                </span>
+
+            </div>
+
+            <div id="activityList">
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<footer class="dashboard-footer">
+
+    <strong>AI Iris Recognition System</strong>
+
+    <span>| Version 2.0 |</span>
+
+    <span>Powered by TensorFlow • OpenCV • FastAPI</span>
+
+    <span>| © 2026</span>
+
+</footer>
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

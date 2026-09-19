@@ -1,0 +1,255 @@
+import os
+import sys
+import json
+import cv2
+import numpy as np
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["TF_NUM_INTRAOP_THREADS"] = "1"
+os.environ["TF_NUM_INTEROP_THREADS"] = "1"
+
+from utils.pupil_detection import detect_pupil
+from utils.iris_segmentation import segment_iris
+from utils.iris_normalization import normalize_iris
+from utils.feature_extractor import extract_features
+from utils.lbp_extractor import calculate_lbp
+from utils.gabor_extractor import apply_gabor
+from utils.glcm_extractor import extract_glcm
+from utils.entropy_extractor import calculate_entropy
+from utils.color_analysis import analyze_color
+from utils.cnn_extractor import extract_cnn_features
+
+
+def json_converter(obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+
+    if isinstance(obj, np.floating):
+        return float(obj)
+
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+
+    return str(obj)
+
+
+def process_one(crop_path, index):
+
+    try:
+
+        print()
+        print("=" * 60)
+        print("VISION IMAGE:", index)
+        print("CROP:", crop_path)
+        print("=" * 60)
+
+        image = cv2.imread(crop_path)
+
+        if image is None:
+            print("ERROR: Unable to read crop")
+            return None
+
+        print("Running pupil detection...")
+        pupil_img, pupil = detect_pupil(image)
+
+        print("Running iris segmentation...")
+        iris_img, iris = segment_iris(image)
+
+        if iris is None:
+            print("ERROR: Iris not detected")
+            return None
+
+        print("Iris:", iris)
+
+        print("Running normalization...")
+        normalized = normalize_iris(image, iris)
+
+        if normalized is None:
+            print("ERROR: Normalization failed")
+            return None
+
+        os.makedirs("outputs", exist_ok=True)
+
+        normalized_path = "outputs/normalized_iris.jpg"
+        cv2.imwrite(normalized_path, normalized)
+
+        print("Running feature extraction...")
+        features = extract_features(pupil, iris, image)
+
+        if features is None:
+            print("ERROR: Feature extraction failed")
+            return None
+
+        print("Running LBP...")
+        lbp = calculate_lbp(normalized)
+
+        print("Running Gabor...")
+        gabor = apply_gabor(normalized)
+
+        print("Running GLCM...")
+        glcm_features = extract_glcm(normalized)
+
+        print("Running entropy...")
+        entropy = calculate_entropy(normalized)
+
+        print("Running color analysis...")
+        color_analysis = {"eye_color": "Unknown"}
+
+        # Use the original color iris image for eye-color analysis.
+# Normalized iris is grayscale and must not be used for color detection.
+color_source = iris_img if iris_img is not None else image
+temp = analyze_color(color_source)
+
+        if temp is not None:
+            color_analysis = temp
+
+        print("Running CNN...")
+        cnn_embedding = extract_cnn_features(normalized)
+
+        if isinstance(cnn_embedding, np.ndarray):
+            cnn_embedding = cnn_embedding.tolist()
+
+        pupil_path = "outputs/pupil.jpg"
+        segment_path = "outputs/iris_segment.jpg"
+        lbp_path = "outputs/lbp.jpg"
+        gabor_path = "outputs/gabor.jpg"
+
+        if pupil_img is not None:
+            cv2.imwrite(pupil_path, pupil_img)
+
+        if iris_img is not None:
+            cv2.imwrite(segment_path, iris_img)
+
+        if lbp is not None:
+            cv2.imwrite(lbp_path, lbp)
+
+        if gabor is not None:
+            cv2.imwrite(gabor_path, gabor)
+
+        result = {
+            "crop_path": crop_path,
+            "pupil": pupil,
+            "iris": iris,
+            "features": features,
+            "glcm": glcm_features,
+            "entropy": entropy,
+            "color_analysis": color_analysis,
+            "cnn_embedding": cnn_embedding,
+            "images": {
+                "pupil": pupil_path,
+                "segmentation": segment_path,
+                "normalized": normalized_path,
+                "lbp": lbp_path,
+                "gabor": gabor_path
+            }
+        }
+
+        return json.loads(
+            json.dumps(result, default=json_converter)
+        )
+
+    except Exception as error:
+
+        print(
+            "VISION ERROR:",
+            str(error)
+        )
+
+        return None
+
+
+if len(sys.argv) < 2:
+    print("ERROR: input JSON missing")
+    sys.exit(2)
+
+input_file = sys.argv[1]
+
+if not os.path.exists(input_file):
+    print("ERROR: input file not found")
+    sys.exit(3)
+
+with open(input_file, "r") as f:
+    items = json.load(f)
+
+if not isinstance(items, list):
+    print("ERROR: input must be a list")
+    sys.exit(4)
+
+print("=" * 70)
+print("VISION BATCH WORKER STARTED")
+print("TOTAL CROPS:", len(items))
+print("=" * 70)
+
+results = []
+
+for index, item in enumerate(items, 1):
+
+    crop_path = item.get("crop_path")
+    image_path = item.get("image")
+
+    if not crop_path:
+        results.append({
+            "image": image_path,
+            "success": False,
+            "result": None
+        })
+        continue
+
+    result = process_one(
+        crop_path,
+        index
+    )
+
+    if result is not None:
+
+        print("CNN EMBEDDING SUCCESS")
+        print(
+            "Embedding Length:",
+            len(result["cnn_embedding"])
+        )
+
+        results.append({
+            "image": image_path,
+            "success": True,
+            "result": result
+        })
+
+    else:
+
+        print("VISION FAILED:", image_path)
+
+        results.append({
+            "image": image_path,
+            "success": False,
+            "result": None
+        })
+
+output = {
+    "total": len(items),
+    "successful": sum(
+        1 for x in results
+        if x["success"]
+    ),
+    "failed": sum(
+        1 for x in results
+        if not x["success"]
+    ),
+    "results": results
+}
+
+print(
+    "RESULT_JSON:" +
+    json.dumps(output)
+)
+
+print("=" * 70)
+print("VISION BATCH WORKER COMPLETED")
+print("=" * 70)
+
+sys.exit(0)

@@ -1,0 +1,119 @@
+import os,json,re
+from datetime import datetime
+from pathlib import Path
+from fastapi import APIRouter,HTTPException,Query
+router=APIRouter()
+BASE_DIR=Path(__file__).resolve().parent.parent
+OUTPUTS_FOLDER=BASE_DIR/"outputs"
+REPORTS_FOLDER=OUTPUTS_FOLDER/"reports"
+
+def safe_id(v):
+    if not v: raise HTTPException(400,"report_id is required")
+    v=os.path.basename(v.strip())
+    if not re.fullmatch(r"IR-[A-Za-z0-9_-]+",v): raise HTTPException(400,"Invalid report_id")
+    return v
+def readj(p,default=None):
+    try:
+        if p.exists():
+            with p.open("r",encoding="utf-8") as f:return json.load(f)
+    except Exception as e: print("REPORT JSON READ ERROR:",p,e)
+    return {} if default is None else default
+def first(*v,default=None):
+    for x in v:
+        if x is not None and x!="":return x
+    return default
+def norm(v):
+    if not v:return v
+    v=str(v).replace("\\","/")
+    if v.startswith("http://") or v.startswith("https://"):
+        from urllib.parse import urlparse
+        v=urlparse(v).path
+    return "/"+v.lstrip("/")
+
+@router.get("/report")
+async def get_report(report_id:str=Query(...)):
+    rid=safe_id(report_id); d=REPORTS_FOLDER/rid; d.mkdir(parents=True,exist_ok=True)
+    report=readj(d/"report.json",{}); detect=readj(d/"detect.json",{}); verify=readj(d/"verify.json",{})
+    meta=readj(d/"meta.json",{}); vision=readj(d/"vision.json",{}); history=readj(d/"history_saved.json",{})
+    if not detect:detect=readj(OUTPUTS_FOLDER/"detect.json",{})
+    if not verify:verify=readj(OUTPUTS_FOLDER/"verify.json",{})
+    existing=report.get("report",report) if isinstance(report,dict) else {}
+    verification=existing.get("verification") or verify.get("verification") or verify
+    employee=existing.get("employee") or verify.get("employee") or verify.get("customer") or {}
+    iris=existing.get("iris") or vision.get("iris") or verify.get("iris") or {}
+    features=existing.get("features") or vision.get("features") or {}
+    glcm=existing.get("glcm") or vision.get("glcm") or {}
+    entropy=existing.get("entropy",vision.get("entropy"))
+    color=existing.get("color_analysis") or vision.get("color_analysis") or {}
+    cnn=existing.get("cnn_embedding") or vision.get("cnn_embedding") or []
+    analysis=existing.get("analysis") or {}
+    similarity=first(verification.get("similarity") if isinstance(verification,dict) else None,verify.get("similarity"),default=0)
+    confidence=first(verification.get("confidence") if isinstance(verification,dict) else None,verify.get("confidence"),default=0)
+    status=first(verification.get("match_status") if isinstance(verification,dict) else None,verify.get("match_status"),default="Processed")
+    detection=first(analysis.get("detection_confidence") if isinstance(analysis,dict) else None,detect.get("detection_confidence"),detect.get("confidence"),default=0)
+    eye=first(existing.get("eye_side"),verify.get("eye_side"),vision.get("eye_side"),default="Unknown")
+    now=datetime.now()
+    created=first(existing.get("created_at"),meta.get("created_at"),default=now.isoformat())
+    date=first(existing.get("scan_date"),meta.get("scan_date"),default=now.strftime("%Y-%m-%d"))
+    time=first(existing.get("scan_time"),meta.get("scan_time"),default=now.strftime("%H:%M:%S"))
+    for k in ("captured_image","original_image","capture_image","crop_image","segmentation_image","normalized_image","lbp_image","gabor_image"):
+        if k in iris:iris[k]=norm(iris[k])
+    if isinstance(employee,dict):
+        if employee.get("photo_path"):employee["photo_path"]=norm(employee["photo_path"])
+        if isinstance(employee.get("images"),list):employee["images"]=[norm(x) for x in employee["images"]]
+    body={"report_id":rid,"scan_date":date,"scan_time":time,"eye_side":eye,"employee":employee,
+          "verification":{**(verification if isinstance(verification,dict) else {}),"similarity":similarity,"confidence":confidence,"match_status":status},
+          "images":(
+    existing.get("images")
+    or vision.get("images")
+    or {}
+),
+"captured_image":(
+    existing.get("captured_image")
+    or vision.get("captured_image")
+    or vision.get("original_image")
+    or vision.get("capture_image")
+    or ""
+),
+"crop_image":(
+    existing.get("crop_image")
+    or vision.get("crop_image")
+    or ""
+),
+"segmentation_image":(
+    existing.get("segmentation_image")
+    or vision.get("segmentation_image")
+    or (vision.get("images") or {}).get("segmentation")
+    or ""
+),
+"normalized_image":(
+    existing.get("normalized_image")
+    or vision.get("normalized_image")
+    or (vision.get("images") or {}).get("normalized")
+    or ""
+),
+"lbp_image":(
+    existing.get("lbp_image")
+    or vision.get("lbp_image")
+    or (vision.get("images") or {}).get("lbp")
+    or ""
+),
+"gabor_image":(
+    existing.get("gabor_image")
+    or vision.get("gabor_image")
+    or (vision.get("images") or {}).get("gabor")
+    or ""
+),
+"color_analysis":(
+    existing.get("color_analysis")
+    or vision.get("color_analysis")
+    or {}
+),"iris":iris,"features":features,"glcm":glcm,"entropy":entropy,
+          "color_analysis":color,"cnn_embedding":cnn,"detect":detect,"verify":verify,"meta":meta,
+          "analysis":{**(analysis if isinstance(analysis,dict) else {}),"detection_confidence":detection,"eye_side":eye,"features":features,"entropy":entropy,"eye_color":color},
+          "history":history,"created_at":created}
+    final={"status":True,"report_id":rid,"created_at":created,"report":body}
+    try:
+        with (d/"report.json").open("w",encoding="utf-8") as f:json.dump(final,f,ensure_ascii=False,indent=2,default=str)
+    except Exception as e:print("REPORT SAVE ERROR:",e)
+    return final

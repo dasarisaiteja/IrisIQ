@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+opencv-python
+mediapipe
+tensorflow
+numpy
+pandas
+pillow
+scikit-learn
+matplotlib
+python-multipart
+h5py

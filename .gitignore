@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+ai-env/
+*.pyc
+
+# Environment / secrets
+.env
+.env.*
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded/generated files
+uploads/
+outputs/
+runs/
+
+# Datasets / generated datasets
+dataset/
+processed_dataset/
+training_dataset/
+
+# Model/training artifacts
+*.pkl
+*.h5
+*.pt
+*.onnx
+
+# Logs
+*.log
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/

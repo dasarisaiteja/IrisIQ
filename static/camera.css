@@ -1,0 +1,107 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    background:#eef2f7;
+
+    font-family:Arial,Helvetica,sans-serif;
+
+}
+
+/* Live Camera */
+
+#video{
+
+    width:100%;
+
+    max-width:100%;
+
+    height:500px;
+
+    object-fit:cover;
+
+    border:4px solid #0d6efd;
+
+    border-radius:15px;
+
+    background:#000;
+
+}
+
+/* Preview */
+
+#preview{
+
+    max-width:450px;
+
+    width:100%;
+
+    border-radius:12px;
+
+    border:3px solid #198754;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.2);
+
+}
+
+/* Table */
+
+.table th{
+
+    width:45%;
+
+    vertical-align:middle;
+
+}
+
+.table td{
+
+    vertical-align:middle;
+
+    font-weight:bold;
+
+}
+
+/* Cards */
+
+.card{
+
+    border-radius:20px;
+
+}
+
+/* Button */
+
+#captureBtn{
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    padding:14px;
+
+}
+
+/* Loading */
+
+#loading{
+
+    margin-top:20px;
+
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+    #video{
+
+        height:320px;
+
+    }
+
+}

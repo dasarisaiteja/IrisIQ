@@ -15,7 +15,22 @@
 
 <body>
 
-<div class="container mt-5">
+<div class="container py-4">
+
+    <!-- Top Navigation & Auth Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div class="d-flex align-items-center gap-2">
+            <a href="dashboard.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+            </a>
+            <a href="index.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fa-solid fa-house me-1"></i> Home
+            </a>
+        </div>
+        <div id="navAuthContainer">
+            <!-- Populated automatically by auth_client.js -->
+        </div>
+    </div>
 
     <div class="card shadow">
 
@@ -280,8 +295,8 @@
 
 </div>
 
-<script src="auth_client.js"></script>
-<script src="register.js?v=20260908"></script>
+<script src="auth_client.js?v=20260928_3"></script>
+<script src="register.js?v=20260928_3"></script>
 
 </body>
 

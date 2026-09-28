@@ -371,6 +371,7 @@ print("=" * 70)
 # ============================================================
 
 vision_items = []
+conf_by_image = {}
 
 for item in yolo_result.get(
     "results",
@@ -386,6 +387,16 @@ for item in yolo_result.get(
 
     if not result:
         continue
+
+    conf = result.get("confidence")
+    raw_img = item.get("image")
+    if raw_img and conf is not None:
+        conf_by_image[raw_img] = conf
+        conf_by_image[os.path.basename(raw_img)] = conf
+        try:
+            conf_by_image[os.path.abspath(raw_img)] = conf
+        except Exception:
+            pass
 
     crop_path = result.get(
         "crop_path"
@@ -565,6 +576,7 @@ if (
 all_embeddings = []
 processed_images = []
 failed_images = []
+last_scan_info = None
 
 
 for item in vision_result.get(
@@ -628,6 +640,22 @@ for item in vision_result.get(
         processed_images.append(
             image_path
         )
+
+    conf = None
+    if image_path:
+        conf = (
+            conf_by_image.get(image_path)
+            or conf_by_image.get(os.path.basename(image_path))
+        )
+    features = result.get("features") or {}
+    color_analysis = result.get("color_analysis") or {}
+
+    last_scan_info = {
+        "confidence": conf,
+        "eye_color": color_analysis.get("eye_color"),
+        "pupil_radius": features.get("pupil_radius"),
+        "iris_radius": features.get("iris_radius")
+    }
 
 
 # ============================================================
@@ -769,15 +797,20 @@ last_embedding_file = os.path.join(
 
 try:
 
+    payload = {
+        "embedding": last_embedding
+    }
+
+    if last_scan_info:
+        payload["scan_info"] = last_scan_info
+
     with open(
         last_embedding_file,
         "w"
     ) as f:
 
         json.dump(
-            {
-                "embedding": last_embedding
-            },
+            payload,
             f
         )
 

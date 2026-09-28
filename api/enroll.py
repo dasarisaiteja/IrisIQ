@@ -581,6 +581,7 @@ async def enroll(
     )
 
     last_embedding = None
+    scan_info = None
 
     # ========================================================
     # CHECK LAST EMBEDDING FILE
@@ -603,6 +604,10 @@ async def enroll(
 
                 last_embedding = data.get(
                     "embedding"
+                )
+
+                scan_info = data.get(
+                    "scan_info"
                 )
 
         except Exception as error:
@@ -809,7 +814,7 @@ async def enroll(
     # FINAL RESPONSE
     # ========================================================
 
-    return {
+    response = {
 
         "status": True,
 
@@ -863,3 +868,13 @@ async def enroll(
         }
 
     }
+
+    if scan_info and isinstance(scan_info, dict):
+        response["scan_info"] = {
+            "confidence": scan_info.get("confidence"),
+            "eye_color": scan_info.get("eye_color"),
+            "pupil_radius": scan_info.get("pupil_radius"),
+            "iris_radius": scan_info.get("iris_radius")
+        }
+
+    return response

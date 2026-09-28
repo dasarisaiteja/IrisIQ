@@ -1,5 +1,44 @@
 console.log("========== IRIS CAMERA START ==========");
 
+// Enforce staff-only biometric scanning requirement
+const currentRole = (typeof window !== "undefined" && window.IrisAuth && typeof window.IrisAuth.getRole === "function")
+    ? window.IrisAuth.getRole()
+    : null;
+
+if (currentRole === "Student") {
+    alert("Counselor/Admin access required for biometric scanning.");
+    window.location.href = "/static/student_profile.html";
+    throw new Error("Student role not permitted on camera scanning page");
+}
+
+function extractApiErrorMessage(data, fallbackMessage) {
+    if (data && typeof data === "object") {
+        if (typeof data.message === "string" && data.message.trim() !== "") {
+            return data.message;
+        }
+        if (typeof data.detail === "string" && data.detail.trim() !== "") {
+            return data.detail;
+        }
+        if (Array.isArray(data.detail) && data.detail.length > 0) {
+            const items = data.detail.map(d => {
+                if (typeof d === "string") return d;
+                if (d && typeof d === "object" && typeof d.msg === "string") return d.msg;
+                return null;
+            }).filter(Boolean);
+            if (items.length > 0) {
+                return items.join("; ");
+            }
+        }
+        if (data.detail && typeof data.detail === "object") {
+            const nested = data.detail.message || data.detail.error || data.detail.msg;
+            if (typeof nested === "string" && nested.trim() !== "") {
+                return nested;
+            }
+        }
+    }
+    return fallbackMessage;
+}
+
 const employeeCode =
     sessionStorage.getItem("employee_code");
 
@@ -106,7 +145,97 @@ if (loading) {
     loading.style.display = "none";
 }
 
-if (scanStatus) {
+/* =====================================================
+   POST-REGISTRATION SCAN INFO HAND-OFF
+===================================================== */
+
+let hasPostRegistrationInfo = false;
+
+function applyPostRegistrationScanInfo() {
+    const raw = sessionStorage.getItem("lastScanInfo");
+    if (!raw) {
+        return false;
+    }
+
+    try {
+        const info = JSON.parse(raw);
+        if (info && typeof info === "object") {
+            hasPostRegistrationInfo = true;
+
+            if (scanStatus) {
+                scanStatus.innerHTML = "Registered";
+            }
+
+            if (confidence) {
+                if (
+                    info.confidence !== null &&
+                    info.confidence !== undefined &&
+                    info.confidence !== "" &&
+                    !isNaN(Number(info.confidence))
+                ) {
+                    confidence.innerHTML =
+                        (Number(info.confidence) * 100).toFixed(2) + "%";
+                } else {
+                    confidence.innerHTML = "--";
+                }
+            }
+
+            if (eyeColor) {
+                if (
+                    info.eye_color !== null &&
+                    info.eye_color !== undefined &&
+                    String(info.eye_color).trim() !== ""
+                ) {
+                    eyeColor.innerHTML = String(info.eye_color);
+                } else {
+                    eyeColor.innerHTML = "--";
+                }
+            }
+
+            if (pupilRadius) {
+                if (
+                    info.pupil_radius !== null &&
+                    info.pupil_radius !== undefined &&
+                    info.pupil_radius !== "" &&
+                    !isNaN(Number(info.pupil_radius))
+                ) {
+                    pupilRadius.innerHTML = String(info.pupil_radius);
+                } else {
+                    pupilRadius.innerHTML = "--";
+                }
+            }
+
+            if (irisRadius) {
+                if (
+                    info.iris_radius !== null &&
+                    info.iris_radius !== undefined &&
+                    info.iris_radius !== "" &&
+                    !isNaN(Number(info.iris_radius))
+                ) {
+                    irisRadius.innerHTML = String(info.iris_radius);
+                } else {
+                    irisRadius.innerHTML = "--";
+                }
+            }
+            return true;
+        }
+    } catch (err) {
+        console.warn("Failed to parse lastScanInfo from sessionStorage:", err);
+    } finally {
+        // Consumed once so refreshing camera.html safely reverts to Ready / --
+        sessionStorage.removeItem("lastScanInfo");
+    }
+    return false;
+}
+
+if (typeof window !== "undefined") {
+    window.applyPostRegistrationScanInfo = applyPostRegistrationScanInfo;
+}
+
+// Apply immediately on load
+applyPostRegistrationScanInfo();
+
+if (scanStatus && !hasPostRegistrationInfo) {
     scanStatus.innerHTML =
         "Starting Camera...";
 }
@@ -537,7 +666,7 @@ async function startCamera() {
 
         btn.disabled = false;
 
-        if (scanStatus) {
+        if (scanStatus && !hasPostRegistrationInfo) {
 
             scanStatus.innerHTML =
                 "Ready";
@@ -1366,10 +1495,12 @@ btn.onclick =
                 }
 
 
-                throw new Error(
-                    data?.message ||
+                const errorMsg = extractApiErrorMessage(
+                    data,
                     "YOLO detection failed. Please position your eye correctly and try again."
                 );
+
+                throw new Error(errorMsg);
             }
 
 
@@ -1601,10 +1732,12 @@ btn.onclick =
                 !verify.status
             ) {
 
-                throw new Error(
-                    verify?.message ||
+                const verifyErrorMsg = extractApiErrorMessage(
+                    verify,
                     "Biometric verification failed."
                 );
+
+                throw new Error(verifyErrorMsg);
             }
 
 

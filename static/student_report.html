@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Student Profile & Assessment Report (Report V2) | Iris AI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="student_report.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<!-- Interactive Control Topbar -->
+<div class="report-topbar">
+    <div class="d-flex align-items-center gap-3">
+        <a href="dashboard.html" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-arrow-left me-1"></i> Dashboard</a>
+        <a href="students.html" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-users me-1"></i> Students</a>
+        <select id="reportStudentSelect" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 260px;"></select>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button id="printBtn" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-print me-1"></i> Print</button>
+        <button id="downloadPdfBtn" class="btn btn-sm btn-primary px-3"><i class="fa-solid fa-file-pdf me-1"></i> Download PDF (V2)</button>
+    </div>
+</div>
+
+<div class="report-container" id="reportRoot">
+    <!-- 1. Cover Page -->
+    <div class="cover-page" id="sec01">
+        <div class="cover-badge"><i class="fa-solid fa-award me-1"></i> Official Client Intelligence Dossier</div>
+        <h1 class="display-5 fw-bold mb-2">Comprehensive AI Student Profile & Assessment Report</h1>
+        <h5 class="text-info fw-semibold mb-4">Multi-Source Behavioral, Cognitive, Academic & Career Intelligence</h5>
+        <div class="row g-3 mt-4 pt-3 border-top border-secondary">
+            <div class="col-sm-4"><small class="text-secondary d-block">Report ID</small><strong id="repId">Loading...</strong></div>
+            <div class="col-sm-4"><small class="text-secondary d-block">Report Version</small><strong>Report V2 (AI Profiling)</strong></div>
+            <div class="col-sm-4"><small class="text-secondary d-block">Date of Generation</small><strong id="repDate">-</strong></div>
+        </div>
+    </div>
+
+    <!-- 2. Student Details -->
+    <div class="section-block" id="sec02">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">02</span> Student Demographic & Academic Profile</h4>
+            <span class="source-badge">Source: profile-derived</span>
+        </div>
+        <div class="row align-items-center g-4">
+            <div class="col-auto">
+                <img id="stuPhoto" src="images/admin.png" class="student-photo-lg" alt="Photo" onerror="this.src='images/admin.png'">
+            </div>
+            <div class="col">
+                <h3 class="fw-bold m-0" id="stuName">-</h3>
+                <p class="text-muted mb-2" id="stuInstitute">-</p>
+                <div class="row g-2 small">
+                    <div class="col-sm-4"><b>Student ID:</b> <span id="stuId">-</span></div>
+                    <div class="col-sm-4"><b>Age & Gender:</b> <span id="stuAgeGender">-</span></div>
+                    <div class="col-sm-4"><b>Stream:</b> <span id="stuStream" class="badge bg-primary-subtle text-primary">-</span></div>
+                    <div class="col-sm-4"><b>Course & Year:</b> <span id="stuCourseYear">-</span></div>
+                    <div class="col-sm-4"><b>Contact:</b> <span id="stuContact">-</span></div>
+                    <div class="col-sm-4"><b>Location:</b> <span id="stuLocation">-</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Executive Summary -->
+    <div class="section-block" id="sec03">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">03</span> Executive Summary</h4>
+            <span class="source-badge">Source: rule-based</span>
+        </div>
+        <div class="p-3 bg-light rounded-3 border mb-3">
+            <p class="lead fs-6 mb-0 text-dark" id="execSummaryText">-</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4"><div class="metric-card"><div class="metric-title">Primary Stream Affinity</div><div class="metric-val fs-5" id="execStream">-</div></div></div>
+            <div class="col-md-4"><div class="metric-card"><div class="metric-title">Primary Career Affinity</div><div class="metric-val fs-5" id="execCareer">-</div></div></div>
+            <div class="col-md-4"><div class="metric-card"><div class="metric-title">Overall Cognitive Index</div><div class="metric-val fs-5" id="execCogIndex">-</div></div></div>
+        </div>
+    </div>
+
+    <!-- 4. Iris Analysis & 5. Iris Quality -->
+    <div class="section-block" id="sec04_05">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="section-header mb-3">
+                    <h4 class="section-title"><span class="section-num">04</span> Biometric Iris Analysis</h4>
+                    <span class="source-badge">Source: iris-derived</span>
+                </div>
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Biometric Status:</span>
+                        <strong id="irisStatus" class="text-primary">-</strong>
+                    </div>
+                    <p class="small text-muted mb-0" id="irisNotes">
+                        Enrolled reference data from iris biometric system used for identification and capture validation only.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="section-header mb-3">
+                    <h4 class="section-title"><span class="section-num">05</span> Iris Capture Quality Diagnostics</h4>
+                    <span class="source-badge">Source: iris-derived</span>
+                </div>
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="row g-2 small">
+                        <div class="col-6"><b>Capture Quality:</b> <span id="iqScore" class="badge bg-success">88.5%</span></div>
+                        <div class="col-6"><b>Image Rating:</b> <span id="iqRating">Good</span></div>
+                        <div class="col-6"><b>Usable Iris Area:</b> <span id="iqUsable">92.4%</span></div>
+                        <div class="col-6"><b>Occlusion Ratio:</b> <span id="iqOcclusion">7.6%</span></div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Evaluates blur, contrast, and eyelid boundary clearance.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Personality Profile -->
+    <div class="section-block" id="sec06">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">06</span> Personality Profile (Big Five)</h4>
+            <span class="source-badge">Source: assessment-derived</span>
+        </div>
+        <div id="personalityContainer" class="row g-3"></div>
+    </div>
+
+    <!-- 7. Strengths & 8. Development Areas -->
+    <div class="section-block" id="sec07_08">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="section-header mb-3">
+                    <h4 class="section-title"><span class="section-num">07</span> Identified Strengths</h4>
+                    <span class="source-badge">Source: assessment-derived</span>
+                </div>
+                <div id="strengthsList"></div>
+            </div>
+            <div class="col-md-6">
+                <div class="section-header mb-3">
+                    <h4 class="section-title"><span class="section-num">08</span> Priority Development Areas</h4>
+                    <span class="source-badge">Source: rule-based</span>
+                </div>
+                <div id="devAreasList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. Behavioural Indicators -->
+    <div class="section-block" id="sec09">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">09</span> Behavioural Indicators</h4>
+            <span class="source-badge">Source: assessment-derived</span>
+        </div>
+        <div id="behaviourContainer" class="row g-3"></div>
+    </div>
+
+    <!-- 10. Cognitive Profile & 11. Critical Abilities -->
+    <div class="section-block" id="sec10_11">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">10 & 11</span> Cognitive Profile & Critical Abilities</h4>
+            <span class="source-badge">Source: assessment-derived</span>
+        </div>
+        <p class="small text-muted mb-3">10-Domain assessment-derived cognitive indicators synthesized from structured questionnaires and confirmed curriculum marks.</p>
+        <div id="cognitiveGrid" class="row g-3 mb-3"></div>
+
+        <h6 class="fw-bold mb-2 text-dark">11. Critical Abilities Breakdown</h6>
+        <div id="criticalAbilitiesGrid" class="row g-3 mb-4"></div>
+
+        <!-- Legacy Reference -->
+        <div class="p-3 bg-warning-subtle text-dark border border-warning rounded-3 small">
+            <strong>Historical Demonstration Reference:</strong>
+            Static iris biometric images do not measure human brain structure, neuron count, or cranial activity.
+        </div>
+    </div>
+
+    <!-- 12. VAK, 13. Leadership, 14. Thinking/Action, 15. Team Role -->
+    <div class="section-block" id="sec12_15">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">12 - 15</span> Learning & Leadership Dynamics</h4>
+            <span class="source-badge">Source: assessment-derived</span>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold mb-2">12. Learning Preferences (VAK)</h6>
+                    <div id="repVakContent" class="small">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold mb-2">13. Leadership Orientation</h6>
+                    <div id="repLeadContent" class="small">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold mb-2">14. Thinking vs. Action</h6>
+                    <div id="repThinkContent" class="small">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold mb-2">15. Team Management vs. Team Player</h6>
+                    <div id="repTeamContent" class="small">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 16. Academic Performance & 17. Critical Subjects -->
+    <div class="section-block" id="sec16_17">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">16 & 17</span> Academic Performance & Critical Subjects</h4>
+            <span class="source-badge">Source: academic-derived</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Score</th>
+                        <th>Strength Level</th>
+                        <th>Compatibility</th>
+                        <th>Recommended Improvement</th>
+                    </tr>
+                </thead>
+                <tbody id="repSubjectsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 18. KPI Analysis -->
+    <div class="section-block" id="sec18">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">18</span> Key Performance Indicator (KPI) Matrix</h4>
+            <span class="source-badge">Source: rule-based</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Current Score</th>
+                        <th>Target Score</th>
+                        <th>Measured Gap</th>
+                        <th>Prescribed Action</th>
+                    </tr>
+                </thead>
+                <tbody id="repKpiBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 19. Stream Selection -->
+    <div class="section-block" id="sec19">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">19</span> Stream Affinity Analysis & Educational Pathways</h4>
+            <span class="source-badge">Source: rule-based</span>
+        </div>
+        <div id="repStreamConflicts"></div>
+        <div id="repStreamsContainer" class="row g-3"></div>
+        <div class="mt-3 text-muted small border-top pt-2" id="repStreamProvenance">Confidence: Not statistically calibrated | Source: rule-based heuristic matching</div>
+    </div>
+
+    <!-- 20. Co-Curricular & 21. Sports -->
+    <div class="section-block" id="sec20_21">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">20 & 21</span> Co-Curricular & Sports Recommendations</h4>
+            <span class="source-badge">Source: rule-based</span>
+        </div>
+        <h6 class="fw-bold text-primary mb-2">20. Co-Curricular Activities</h6>
+        <div id="repCocurrList" class="row g-3 mb-4"></div>
+
+        <h6 class="fw-bold text-success mb-2">21. Sports Recommendations</h6>
+        <p class="small text-muted mb-2"><i>Ethical Notice: Sports selections are derived from stated interests and activities. No medical inferences are drawn from iris biometrics.</i></p>
+        <div id="repSportsList" class="row g-3"></div>
+    </div>
+
+    <!-- 22, 23, 24, 25. Career Recommendations & Compatibility -->
+    <div class="section-block" id="sec22_25">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">22 - 25</span> Career Recommendations & Compatibility Matrix</h4>
+            <span class="source-badge">Source: rule-based</span>
+        </div>
+        <h6 class="fw-bold text-warning mb-2">22. Higher-Match Vocational Pathways</h6>
+        <div id="repTopCareers" class="row g-3 mb-4"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h6 class="fw-bold text-primary m-0">23. Catalog-Trending Careers</h6>
+            <small class="badge bg-secondary-subtle text-secondary border">Source: Curated Catalog</small>
+        </div>
+        <p class="small text-muted mb-2"><i>Note: Catalog taxonomy categorization; does not represent live macroeconomic labor-market statistics.</i></p>
+        <div id="repTrendCareers" class="row g-3 mb-4"></div>
+
+        <h6 class="fw-bold text-secondary mb-2">24. Additional Career Matches</h6>
+        <div id="repOtherCareers" class="row g-3 mb-4"></div>
+
+        <h6 class="fw-bold text-dark mb-2">25. Career Compatibility Summary Matrix</h6>
+        <div id="repCareerMatrix" class="table-responsive mb-3"></div>
+        <div class="text-muted small border-top pt-2">Confidence: Not statistically calibrated | Source: rule-based heuristic matching</div>
+    </div>
+
+    <!-- 26. Skill Gap & 27. Development Plan -->
+    <div class="section-block" id="sec26_27">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">26 & 27</span> Skill Gap Analysis & Quarterly Development Plan</h4>
+            <span class="source-badge">Source: rule-based</span>
+        </div>
+        <div id="repSkillGaps" class="row g-3 mb-4"></div>
+        <h6 class="fw-bold text-dark mb-2">27. Structured Quarterly Milestone Roadmap</h6>
+        <div id="repRoadmap" class="row g-3"></div>
+    </div>
+
+    <!-- 28. Overall Profile & 29. AI Summary -->
+    <div class="section-block" id="sec28_29">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">28 & 29</span> Holistic Profile & AI Summary</h4>
+            <span class="source-badge">Source: profile-derived / rule-based</span>
+        </div>
+        <div id="repKeySkillsInterests" class="mb-3"></div>
+        <div class="p-4 bg-light rounded-3 border mb-3">
+            <h6 class="fw-bold text-primary mb-2">29. Holistic AI Profile Summary</h6>
+            <p class="lead fs-6 mb-0 text-dark" id="repAiSummary">-</p>
+        </div>
+    </div>
+
+    <!-- 30. Methodology, 31. Data Sources, 32. Disclaimer -->
+    <div class="section-block" id="sec30_32">
+        <div class="section-header">
+            <h4 class="section-title"><span class="section-num">30 - 32</span> Methodology, Provenance & Legal Disclaimers</h4>
+            <span class="source-badge">Source: system-governance</span>
+        </div>
+        <div class="row g-3 small">
+            <div class="col-md-4">
+                <h6 class="fw-bold">30. Methodology</h6>
+                <p class="text-muted">Multi-source assessment aggregation combining curricular records, structured assessment metrics, and rule-weighted vocational compatibility matching. ML infrastructure is implemented and ready for validated model integration; production ML prediction models have not yet been scientifically validated.</p>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold">31. Data Sources</h6>
+                <ul class="text-muted ps-3 mb-0">
+                    <li>Student Profile Records</li>
+                    <li>Academic Curriculum Transcripts</li>
+                    <li>Structured Assessments (8 Domains)</li>
+                    <li>Biometric Iris Capture Quality</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-bold">32. Ethical & Legal Disclaimer</h6>
+                <p class="text-muted">For developmental coaching and academic planning only. Biometric data is strictly limited to identity verification and image diagnostics.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="student_report.js"></script>
+</body>
+</html>

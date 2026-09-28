@@ -1,5 +1,6 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from typing import Dict, Any
 
 import shutil
 import os
@@ -7,6 +8,9 @@ import json
 import subprocess
 import sys
 import traceback
+
+from security.upload_validator import validate_uploaded_image
+from security.auth import require_counselor_or_admin
 
 
 router = APIRouter()
@@ -203,30 +207,29 @@ def run_worker(
 
 @router.post("/detect")
 async def detect(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    current_user: Dict[str, Any] = Depends(require_counselor_or_admin)
 ):
 
     try:
 
         # ====================================================
-        # SAVE UPLOADED FILE
+        # VALIDATE UPLOADED FILE
         # ====================================================
+
+        image_bytes, safe_filename = await validate_uploaded_image(file)
 
         file_path = os.path.join(
             UPLOAD_FOLDER,
-            file.filename
+            safe_filename
         )
-
 
         with open(
             file_path,
             "wb"
         ) as buffer:
 
-            shutil.copyfileobj(
-                file.file,
-                buffer
-            )
+            buffer.write(image_bytes)
 
 
         print("====================================")

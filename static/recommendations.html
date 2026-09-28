@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream, Career & Activity Recommendations | Iris AI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .rec-card {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .rec-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        .score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .score-high { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+        .score-med { background: #e0f2fe; color: #0369a1; border: 2px solid #7dd3fc; }
+        .score-fair { background: #fef3c7; color: #b45309; border: 2px solid #fde68a; }
+        .nav-pills .nav-link {
+            border-radius: 10px;
+            font-weight: 600;
+            color: #475569;
+            padding: 10px 20px;
+            margin-right: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+        }
+        .nav-pills .nav-link.active {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+        .tag-pill {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            margin: 2px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<main class="main">
+<div class="container-fluid">
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="fa-solid fa-eye"></i></div>
+        <div class="logo-text">
+            <h4>Iris AI</h4>
+            <small>Person Profiling System</small>
+        </div>
+    </div>
+    <ul class="menu">
+        <li><a href="dashboard.html"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a></li>
+        <li><a href="students.html"><i class="fa-solid fa-graduation-cap"></i><span>Students</span></a></li>
+        <li><a href="camera.html"><i class="fa-solid fa-camera"></i><span>Iris Analysis (Scan)</span></a></li>
+        <li><a href="assessments.html"><i class="fa-solid fa-list-check"></i><span>Assessments</span></a></li>
+        <li><a href="student_profile.html"><i class="fa-solid fa-user-gear"></i><span>Student Profile</span></a></li>
+        <li><a href="ai_profile.html"><i class="fa-solid fa-brain"></i><span>AI Profile</span></a></li>
+        <li class="active"><a href="recommendations.html"><i class="fa-solid fa-compass"></i><span>Recommendations</span></a></li>
+        <li><a href="student_report.html"><i class="fa-solid fa-file-pdf"></i><span>Report V2 (AI Profile)</span></a></li>
+        <li><a href="report.html"><i class="fa-solid fa-file-lines"></i><span>Report V1 (Biometrics)</span></a></li>
+        <li><a href="about.html"><i class="fa-solid fa-circle-info"></i><span>About</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+        <div class="version">
+            <strong>Iris AI & Profiling</strong>
+            <small>Version 2.0</small>
+        </div>
+    </div>
+</aside>
+
+<div class="main-content">
+    <header class="topbar">
+        <div class="left">
+            <div>
+                <h2 class="page-title">Personalized Recommendations</h2>
+                <small class="page-subtitle">Algorithmic academic stream, vocational career, and co-curricular guidance</small>
+            </div>
+        </div>
+        <div class="right d-flex align-items-center gap-3">
+            <select id="studentSelect" class="form-select form-select-sm" style="min-width: 220px;"></select>
+            <a id="reportBtn" href="student_report.html" class="btn btn-sm btn-primary"><i class="fa-solid fa-file-pdf me-1"></i> Report V2</a>
+        </div>
+    </header>
+
+    <div class="content-body">
+        <!-- Tabs -->
+        <ul class="nav nav-pills mb-4" id="recTabs">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#streamsPane"><i class="fa-solid fa-graduation-cap me-1"></i> Stream Affinity & Pathways</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#careersPane"><i class="fa-solid fa-briefcase me-1"></i> Career Compatibility</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#cocurricularPane"><i class="fa-solid fa-palette me-1"></i> Co-Curricular Activities</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#sportsPane"><i class="fa-solid fa-medal me-1"></i> Sports Recommendations</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#gapsPane"><i class="fa-solid fa-stairs me-1"></i> Skill Gap Roadmap</button></li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- 1. Streams Tab -->
+            <div class="tab-pane fade show active" id="streamsPane">
+                <div class="alert alert-light border d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <strong class="text-primary"><i class="fa-solid fa-lightbulb me-1"></i> Comparative Stream Affinity:</strong>
+                        Evaluates multi-factor alignment across confirmed academic marks, structured cognitive assessments, and declared interests. Heuristic fit index (0–100 scale), not a probability or scientific guarantee. Biometrics are not used to restrict choices.
+                    </div>
+                </div>
+                <div id="streamConflictsContainer"></div>
+                <div id="streamsContainer" class="row g-4">
+                    <div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading stream recommendations...</div>
+                </div>
+            </div>
+
+            <!-- 2. Careers Tab -->
+            <div class="tab-pane fade" id="careersPane">
+                <div class="mb-4">
+                    <h5 class="fw-bold text-dark mb-1"><i class="fa-solid fa-star text-warning me-2"></i> Higher-Match Careers</h5>
+                    <p class="text-muted small">Multi-dimensional compatibility matching student curriculum readiness, skills, cognitive profile, and declared interests (Heuristic fit index 0–100, not a probability or scientific guarantee)</p>
+                    <div id="topCareersContainer" class="row g-4 mb-4"></div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h5 class="fw-bold text-dark m-0"><i class="fa-solid fa-layer-group text-primary me-2"></i> Catalog-Trending Careers</h5>
+                        <span class="badge bg-secondary-subtle text-secondary border">Source: Curated Catalog</span>
+                    </div>
+                    <p class="text-muted small mb-3">Careers categorized as emerging in curated catalog taxonomy (Note: Static catalog metadata; does not represent real-time macroeconomic labor-market statistics)</p>
+                    <div id="trendingCareersContainer" class="row g-4 mb-4"></div>
+
+                    <h5 class="fw-bold text-dark mb-1"><i class="fa-solid fa-compass text-info me-2"></i> Additional Career Matches</h5>
+                    <p class="text-muted small">Further exploratory vocational pathways aligned with secondary profile strengths</p>
+                    <div id="otherCareersContainer" class="row g-4"></div>
+                </div>
+            </div>
+
+            <!-- 3. Co-Curricular Tab -->
+            <div class="tab-pane fade" id="cocurricularPane">
+                <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-palette text-primary me-2"></i> Tailored Co-Curricular Activities</h5>
+                <div id="cocurricularContainer" class="row g-4"></div>
+            </div>
+
+            <!-- 4. Sports Tab -->
+            <div class="tab-pane fade" id="sportsPane">
+                <div class="alert alert-warning border-warning d-flex align-items-center gap-3 mb-4">
+                    <i class="fa-solid fa-shield-halved fa-2x text-warning"></i>
+                    <div>
+                        <strong>Ethical AI Notice:</strong> Sports recommendations are guided strictly by declared personal interests, participation history, and structured assessment coordination preferences. No physical, cardiovascular, or medical capabilities are inferred from iris biometrics.
+                    </div>
+                </div>
+                <div id="sportsContainer" class="row g-4"></div>
+            </div>
+
+            <!-- 5. Skill Gaps Tab -->
+            <div class="tab-pane fade" id="gapsPane">
+                <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-stairs text-primary me-2"></i> Skill & Ability Development Gap Analysis</h5>
+                <div id="gapsContainer" class="row g-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="recommendations.js"></script>
+</body>
+</html>

@@ -59,6 +59,30 @@ href="dashboard.css">
 
         <li>
 
+            <a href="students.html">
+
+                <i class="fa-solid fa-graduation-cap"></i>
+
+                <span>Students</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="camera.html">
+
+                <i class="fa-solid fa-camera"></i>
+
+                <span>Live Iris Scan</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
             <a href="register.html">
 
                 <i class="fa-solid fa-user-plus"></i>
@@ -71,11 +95,59 @@ href="dashboard.css">
 
         <li>
 
-            <a href="camera.html">
+            <a href="assessments.html">
 
-                <i class="fa-solid fa-camera"></i>
+                <i class="fa-solid fa-list-check"></i>
 
-                <span>Live Scan</span>
+                <span>Assessments</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="student_profile.html">
+
+                <i class="fa-solid fa-user-gear"></i>
+
+                <span>Student Profile</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="ai_profile.html">
+
+                <i class="fa-solid fa-brain"></i>
+
+                <span>AI Profile</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="recommendations.html">
+
+                <i class="fa-solid fa-compass"></i>
+
+                <span>Recommendations</span>
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="student_report.html">
+
+                <i class="fa-solid fa-file-pdf"></i>
+
+                <span>Report V2 (AI Profile)</span>
 
             </a>
 
@@ -87,19 +159,7 @@ href="dashboard.css">
 
                 <i class="fa-solid fa-file-lines"></i>
 
-                <span>Reports</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="#">
-
-                <i class="fa-solid fa-chart-column"></i>
-
-                <span>Analytics</span>
+                <span>Report V1 (Biometrics)</span>
 
             </a>
 
@@ -346,6 +406,120 @@ href="dashboard.css">
     </div>
 
 </div>
+
+<!-- ================= STUDENT INTELLIGENCE METRICS ================= -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold text-dark m-0">
+                <i class="fa-solid fa-graduation-cap text-primary me-2"></i>
+                Student Profiling & Intelligence Overview
+            </h6>
+            <a href="students.html" class="btn btn-sm btn-outline-primary py-1 px-3">
+                <i class="fa-solid fa-users me-1"></i> View Students
+            </a>
+        </div>
+    </div>
+
+    <!-- Total Students -->
+    <div class="col-xl-3 col-md-6 col-12">
+        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Total Students</small>
+                <h3 class="fw-bold text-primary m-0" id="totalStudents">0</h3>
+                <small class="text-muted" style="font-size: 11px;">Registered Profiles</small>
+            </div>
+            <div class="p-3 rounded-circle bg-primary-subtle text-primary">
+                <i class="fa-solid fa-users fa-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Assessments -->
+    <div class="col-xl-3 col-md-6 col-12">
+        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Completed Assessments</small>
+                <h3 class="fw-bold text-success m-0" id="completedAssessments">0</h3>
+                <small class="text-muted" style="font-size: 11px;">8-Domain Evaluations</small>
+            </div>
+            <div class="p-3 rounded-circle bg-success-subtle text-success">
+                <i class="fa-solid fa-list-check fa-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profiles Generated -->
+    <div class="col-xl-3 col-md-6 col-12">
+        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Profiles Generated</small>
+                <h3 class="fw-bold text-info m-0" id="profilesGenerated">0</h3>
+                <small class="text-muted" style="font-size: 11px;">AI Holistic Profiles</small>
+            </div>
+            <div class="p-3 rounded-circle bg-info-subtle text-info">
+                <i class="fa-solid fa-brain fa-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Generated -->
+    <div class="col-xl-3 col-md-6 col-12">
+        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Reports Generated</small>
+                <h3 class="fw-bold text-warning m-0" id="reportsGenerated">0</h3>
+                <small class="text-muted" style="font-size: 11px;">V2 Client Reports</small>
+            </div>
+            <div class="p-3 rounded-circle bg-warning-subtle text-warning">
+                <i class="fa-solid fa-file-pdf fa-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Career Recommendations -->
+    <div class="col-xl-4 col-md-4 col-12">
+        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Career Recommendations</small>
+                <h4 class="fw-bold text-dark m-0" id="careerRecommendations">0</h4>
+                <small class="text-muted" style="font-size: 11px;">Top & Trending Matches</small>
+            </div>
+            <div class="p-2 rounded bg-light text-primary">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stream Recommendations -->
+    <div class="col-xl-4 col-md-4 col-12">
+        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Stream Recommendations</small>
+                <h4 class="fw-bold text-dark m-0" id="streamRecommendations">0</h4>
+                <small class="text-muted" style="font-size: 11px;">STEM, Commerce & Arts</small>
+            </div>
+            <div class="p-2 rounded bg-light text-info">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Assessments -->
+    <div class="col-xl-4 col-md-4 col-12">
+        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
+            <div>
+                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Pending Assessments</small>
+                <h4 class="fw-bold text-secondary m-0" id="pendingAssessments">0</h4>
+                <small class="text-muted" style="font-size: 11px;">Awaiting Student Input</small>
+            </div>
+            <div class="p-2 rounded bg-light text-secondary">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ================= QUICK ACTIONS ================= -->
 
 <div class="row mt-4 mb-4">

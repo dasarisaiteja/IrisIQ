@@ -130,6 +130,31 @@ async function loadDashboard() {
             notMatched
         );
 
+        // ==================================================
+        // STUDENT INTELLIGENCE CARDS (ADDITIVE)
+        // ==================================================
+        if (document.getElementById("totalStudents")) {
+            animate("totalStudents", Number(data.total_students ?? 0));
+        }
+        if (document.getElementById("completedAssessments")) {
+            animate("completedAssessments", Number(data.completed_assessments ?? 0));
+        }
+        if (document.getElementById("profilesGenerated")) {
+            animate("profilesGenerated", Number(data.profiles_generated ?? 0));
+        }
+        if (document.getElementById("reportsGenerated")) {
+            animate("reportsGenerated", Number(data.reports_generated ?? 0));
+        }
+        if (document.getElementById("careerRecommendations")) {
+            animate("careerRecommendations", Number(data.career_recommendations ?? 0));
+        }
+        if (document.getElementById("streamRecommendations")) {
+            animate("streamRecommendations", Number(data.stream_recommendations ?? 0));
+        }
+        if (document.getElementById("pendingAssessments")) {
+            animate("pendingAssessments", Number(data.pending_assessments ?? 0));
+        }
+
 
         // ==================================================
         // RECENT SCANS

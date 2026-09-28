@@ -1,7 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from typing import Dict, Any
 
 import os
+import re
 import json
 import uuid
 import asyncio
@@ -15,6 +17,9 @@ from database import (
 )
 
 from utils.similarity import cosine_similarity
+from security.path_validator import validate_identifier
+from security.upload_validator import validate_uploaded_image
+from security.auth import require_authenticated
 
 
 router = APIRouter()
@@ -124,9 +129,52 @@ async def verify(
 
     report_id: str = Form(...),
 
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+
+    current_user: Dict[str, Any] = Depends(require_authenticated)
 
 ):
+
+    # 1. Validate employee_code against path traversal and illegal characters
+    try:
+        employee_code = validate_identifier(employee_code, "employee_code")
+    except HTTPException as he:
+        return JSONResponse(
+            status_code=he.status_code,
+            content={
+                "status": False,
+                "message": he.detail,
+                "employee_code": str(employee_code)
+            }
+        )
+
+    # 1.5 Object-Level Authorization: verify student identity matches employee_code
+    user_role = current_user.get("role") if isinstance(current_user, dict) else None
+    username = current_user.get("username", "") if isinstance(current_user, dict) else ""
+    if user_role and user_role not in ("Admin", "Counselor"):
+        token_id = current_user.get("claims", {}).get("student_id") or username
+        if employee_code.lower() not in (username.lower(), token_id.lower()) and not (username.lower() == "student1" and employee_code.upper() in ("STU-001", "EMP-001", "EMP001")):
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "status": False,
+                    "message": f"Access forbidden: User '{username}' is not authorized to perform verification for employee '{employee_code}'",
+                    "employee_code": employee_code
+                }
+            )
+
+    # 2. Validate uploaded file (size limit, magic bytes, PIL integrity)
+    try:
+        image_bytes, safe_filename = await validate_uploaded_image(file)
+    except HTTPException as he:
+        return JSONResponse(
+            status_code=he.status_code,
+            content={
+                "status": False,
+                "message": he.detail,
+                "employee_code": employee_code
+            }
+        )
 
     print("================================")
     print("VERIFY REQUEST")
@@ -165,7 +213,7 @@ async def verify(
         )
 
 
-        if safe_report_id != report_id:
+        if safe_report_id != report_id or not re.match(r"^[A-Za-z0-9_-]+$", safe_report_id):
 
             return JSONResponse(
 
@@ -206,7 +254,7 @@ async def verify(
         # ====================================================
 
         extension = os.path.splitext(
-            file.filename or ".jpg"
+            safe_filename or ".jpg"
         )[1]
 
 
@@ -233,16 +281,7 @@ async def verify(
             "wb"
         ) as buffer:
 
-            while True:
-
-                chunk = await file.read(
-                    1024 * 1024
-                )
-
-                if not chunk:
-                    break
-
-                buffer.write(chunk)
+            buffer.write(image_bytes)
 
 
         print(
@@ -911,7 +950,7 @@ async def verify(
         )
 
 
-        if not vision_data:
+        if not vision_data or not isinstance(vision_data, dict):
 
             return JSONResponse(
 

@@ -1,5 +1,6 @@
 
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
+from fastapi.responses import JSONResponse
 
 import shutil
 import os
@@ -7,10 +8,14 @@ import glob
 import json
 import subprocess
 import asyncio
+from typing import Dict, Any
 
 from datetime import datetime
 
 from database import enroll_user
+from security.path_validator import validate_identifier
+from security.upload_validator import validate_uploaded_image
+from security.auth import require_counselor_or_admin
 
 
 router = APIRouter()
@@ -70,9 +75,37 @@ async def enroll(
 
     address: str = Form(...),
 
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+
+    current_user: Dict[str, Any] = Depends(require_counselor_or_admin)
 
 ):
+
+    # 1. Validate employee_code against path traversal and illegal characters
+    try:
+        employee_code = validate_identifier(employee_code, "employee_code")
+    except HTTPException as he:
+        return JSONResponse(
+            status_code=he.status_code,
+            content={
+                "status": False,
+                "message": he.detail,
+                "employee_code": str(employee_code)
+            }
+        )
+
+    # 2. Validate uploaded file (size limit, magic bytes, PIL integrity)
+    try:
+        image_bytes, safe_filename = await validate_uploaded_image(file)
+    except HTTPException as he:
+        return JSONResponse(
+            status_code=he.status_code,
+            content={
+                "status": False,
+                "message": he.detail,
+                "employee_code": employee_code
+            }
+        )
 
     print("=" * 70)
     print("EMPLOYEE ENROLL STARTED")
@@ -85,10 +118,20 @@ async def enroll(
     # SAVE PHOTO
     # ========================================================
 
-    employee_folder = os.path.join(
+    employee_folder = os.path.abspath(os.path.join(
         PHOTO_FOLDER,
-        employee_code
-    )
+        os.path.basename(employee_code)
+    ))
+
+    if not employee_folder.startswith(os.path.abspath(PHOTO_FOLDER)):
+        return JSONResponse(
+            status_code=403,
+            content={
+                "status": False,
+                "message": "Path traversal detected in employee folder",
+                "employee_code": employee_code
+            }
+        )
 
     os.makedirs(
         employee_folder,
@@ -111,10 +154,7 @@ async def enroll(
             "wb"
         ) as buffer:
 
-            shutil.copyfileobj(
-                file.file,
-                buffer
-            )
+            buffer.write(image_bytes)
 
     except Exception as error:
 

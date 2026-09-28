@@ -1,0 +1,16 @@
+{
+  "include": [
+    "."
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "ai-env"
+  ],
+  "extraPaths": [
+    ".",
+    "ai-env/lib/python3.9/site-packages",
+    "/Users/dasarisaiteja/Desktop/syne it systems/iris peoject/iris-ai-code/ai-env/lib/python3.9/site-packages"
+  ]
+}

@@ -4,8 +4,13 @@ import json
 import cv2
 import tempfile
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, PROJECT_ROOT)
+API_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(API_DIR)
+
+# Remove api/ from sys.path to prevent api/profile.py from shadowing standard library profile
+sys.path = [p for p in sys.path if os.path.abspath(p) != API_DIR]
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"

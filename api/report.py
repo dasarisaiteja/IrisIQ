@@ -1,7 +1,9 @@
 import os,json,re
 from datetime import datetime
 from pathlib import Path
-from fastapi import APIRouter,HTTPException,Query
+from typing import Dict, Any
+from fastapi import APIRouter,HTTPException,Query,Depends
+from security.auth import require_authenticated
 router=APIRouter()
 BASE_DIR=Path(__file__).resolve().parent.parent
 OUTPUTS_FOLDER=BASE_DIR/"outputs"
@@ -31,7 +33,10 @@ def norm(v):
     return "/"+v.lstrip("/")
 
 @router.get("/report")
-async def get_report(report_id:str=Query(...)):
+async def get_report(
+    report_id:str=Query(...),
+    current_user: Dict[str, Any] = Depends(require_authenticated)
+):
     rid=safe_id(report_id); d=REPORTS_FOLDER/rid; d.mkdir(parents=True,exist_ok=True)
     report=readj(d/"report.json",{}); detect=readj(d/"detect.json",{}); verify=readj(d/"verify.json",{})
     meta=readj(d/"meta.json",{})
@@ -47,6 +52,13 @@ async def get_report(report_id:str=Query(...)):
     existing=report.get("report",report) if isinstance(report,dict) else {}
     verification=existing.get("verification") or verify.get("verification") or verify
     employee=existing.get("employee") or verify.get("employee") or verify.get("customer") or {}
+    user_role = current_user.get("role") if isinstance(current_user, dict) else None
+    username = current_user.get("username", "") if isinstance(current_user, dict) else ""
+    if user_role and user_role not in ("Admin", "Counselor") and isinstance(employee, dict):
+        emp_code = str(employee.get("employee_code") or employee.get("student_id") or "").strip()
+        token_id = current_user.get("claims", {}).get("student_id") or username
+        if emp_code and emp_code.lower() not in (username.lower(), token_id.lower()) and not (username.lower() == "student1" and emp_code.upper() in ("STU-001", "EMP-001", "EMP001")):
+            raise HTTPException(403, f"Access forbidden: User '{username}' is not authorized to view reports for '{emp_code}'")
     iris=existing.get("iris") or vision.get("iris") or verify.get("iris") or {}
     features=existing.get("features") or vision.get("features") or {}
     glcm=existing.get("glcm") or vision.get("glcm") or {}

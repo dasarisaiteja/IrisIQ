@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management | Iris AI Intelligence</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #3b82f6;
+        }
+        .table-card {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .badge-stream {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin: 2px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body>
+<main class="main">
+<div class="container-fluid">
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon"><i class="fa-solid fa-eye"></i></div>
+        <div class="logo-text">
+            <h4>Iris AI</h4>
+            <small>Person Profiling System</small>
+        </div>
+    </div>
+    <ul class="menu">
+        <li>
+            <a href="dashboard.html">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="active">
+            <a href="students.html">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>Students</span>
+            </a>
+        </li>
+        <li>
+            <a href="camera.html">
+                <i class="fa-solid fa-camera"></i>
+                <span>Iris Analysis (Scan)</span>
+            </a>
+        </li>
+        <li>
+            <a href="assessments.html">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Assessments</span>
+            </a>
+        </li>
+        <li>
+            <a href="student_profile.html">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Student Profile</span>
+            </a>
+        </li>
+        <li>
+            <a href="ai_profile.html">
+                <i class="fa-solid fa-brain"></i>
+                <span>AI Profile</span>
+            </a>
+        </li>
+        <li>
+            <a href="recommendations.html">
+                <i class="fa-solid fa-compass"></i>
+                <span>Recommendations</span>
+            </a>
+        </li>
+        <li>
+            <a href="student_report.html">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Report V2 (AI Profile)</span>
+            </a>
+        </li>
+        <li>
+            <a href="report.html">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Report V1 (Biometrics)</span>
+            </a>
+        </li>
+        <li>
+            <a href="about.html">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>About</span>
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-footer">
+        <div class="version">
+            <strong>Iris AI & Profiling</strong>
+            <small>Version 2.0</small>
+        </div>
+    </div>
+</aside>
+
+<div class="main-content">
+    <header class="topbar">
+        <div class="left">
+            <div>
+                <h2 class="page-title">Student Directory</h2>
+                <small class="page-subtitle">Manage registered students, academic records, and assessments</small>
+            </div>
+        </div>
+        <div class="right">
+            <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#newStudentModal">
+                <i class="fa-solid fa-plus me-2"></i> Register New Student
+            </button>
+        </div>
+    </header>
+
+    <div class="content-body">
+        <div class="table-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0"><i class="fa-solid fa-users text-primary me-2"></i> Enrolled Students (<span id="studentCount">0</span>)</h5>
+                <div class="search-box" style="width: 320px;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by name, ID, or course...">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Student ID</th>
+                            <th>Biometric Iris Link</th>
+                            <th>Course & Year</th>
+                            <th>Stream</th>
+                            <th>Contact</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-spinner fa-spin me-2"></i> Loading student directory...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</main>
+
+<!-- Modal: New Student -->
+<div class="modal fade" id="newStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus text-primary me-2"></i> Register New Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name *</label>
+                            <input type="text" id="formFullName" class="form-control" required placeholder="e.g. Aryan Sharma">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Age</label>
+                            <input type="number" id="formAge" class="form-control" value="18" min="10" max="60">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select id="formGender" class="form-select">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" id="formEmail" class="form-control" placeholder="student@example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Mobile Number</label>
+                            <input type="text" id="formMobile" class="form-control" placeholder="+91 9876543210">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">School / College</label>
+                            <input type="text" id="formSchool" class="form-control" placeholder="e.g. Delhi Public School / IIT">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Course / Grade</label>
+                            <input type="text" id="formCourse" class="form-control" placeholder="e.g. Senior Secondary / B.Tech">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Current Year</label>
+                            <input type="text" id="formYear" class="form-control" value="11th Grade" placeholder="e.g. 1st Year / 12th">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Academic Stream</label>
+                            <select id="formStream" class="form-select">
+                                <option value="Science">Science (STEM)</option>
+                                <option value="Commerce">Commerce</option>
+                                <option value="Humanities">Humanities</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Location / City</label>
+                            <input type="text" id="formLocation" class="form-control" placeholder="e.g. Mumbai, India">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Link to Enrolled Iris Biometric (Optional)</label>
+                            <select id="formEmployeeCode" class="form-select">
+                                <option value="">-- No Biometric Record (Assessments Only) --</option>
+                            </select>
+                            <small class="text-muted">Optionally link to an existing enrolled iris profile from the biometric database.</small>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-save me-1"></i> Save Student</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="students.js"></script>
+</body>
+</html>

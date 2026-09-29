@@ -1,21 +1,72 @@
-body{
-
-    background:#eef2f7;
-
+/* IrisIQ Student Registration Styling */
+:root {
+    --bg-dark: #081120;
+    --card-bg: rgba(15, 23, 42, 0.85);
+    --border-glass: rgba(255, 255, 255, 0.12);
+    --primary-accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.35);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
 }
 
-#video{
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
 
-    width:100%;
+body {
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 15% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+    min-height: 100vh;
+    color: var(--text-main);
+    overflow-x: hidden;
+}
 
-    height:500px;
+.registration-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 20px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4), 0 0 40px rgba(59, 130, 246, 0.1);
+}
 
-    border:4px solid #0d6efd;
+.icon-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    border-radius:12px;
+.form-control:focus {
+    background-color: #1e293b !important;
+    border-color: var(--primary-accent) !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+    color: #fff !important;
+}
 
-    object-fit:cover;
+.letter-spacing-1 {
+    letter-spacing: 0.05em;
+}
 
-    background:#000;
+.success-badge {
+    animation: pulseBadge 1.5s ease-in-out infinite alternate;
+}
 
+@keyframes pulseBadge {
+    0% {
+        transform: scale(0.96);
+    }
+    100% {
+        transform: scale(1.04);
+    }
 }

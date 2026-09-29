@@ -1,0 +1,291 @@
+IRIS PROJECT – FRONTEND DETAILED REQUIREMENTS
+Screen-by-screen UI/UX + button behavior + navigation + validation + role-based access
+1. Objective
+Build the complete IRIS frontend from the public website through authentication, role dashboards, student registration, left/right eye scanning, analysis processing, report display and PDF access. Every screen must be connected to backend APIs; no assessment result may be hard-coded.
+2. Roles
+Role
+Login
+Access
+Admin
+Admin Login
+Full system management
+Student
+Student Login
+Own profile, assessment, scan and report
+Counsellor
+Counsellor Login
+Assigned students, reports, counselling and follow-up
+3. Public Website
+Screen/Section
+Must show
+Actions
+Home
+IRIS branding, purpose, eye-assessment overview, CTA
+Get Started, Login, Learn More
+About
+What IRIS is, purpose, who uses it
+Read/scroll
+How It Works
+Register → Left Eye → Right Eye → Analysis → Report → Counselling
+View process
+Features/Benefits
+Assessment/report/counselling benefits
+Learn more
+Contact
+Contact details and optional enquiry form
+Submit enquiry
+Header/Footer
+Logo, navigation, Login, Get Started, copyright
+Navigate
+4. Public Website Button Behavior
+Button
+Click Result
+Get Started
+Open Student Registration
+Login
+Open role selection/login
+Learn More
+Scroll/open How It Works
+Contact Us
+Open Contact
+Submit Contact
+Validate and call contact API; show success/error
+5. Role-Based Login
+Login page must provide three clear choices: Admin, Student and Counsellor.
+Role
+Fields
+Success Route
+Failure
+Admin
+Username/email + password
+Admin Dashboard
+Show invalid credentials
+Student
+Student ID/email + password according to API
+Student Dashboard
+Show invalid credentials
+Counsellor
+Username/email + password
+Counsellor Dashboard
+Show invalid credentials
+Protect routes by role. A user must not open another role's pages by changing the URL.
+Show loading during login, disable duplicate submit, store only the authentication data required by the backend.
+Logout clears the session/token and returns to Login/Public Home.
+6. Admin Dashboard
+Widget/Module
+Display
+Click
+Total Students
+Count
+Student List
+Total Assessments
+Count
+Assessment List
+Pending Scans
+Count
+Pending Scan List
+Processing
+Count
+Processing List
+Reports Ready
+Count
+Report List
+Counsellors
+Count
+Counsellor Management
+Recent Students
+Latest records
+Student Detail
+Recent Assessments
+Latest status/activity
+Assessment Detail
+Quick Actions
+Register Student, Students, Reports
+Open module
+Sidebar: Dashboard, Students, Assessments, Eye Scans, Reports, Counsellors, Counselling/Follow-up, Users/Roles, Notifications, Settings, Profile, Logout.
+All counts and lists must come from APIs.
+7. Admin Student List
+Column
+Expected
+Student ID
+Unique ID
+Student Name
+Name
+Assessment Status
+Registered/Scan Pending/Processing/Report Ready/Failed
+Left Eye
+Pending/Completed
+Right Eye
+Pending/Completed
+Report
+Ready/Not Ready
+Counsellor
+Assigned counsellor
+Date
+Registration/assessment date
+Action
+View/Scan/Report/Assign
+8. Student Registration
+Replace the existing Customer Registration UI with Student Registration.
+Field
+Required
+UI Rule
+Student ID
+Yes
+Required; backend uniqueness validation
+Student Name
+Yes
+Required
+Button
+Action
+Register / Continue
+Validate → call registration API → show success → navigate to Scan
+Cancel
+Return to previous screen
+Reset
+Clear form
+9. Registration Success
+Show 'Student registered successfully'.
+Display Student ID, Student Name and Assessment ID if returned.
+Primary button: Start Eye Scan.
+Do not start scan if registration failed.
+10. Eye Scan Page
+The page must visibly separate Left Eye and Right Eye. Both are mandatory.
+Area
+UI
+Header
+IRIS, Student ID, Student Name, Assessment ID, current status
+Progress
+Registration → Left Eye → Right Eye → Analysis → Report
+Left Eye Card
+Camera/scan area, instructions, Start Scan, status, Retry
+Right Eye Card
+Camera/scan area, instructions, Start Scan, status, Retry
+Bottom
+Continue / Generate Analysis; disabled until both complete
+Error Area
+Safe error + retry/help
+11. Left Eye Scan – Exact Flow
+Click Start Left Eye Scan.
+Request camera permission if required.
+Open left-eye scan interface.
+User positions eye according to instructions.
+Capture/Scan sends image/scan payload to backend.
+Show Processing.
+On backend success, mark Left Eye Completed.
+On failure, show reason-safe error and Retry.
+12. Right Eye Scan – Exact Flow
+Click Start Right Eye Scan.
+Open right-eye scan interface.
+Capture/Scan sends right-eye data.
+Show Processing.
+On success, mark Right Eye Completed.
+On failure, show error and Retry.
+13. Scan Rules
+Left and right scans must use the same Assessment ID.
+Frontend cannot manually mark a scan completed.
+Continue remains disabled until backend confirms both scans.
+Prevent duplicate submission while an upload is processing.
+Handle camera denied, invalid scan, timeout and server error states.
+Show exactly which eye failed.
+14. Analysis Processing
+After both scans are completed, enable Generate Analysis/Continue.
+Call the analysis/process API.
+Show Processing/Analyzing state.
+Do not display fake results.
+Poll/refresh status or use the API mechanism agreed with backend.
+On success open Report; on failure show Retry.
+15. Student Dashboard
+Section
+Display
+Action
+Profile
+Student ID/Name
+View profile
+Assessment
+Current assessment status
+Open assessment
+Left Eye
+Pending/Completed
+Continue if pending
+Right Eye
+Pending/Completed
+Continue if pending
+Report
+Ready/Not Ready
+View report if ready
+Next Action
+Contextual CTA
+Start/Continue/View
+Student sees only their own data. No admin/counsellor pages.
+16. Student Report – Exact Sections
+Report header: IRIS, report title, Student ID, Student Name, Assessment ID, assessment date, generated date.
+Student information.
+Left Eye scan status/result.
+Right Eye scan status/result.
+Combined/final assessment result.
+Behaviour analysis: actual backend categories/scores/descriptions.
+Personality analysis: actual backend categories/scores/descriptions.
+Subject/interest analysis and recommendations when defined by official report.
+Any additional official IRIS PDF sections, charts and recommendations.
+Report actions: Download PDF, Print if required, Back.
+Important: exact labels, scores, descriptions and report sections must be mapped to the approved IRIS PDF. Frontend must render backend values.
+17. Counsellor Dashboard
+Area
+Display
+Action
+Assigned Students
+Assigned student list
+Open
+Reports Ready
+Reports awaiting review
+View Report
+Pending Counselling
+Students needing counselling
+Open
+Follow-ups
+Due/upcoming follow-ups
+Update
+Recent Activity
+Latest reviews
+Open
+18. Counsellor Student/Report View
+Student ID/Name, assessment status, scan status.
+Complete report including behaviour/personality/subject sections.
+Add Counselling Note.
+Add Follow-up with date/status.
+Mark Reviewed.
+Back and Logout.
+19. Loading/Error/Success States
+State
+UI
+Loading
+Spinner/progress; disable duplicate buttons
+Success
+Clear confirmation + next action
+Validation Error
+Field-level message
+API Error
+Safe readable message + retry where appropriate
+Unauthorized
+Redirect to role login
+Session Expired
+Ask user to login again
+Scan Failure
+Eye-specific error + Retry
+Analysis Failure
+Error + controlled Retry
+20. Route/Navigation Map
+Public Home → Get Started → Student Registration → Success → Eye Scan → Both Eyes Completed → Analysis → Report/PDF
+Public Home → Login → Admin Dashboard OR Student Dashboard OR Counsellor Dashboard.
+21. Frontend Acceptance Criteria
+All three roles work and are protected.
+Public website is complete and responsive.
+Customer Registration is replaced by Student Registration.
+Left and Right Eye are separate mandatory scans.
+Both scan completion is backend-confirmed.
+Analysis and report are API-driven.
+Report contains all approved IRIS sections.
+PDF action works through backend.
+No hardcoded student/AI/report data.
+Desktop/mobile responsive behavior is handled.

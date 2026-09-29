@@ -1,303 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Customer Registration</title>
-
+    <title>Student Registration | IrisIQ</title>
+    
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="register.css">
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="register.css?v=20260929_1">
 </head>
-
 <body>
 
-<div class="container py-4">
+<div class="registration-wrapper py-5 px-3">
+    <div class="container" style="max-width: 760px;">
+        
+        <!-- Top Navigation & Auth Bar -->
+        <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+            <div class="d-flex align-items-center gap-2">
+                <a href="dashboard.html" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+                </a>
+                <a href="index.html" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-house me-1"></i> Home
+                </a>
+            </div>
+            <div id="navAuthContainer">
+                <!-- Managed automatically by auth_client.js -->
+            </div>
+        </header>
 
-    <!-- Top Navigation & Auth Bar -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-        <div class="d-flex align-items-center gap-2">
-            <a href="dashboard.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
-            </a>
-            <a href="index.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="fa-solid fa-house me-1"></i> Home
-            </a>
-        </div>
-        <div id="navAuthContainer">
-            <!-- Populated automatically by auth_client.js -->
-        </div>
-    </div>
+        <!-- Main Registration Card -->
+        <main class="card border-0 shadow-lg registration-card">
+            
+            <!-- Card Header -->
+            <div class="card-header bg-transparent border-bottom border-light border-opacity-10 py-4 px-4 px-md-5">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-avatar">
+                        <i class="fa-solid fa-id-card text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h2 class="h4 mb-1 text-white fw-bold">Student Registration</h2>
+                        <p class="text-secondary small mb-0">Official IrisIQ Student Registration & Assessment Creation</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="card shadow">
+            <div class="card-body p-4 p-md-5">
 
-        <div class="card-header bg-primary text-white">
-
-            <h3 class="mb-0">Customer Registration</h3>
-
-        </div>
-
-        <div class="card-body">
-
-            <!-- Row 1 -->
-
-            <div class="row">
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Customer Code</label>
-
-                    <input
-                        type="text"
-                        id="employee_code"
-                        class="form-control">
-
+                <!-- Alert Feedback Box -->
+                <div id="alertBox" class="alert d-none mb-4" role="alert">
+                    <div class="d-flex align-items-center gap-2">
+                        <i id="alertIcon" class="fa-solid fa-circle-exclamation fs-5"></i>
+                        <span id="alertMsg" class="small fw-semibold"></span>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
+                <!-- Registration Form View -->
+                <div id="formSection">
+                    <form id="studentRegistrationForm" autocomplete="off" novalidate>
+                        
+                        <!-- Student ID Field -->
+                        <div class="mb-4">
+                            <label for="student_id" class="form-label text-light fw-semibold small text-uppercase letter-spacing-1">
+                                Student ID <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-dark-subtle border-secondary border-opacity-50 text-secondary">
+                                    <i class="fa-solid fa-hashtag"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    id="student_id"
+                                    name="student_id"
+                                    class="form-control bg-dark-subtle text-white border-secondary border-opacity-50"
+                                    placeholder="e.g. STU-2026-001"
+                                    required
+                                    maxlength="64"
+                                    pattern="^[A-Za-z0-9_-]+$"
+                                    aria-describedby="studentIdHelp"
+                                >
+                            </div>
+                            <div id="studentIdHelp" class="form-text text-secondary small mt-1">
+                                Unique alphanumeric identifier (letters, numbers, hyphens, and underscores only).
+                            </div>
+                            <div class="invalid-feedback text-danger small">
+                                Please provide a valid unique Student ID.
+                            </div>
+                        </div>
 
-                    <label class="form-label">Customer Name</label>
+                        <!-- Student Name Field -->
+                        <div class="mb-4">
+                            <label for="student_name" class="form-label text-light fw-semibold small text-uppercase letter-spacing-1">
+                                Student Name <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-dark-subtle border-secondary border-opacity-50 text-secondary">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    id="student_name"
+                                    name="student_name"
+                                    class="form-control bg-dark-subtle text-white border-secondary border-opacity-50"
+                                    placeholder="e.g. Aarav Patel"
+                                    required
+                                    minlength="2"
+                                    maxlength="128"
+                                >
+                            </div>
+                            <div class="invalid-feedback text-danger small">
+                                Please provide the student's full name.
+                            </div>
+                        </div>
 
-                    <input
-                        type="text"
-                        id="user_name"
-                        class="form-control">
+                        <!-- Info Note: Only ID & Name Required -->
+                        <div class="p-3 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 mb-4">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fa-solid fa-circle-info text-primary mt-1"></i>
+                                <span class="small text-light-emphasis">
+                                    In accordance with official specifications, only <strong>Student ID</strong> and <strong>Student Name</strong> are required for initial registration. An assessment record will be created automatically.
+                                </span>
+                            </div>
+                        </div>
 
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 pt-2">
+                            <button
+                                type="submit"
+                                id="registerBtn"
+                                class="btn btn-primary btn-lg rounded-pill px-4 flex-grow-1 w-100 w-sm-auto fw-bold"
+                            >
+                                <span id="registerSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                                <i id="registerIcon" class="fa-solid fa-user-plus me-1"></i> Register / Continue
+                            </button>
+                            <button
+                                type="button"
+                                id="resetBtn"
+                                class="btn btn-outline-secondary btn-lg rounded-pill px-4 w-100 w-sm-auto"
+                            >
+                                <i class="fa-solid fa-rotate-left me-1"></i> Reset
+                            </button>
+                            <button
+                                type="button"
+                                id="cancelBtn"
+                                class="btn btn-outline-danger btn-lg rounded-pill px-4 w-100 w-sm-auto"
+                            >
+                                <i class="fa-solid fa-xmark me-1"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Registration Success View (Initially Hidden) -->
+                <div id="successSection" class="d-none text-center py-3">
+                    <div class="success-badge mb-3">
+                        <i class="fa-solid fa-circle-check text-success display-3"></i>
+                    </div>
+                    <h3 class="text-white fw-bold mb-2">Student Registered Successfully</h3>
+                    <p class="text-secondary mb-4">
+                        The student profile and official assessment have been created and initialized.
+                    </p>
+
+                    <!-- Details Card -->
+                    <div class="card bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-4 p-4 text-start mb-4">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <span class="text-secondary small d-block text-uppercase fw-semibold">Student ID</span>
+                                <span id="successStudentId" class="text-white fw-bold fs-5 font-monospace">--</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-secondary small d-block text-uppercase fw-semibold">Student Name</span>
+                                <span id="successStudentName" class="text-white fw-bold fs-5">--</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-secondary small d-block text-uppercase fw-semibold">Assessment ID</span>
+                                <span id="successAssessmentId" class="text-info fw-bold fs-5 font-monospace">--</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-secondary small d-block text-uppercase fw-semibold">Initial Status</span>
+                                <span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                                    <i class="fa-solid fa-spinner fa-spin-pulse me-1"></i> REGISTERED
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Step Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                        <button
+                            type="button"
+                            id="startScanBtn"
+                            class="btn btn-success btn-lg rounded-pill px-4 fw-bold shadow"
+                        >
+                            <i class="fa-solid fa-eye me-2"></i> Start Eye Scan
+                        </button>
+                        <button
+                            type="button"
+                            id="registerAnotherBtn"
+                            class="btn btn-outline-light btn-lg rounded-pill px-4"
+                        >
+                            <i class="fa-solid fa-user-plus me-1"></i> Register Another Student
+                        </button>
+                    </div>
                 </div>
 
             </div>
-
-            <!-- Row 2 -->
-
-            <div class="row mt-3">
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Department</label>
-
-                    <input
-                        type="text"
-                        id="department"
-                        class="form-control">
-
-                </div>
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Designation</label>
-
-                    <input
-                        type="text"
-                        id="designation"
-                        class="form-control">
-
-                </div>
-
-            </div>
-
-            <!-- Row 3 -->
-
-            <div class="row mt-3">
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Gender</label>
-
-                    <select
-                        id="gender"
-                        class="form-control">
-
-                        <option value="">Select Gender</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
-
-                    </select>
-
-                </div>
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Age</label>
-
-                    <input
-                        type="number"
-                        id="age"
-                        class="form-control">
-
-                </div>
-
-            </div>
-
-            <!-- Row 4 -->
-
-            <div class="row mt-3">
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Date of Birth</label>
-
-                    <input
-                        type="date"
-                        id="dob"
-                        class="form-control">
-
-                </div>
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Blood Group</label>
-
-                    <select
-                        id="blood_group"
-                        class="form-control">
-
-                        <option value="">Select</option>
-
-                        <option>A+</option>
-                        <option>A-</option>
-                        <option>B+</option>
-                        <option>B-</option>
-                        <option>AB+</option>
-                        <option>AB-</option>
-                        <option>O+</option>
-                        <option>O-</option>
-
-                    </select>
-
-                </div>
-
-            </div>
-
-            <!-- Row 5 -->
-
-            <div class="row mt-3">
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Mobile</label>
-
-                    <input
-                        type="text"
-                        id="mobile"
-                        class="form-control">
-
-                </div>
-
-                <div class="col-md-6">
-
-                    <label class="form-label">Email</label>
-
-                    <input
-                        type="email"
-                        id="email"
-                        class="form-control">
-
-                </div>
-
-            </div>
-
-   <!-- Row 6 -->
-
-<div class="row mt-3">
-
-    <div class="col-md-12">
-
-        <label class="form-label">Address</label>
-
-        <textarea
-            id="address"
-            class="form-control"
-            rows="3"></textarea>
-
-    </div>
-
-</div>
-
-<br>
-
-<!-- ================= CAMERA ================= -->
-
-<div class="text-center">
-
-    <video
-        id="video"
-        autoplay
-        playsinline
-        muted
-        style="
-            width:100%;
-            max-width:700px;
-            border-radius:15px;
-            border:3px solid #0d6efd;
-            background:#000;">
-    </video>
-
-    <canvas
-        id="canvas"
-        style="display:none;">
-    </canvas>
-
-</div>
-
-<br>
-
-<!-- ================= STATUS ================= -->
-
-<div
-    id="status"
-    class="fw-bold text-primary text-center mb-2">
-
-    Ready
-
-</div>
-
-<div
-    id="counter"
-    class="text-center mb-2">
-
-    0 / 40
-
-</div>
-
-<div class="progress mb-3" style="height:28px;">
-
-    <div
-
-        id="progressBar"
-
-        class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-
-        role="progressbar"
-
-        style="width:0%;">
-
-        0%
+        </main>
+        
+        <!-- Footer Note -->
+        <footer class="text-center mt-4">
+            <p class="text-secondary small mb-0">
+                IrisIQ Autonomous Assessment System &copy; 2026. Compliant with Official IRIS Backend & Frontend Specifications.
+            </p>
+        </footer>
 
     </div>
-
-</div>
-
-<button
-    id="registerBtn"
-    class="btn btn-success btn-lg w-100">
-
-    Register Customer
-
-</button>
-    
-        </div>
-
-    </div>
-
 </div>
 
 <script src="auth_client.js?v=20260928_3"></script>
-<script src="register.js?v=20260928_3"></script>
+<script src="register.js?v=20260929_1"></script>
 
 </body>
-
 </html>

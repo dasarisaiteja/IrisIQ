@@ -1,818 +1,1071 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Admin Portal | IrisIQ</title>
 
-<meta charset="UTF-8">
+    <!-- Typography & Frameworks -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg-dark: #080d1a;
+            --card-bg: rgba(15, 23, 42, 0.85);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-accent: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.25);
+            --sidebar-width: 270px;
+        }
 
-<title>Admin Dashboard | Iris AI</title>
+        body {
+            background-color: var(--bg-dark);
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
 
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+        /* Sidebar */
+        .admin-sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, #0b1120 0%, #0f172a 100%);
+            border-right: 1px solid var(--card-border);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+        .sidebar-header {
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
-<link rel="stylesheet"
-href="dashboard.css">
+        .sidebar-brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #ffffff;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
 
+        .sidebar-brand-text h4 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin: 0;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-brand-text small {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.7rem 1rem;
+            border-radius: 0.65rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link-custom i {
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-link-custom:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link-custom.active {
+            color: #ffffff;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), transparent);
+            border-left: 3px solid var(--primary-accent);
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Main Content Layout */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.3s ease;
+        }
+
+        .top-bar {
+            height: 70px;
+            background: rgba(11, 17, 32, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 990;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .content-area {
+            padding: 2rem;
+            flex-grow: 1;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: 0.85rem;
+            padding: 1.25rem 1.5rem;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .metric-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-val {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+        }
+
+        .metric-icon-bg {
+            position: absolute;
+            right: 1.25rem;
+            bottom: 1.25rem;
+            font-size: 2.25rem;
+            color: rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Tables */
+        .custom-table {
+            width: 100%;
+            margin-bottom: 0;
+            color: #cbd5e1;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .custom-table th {
+            background: rgba(30, 41, 59, 0.6);
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--card-border);
+            font-weight: 600;
+        }
+
+        .custom-table td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Badges */
+        .badge-status {
+            padding: 0.35rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-ready { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-processing { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-pending { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px solid rgba(100, 116, 139, 0.3); }
+        .status-completed { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .status-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* Quick Action Buttons */
+        .quick-action-btn {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--card-border);
+            color: #ffffff;
+            padding: 0.85rem 1.25rem;
+            border-radius: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: var(--primary-accent);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* Section Visibility */
+        .portal-section {
+            display: none;
+        }
+        .portal-section.active {
+            display: block;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 991px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            .main-wrapper {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
-
 <body>
-<main class="main">
 
-<div class="container-fluid">
-<aside class="sidebar">
-
-    <div class="logo">
-
-        <div class="logo-icon">
-            <i class="fa-solid fa-eye"></i>
+    <!-- UNAUTHORIZED / SESSION EXPIRED GUARD OVERLAY -->
+    <div id="authGuardOverlay" style="display: none; position: fixed; inset: 0; background: #080d1a; z-index: 10000; align-items: center; justify-content: center;">
+        <div class="glass-card text-center p-5" style="max-width: 440px;">
+            <i class="fa-solid fa-shield-halved text-danger fa-3x mb-3"></i>
+            <h4 class="text-white fw-bold mb-2">Administrative Authentication Required</h4>
+            <p class="text-secondary small mb-4" id="authGuardMessage">Valid Admin credentials are required to access this system. Your session may have expired.</p>
+            <a href="login.html" class="btn btn-primary w-100 fw-semibold">Return to Login</a>
         </div>
-
-        <div class="logo-text">
-
-            <h4>Iris AI</h4>
-
-            <small>Recognition System</small>
-
-        </div>
-
     </div>
 
-    <ul class="menu">
-
-        <li class="active">
-
-            <a href="dashboard.html">
-
-                <i class="fa-solid fa-gauge-high"></i>
-
-                <span>Dashboard</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="students.html">
-
-                <i class="fa-solid fa-graduation-cap"></i>
-
-                <span>Students</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="camera.html">
-
-                <i class="fa-solid fa-camera"></i>
-
-                <span>Live Iris Scan</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="register.html">
-
-                <i class="fa-solid fa-user-plus"></i>
-
-                <span>Register Employee</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="assessments.html">
-
-                <i class="fa-solid fa-list-check"></i>
-
-                <span>Assessments</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="student_profile.html">
-
-                <i class="fa-solid fa-user-gear"></i>
-
-                <span>Student Profile</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="ai_profile.html">
-
-                <i class="fa-solid fa-brain"></i>
-
-                <span>AI Profile</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="recommendations.html">
-
-                <i class="fa-solid fa-compass"></i>
-
-                <span>Recommendations</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="student_report.html">
-
-                <i class="fa-solid fa-file-pdf"></i>
-
-                <span>Report V2 (AI Profile)</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="report.html">
-
-                <i class="fa-solid fa-file-lines"></i>
-
-                <span>Report V1 (Biometrics)</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="about.html">
-
-                <i class="fa-solid fa-circle-info"></i>
-
-                <span>About</span>
-
-            </a>
-
-        </li>
-
-    </ul>
-
-    <div class="sidebar-footer">
-
-        <div class="version">
-
-            <strong>AI Iris Recognition</strong>
-
-            <small>Version 2.0</small>
-
-        </div>
-
-    </div>
-
-</aside>
-
-    <header class="topbar">
-
-    <div class="left">
-
-        <button id="toggleSidebar">
-
-            <i class="fa-solid fa-bars"></i>
-
-        </button>
-
-        <div>
-
-            <h2 class="page-title">
-
-                AI Iris Dashboard
-
-            </h2>
-
-            <small class="page-subtitle">
-
-                Employee Recognition & Analytics
-
-            </small>
-
-        </div>
-
-    </div>
-
-    <div class="right">
-
-        <div class="search-box">
-
-            <i class="fa-solid fa-magnifying-glass"></i>
-
-            <input
-                type="text"
-                id="searchEmployee"
-                placeholder="Search Employee...">
-
-        </div>
-
-        <button class="icon-btn" title="Notifications">
-
-            <i class="fa-regular fa-bell"></i>
-
-        </button>
-
-        <div class="profile">
-
-            <img
-                src="images/admin.png"
-                alt="Admin">
-
-            <div>
-
-                <strong>Administrator</strong>
-
-                <small id="todayDate"></small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</header>
-<div class="row g-4 mb-4">
-
-    <!-- Total Employees -->
-
-    <div class="col-xl-3 col-lg-6">
-
-        <div class="stat-card employee-card">
-
-            <div class="card-left">
-
-                <div class="card-icon">
-
-                    <i class="fa-solid fa-users"></i>
-
-                </div>
-
-                <div class="card-content">
-
-                    <span>Total Employees</span>
-
-                    <h2 id="totalUsers">0</h2>
-
-                    <small>Registered Employees</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
-                <i class="fa-solid fa-arrow-trend-up"></i>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- Total Scans -->
-
-    <div class="col-xl-3 col-lg-6">
-
-        <div class="stat-card scan-card">
-
-            <div class="card-left">
-
-                <div class="card-icon">
-
-                    <i class="fa-solid fa-camera"></i>
-
-                </div>
-
-                <div class="card-content">
-
-                    <span>Total Scans</span>
-
-                    <h2 id="totalScans">0</h2>
-
-                    <small>Recognition History</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand-icon">
                 <i class="fa-solid fa-eye"></i>
-
             </div>
-
-        </div>
-
-    </div>
-
-    <!-- Accuracy -->
-
-    <div class="col-xl-3 col-lg-6">
-
-        <div class="stat-card accuracy-card">
-
-            <div class="card-left">
-
-                <div class="card-icon">
-
-                    <i class="fa-solid fa-shield-check"></i>
-
-                </div>
-
-                <div class="card-content">
-
-                    <span>Accuracy</span>
-
-                    <h2 id="verifiedUsers">0%</h2>
-
-                    <small>Recognition Accuracy</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
-                <i class="fa-solid fa-chart-line"></i>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- Not Matched -->
-
-    <div class="col-xl-3 col-lg-6">
-
-        <div class="stat-card failed-card">
-
-            <div class="card-left">
-
-                <div class="card-icon">
-
-                    <i class="fa-solid fa-circle-xmark"></i>
-
-                </div>
-
-                <div class="card-content">
-
-                    <span>Not Matched</span>
-
-                    <h2 id="notMatched">0</h2>
-
-                    <small>Verification Failed</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
-                <i class="fa-solid fa-triangle-exclamation"></i>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- ================= STUDENT INTELLIGENCE METRICS ================= -->
-<div class="row g-3 mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-bold text-dark m-0">
-                <i class="fa-solid fa-graduation-cap text-primary me-2"></i>
-                Student Profiling & Intelligence Overview
-            </h6>
-            <a href="students.html" class="btn btn-sm btn-outline-primary py-1 px-3">
-                <i class="fa-solid fa-users me-1"></i> View Students
-            </a>
-        </div>
-    </div>
-
-    <!-- Total Students -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Total Students</small>
-                <h3 class="fw-bold text-primary m-0" id="totalStudents">0</h3>
-                <small class="text-muted" style="font-size: 11px;">Registered Profiles</small>
-            </div>
-            <div class="p-3 rounded-circle bg-primary-subtle text-primary">
-                <i class="fa-solid fa-users fa-lg"></i>
+            <div class="sidebar-brand-text">
+                <h4>IrisIQ</h4>
+                <small>Official Admin Portal</small>
             </div>
         </div>
-    </div>
 
-    <!-- Completed Assessments -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Completed Assessments</small>
-                <h3 class="fw-bold text-success m-0" id="completedAssessments">0</h3>
-                <small class="text-muted" style="font-size: 11px;">8-Domain Evaluations</small>
-            </div>
-            <div class="p-3 rounded-circle bg-success-subtle text-success">
-                <i class="fa-solid fa-list-check fa-lg"></i>
-            </div>
+        <ul class="sidebar-nav">
+            <li class="nav-item">
+                <a href="#dashboard" class="nav-link-custom active" data-section="dashboard">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#students" class="nav-link-custom" data-section="students">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Students</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#assessments" class="nav-link-custom" data-section="assessments">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Assessments</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#scans" class="nav-link-custom" data-section="scans">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Eye Scans</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#reports" class="nav-link-custom" data-section="reports">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#counsellors" class="nav-link-custom" data-section="counsellors">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>Counsellors</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#counselling" class="nav-link-custom" data-section="counselling">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Counselling & Follow-up</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#users" class="nav-link-custom" data-section="users">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span>Users & Roles</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#audit" class="nav-link-custom" data-section="audit">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Audit Logs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#notifications" class="nav-link-custom" data-section="notifications">
+                    <i class="fa-solid fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#settings" class="nav-link-custom" data-section="settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#profile" class="nav-link-custom" data-section="profile">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="btn btn-outline-danger btn-sm w-100 fw-semibold" id="logoutBtn">
+                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Logout
+            </button>
         </div>
-    </div>
-
-    <!-- Profiles Generated -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Profiles Generated</small>
-                <h3 class="fw-bold text-info m-0" id="profilesGenerated">0</h3>
-                <small class="text-muted" style="font-size: 11px;">AI Holistic Profiles</small>
-            </div>
-            <div class="p-3 rounded-circle bg-info-subtle text-info">
-                <i class="fa-solid fa-brain fa-lg"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reports Generated -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Reports Generated</small>
-                <h3 class="fw-bold text-warning m-0" id="reportsGenerated">0</h3>
-                <small class="text-muted" style="font-size: 11px;">V2 Client Reports</small>
-            </div>
-            <div class="p-3 rounded-circle bg-warning-subtle text-warning">
-                <i class="fa-solid fa-file-pdf fa-lg"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Career Recommendations -->
-    <div class="col-xl-4 col-md-4 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Career Recommendations</small>
-                <h4 class="fw-bold text-dark m-0" id="careerRecommendations">0</h4>
-                <small class="text-muted" style="font-size: 11px;">Top & Trending Matches</small>
-            </div>
-            <div class="p-2 rounded bg-light text-primary">
-                <i class="fa-solid fa-briefcase"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stream Recommendations -->
-    <div class="col-xl-4 col-md-4 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Stream Recommendations</small>
-                <h4 class="fw-bold text-dark m-0" id="streamRecommendations">0</h4>
-                <small class="text-muted" style="font-size: 11px;">STEM, Commerce & Arts</small>
-            </div>
-            <div class="p-2 rounded bg-light text-info">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Assessments -->
-    <div class="col-xl-4 col-md-4 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Pending Assessments</small>
-                <h4 class="fw-bold text-secondary m-0" id="pendingAssessments">0</h4>
-                <small class="text-muted" style="font-size: 11px;">Awaiting Student Input</small>
-            </div>
-            <div class="p-2 rounded bg-light text-secondary">
-                <i class="fa-solid fa-hourglass-half"></i>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ================= QUICK ACTIONS ================= -->
-
-<div class="row mt-4 mb-4">
-
-    <div class="col-lg-12">
-
-        <div class="quick-card">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <div>
-
-                    <h5 class="mb-1">
-
-                        <i class="fa-solid fa-bolt text-warning"></i>
-
-                        Quick Actions
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        Frequently used system modules
-
-                    </small>
-
-                </div>
-
-            </div>
-
-            <div class="row g-4">
-
-                <!-- Register -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="register.html" class="quick-btn">
-
-                        <div class="quick-icon bg-primary">
-
-                            <i class="fa-solid fa-user-plus"></i>
-
-                        </div>
-
-                        <h6>Register Employee</h6>
-
-                        <small>Add New Employee</small>
-
-                    </a>
-
-                </div>
-
-                <!-- Scan -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="camera.html" class="quick-btn">
-
-                        <div class="quick-icon bg-success">
-
-                            <i class="fa-solid fa-camera"></i>
-
-                        </div>
-
-                        <h6>Start Scan</h6>
-
-                        <small>Verify Iris</small>
-
-                    </a>
-
-                </div>
-
-                <!-- Reports -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="report.html" class="quick-btn">
-
-                        <div class="quick-icon bg-warning">
-
-                            <i class="fa-solid fa-file-lines"></i>
-
-                        </div>
-
-                        <h6>Reports</h6>
-
-                        <small>View Reports</small>
-
-                    </a>
-
-                </div>
-
-                <!-- About -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="about.html" class="quick-btn">
-
-                        <div class="quick-icon bg-danger">
-
-                            <i class="fa-solid fa-circle-info"></i>
-
-                        </div>
-
-                        <h6>About System</h6>
-
-                        <small>Technology Details</small>
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-<!-- ================= REPORT ANALYTICS ================= -->
-
-<div class="row mt-4">
-
-    <div class="col-lg-12">
-
-        <div class="chart-card">
-
-            <div class="card-header-custom d-flex justify-content-between align-items-center">
-
-                <div>
-
-                    <h5 class="mb-0">
-
-                        <i class="fa-solid fa-chart-column text-primary"></i>
-
-                        Monthly Scan Reports
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        Monthly employee verification statistics
-
-                    </small>
-
-                </div>
-
-                <span class="badge bg-primary">
-
-                    Live Data
-
-                </span>
-
-            </div>
-
-            <canvas id="reportChart" height="95"></canvas>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- ================= RECENT SCANS ================= -->
-
-<div class="row mt-4">
-
-    <!-- Recent Scans -->
-
-    <div class="col-lg-8">
-
-        <div class="table-card">
-
-            <div class="table-header d-flex justify-content-between align-items-center">
-
-                <div>
-
-                    <h5>
-
-                        <i class="fa-solid fa-clock-rotate-left text-primary"></i>
-
-                        Recent Iris Scans
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        Latest employee verification history
-
-                    </small>
-
-                </div>
-
-                <button class="btn btn-primary btn-sm">
-
-                    <i class="fa-solid fa-rotate"></i>
-
-                    Refresh
-
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+        <!-- TOP BAR -->
+        <header class="top-bar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-dark d-lg-none" id="mobileSidebarToggle">
+                    <i class="fa-solid fa-bars"></i>
                 </button>
-
+                <h5 class="fw-bold m-0 text-white" id="currentSectionTitle">Admin Dashboard</h5>
             </div>
 
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Report ID</th>
-
-                            <th>Employee</th>
-
-                            <th>Date</th>
-
-                            <th>Similarity</th>
-
-                            <th>Status</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="scanTable">
-
-                    </tbody>
-
-                </table>
-
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-outline-secondary text-secondary" id="refreshBtn" title="Refresh Data">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+                <div class="d-flex align-items-center gap-2 px-3 py-1 glass-card m-0" style="border-radius: 9999px;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+                    <span class="small fw-semibold text-white" id="adminUserDisplay">admin</span>
+                    <span class="badge bg-primary text-uppercase" style="font-size: 0.65rem;">Admin</span>
+                </div>
             </div>
+        </header>
 
-        </div>
+        <!-- CONTENT AREA -->
+        <main class="content-area">
 
+            <!-- ============================================================== -->
+            <!-- SECTION 1: DASHBOARD OVERVIEW -->
+            <!-- ============================================================== -->
+            <section id="sec-dashboard" class="portal-section active">
+                <!-- 6 Metric Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="metric-card">
+                            <div class="metric-title">Total Students</div>
+                            <div class="metric-val" id="statTotalStudents">--</div>
+                            <i class="fa-solid fa-graduation-cap metric-icon-bg"></i>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="metric-card">
+                            <div class="metric-title">Total Assessments</div>
+                            <div class="metric-val" id="statTotalAssessments">--</div>
+                            <i class="fa-solid fa-list-check metric-icon-bg"></i>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="metric-card">
+                            <div class="metric-title">Pending Scans</div>
+                            <div class="metric-val text-warning" id="statPendingScans">--</div>
+                            <i class="fa-solid fa-camera metric-icon-bg"></i>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="metric-card">
+                            <div class="metric-title">Processing</div>
+                            <div class="metric-val text-info" id="statProcessing">--</div>
+                            <i class="fa-solid fa-microchip metric-icon-bg"></i>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="metric-card">
+                            <div class="metric-title">Reports Ready</div>
+                            <div class="metric-val text-success" id="statReportsReady">--</div>
+                            <i class="fa-solid fa-file-circle-check metric-icon-bg"></i>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="metric-card">
+                            <div class="metric-title">Counsellors</div>
+                            <div class="metric-val text-primary" id="statCounsellors">--</div>
+                            <i class="fa-solid fa-user-doctor metric-icon-bg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Bar -->
+                <div class="glass-card mb-4">
+                    <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-bolt text-warning me-2"></i>Quick Actions</h6>
+                    <div class="d-flex flex-wrap gap-2" id="quickActionsContainer">
+                        <a href="register.html" class="quick-action-btn">
+                            <i class="fa-solid fa-user-plus text-primary"></i>Register Student
+                        </a>
+                        <a href="#students" class="quick-action-btn switch-tab" data-target="students">
+                            <i class="fa-solid fa-graduation-cap text-success"></i>Student Directory
+                        </a>
+                        <a href="#assessments" class="quick-action-btn switch-tab" data-target="assessments">
+                            <i class="fa-solid fa-list-check text-info"></i>All Assessments
+                        </a>
+                        <a href="#reports" class="quick-action-btn switch-tab" data-target="reports">
+                            <i class="fa-solid fa-file-invoice text-warning"></i>Report Directory
+                        </a>
+                        <a href="#counsellors" class="quick-action-btn switch-tab" data-target="counsellors">
+                            <i class="fa-solid fa-user-tie text-danger"></i>Counsellor Management
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Feeds -->
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="glass-card h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-white m-0"><i class="fa-solid fa-user-clock text-primary me-2"></i>Recent Students</h6>
+                                <a href="#students" class="small text-decoration-none switch-tab" data-target="students">View All</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Student ID</th>
+                                            <th>Name</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentStudentsBody">
+                                        <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="glass-card h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-white m-0"><i class="fa-solid fa-chart-line text-success me-2"></i>Recent Assessments</h6>
+                                <a href="#assessments" class="small text-decoration-none switch-tab" data-target="assessments">View All</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Assessment ID</th>
+                                            <th>Student</th>
+                                            <th>Workflow</th>
+                                            <th>Report</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentAssessmentsBody">
+                                        <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 2: STUDENTS DIRECTORY -->
+            <!-- ============================================================== -->
+            <section id="sec-students" class="portal-section">
+                <div class="glass-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-white m-0">Student Directory</h5>
+                            <small class="text-secondary">Official student roster and active assessment states</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary" id="studentSearchInput" placeholder="Search ID or Name..." style="width: 220px;">
+                            <a href="register.html" class="btn btn-primary btn-sm fw-semibold">
+                                <i class="fa-solid fa-plus me-1"></i>Register Student
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Status</th>
+                                    <th>Left Eye</th>
+                                    <th>Right Eye</th>
+                                    <th>Report</th>
+                                    <th>Counsellor</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <tr><td colspan="9" class="text-center text-muted">Loading students...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 3: ASSESSMENTS DIRECTORY -->
+            <!-- ============================================================== -->
+            <section id="sec-assessments" class="portal-section">
+                <div class="glass-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-white m-0">All Assessments</h5>
+                            <small class="text-secondary">Full institutional case oversight across all students</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm bg-dark text-white border-secondary" id="assessmentStatusFilter" style="width: 170px;">
+                                <option value="">All Statuses</option>
+                                <option value="REGISTERED">Registered</option>
+                                <option value="SCAN_PENDING">Scan Pending</option>
+                                <option value="SCAN_COMPLETED">Scan Completed</option>
+                                <option value="PROCESSING">Processing</option>
+                                <option value="ANALYSIS_COMPLETED">Analysis Completed</option>
+                                <option value="REPORT_READY">Report Ready</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                            <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary" id="assessmentSearchInput" placeholder="Search case..." style="width: 200px;">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Assessment ID</th>
+                                    <th>Student</th>
+                                    <th>Workflow Status</th>
+                                    <th>Left Eye</th>
+                                    <th>Right Eye</th>
+                                    <th>Report</th>
+                                    <th>Counsellor</th>
+                                    <th>Created Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assessmentsTableBody">
+                                <tr><td colspan="9" class="text-center text-muted">Loading assessments...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 4: EYE SCANS OVERVIEW -->
+            <!-- ============================================================== -->
+            <section id="sec-scans" class="portal-section">
+                <div class="glass-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-white m-0">Bilateral Eye Scans</h5>
+                            <small class="text-secondary">Quality metrics, attempts, and pupil segmentation tracking</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm bg-dark text-white border-secondary" id="scanEyeFilter" style="width: 140px;">
+                                <option value="">All Eyes</option>
+                                <option value="LEFT">Left Eye</option>
+                                <option value="RIGHT">Right Eye</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Scan ID</th>
+                                    <th>Assessment ID</th>
+                                    <th>Student</th>
+                                    <th>Eye</th>
+                                    <th>Status</th>
+                                    <th>Quality Score</th>
+                                    <th>Attempts</th>
+                                    <th>Completed At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scansTableBody">
+                                <tr><td colspan="8" class="text-center text-muted">Loading eye scans...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 5: REPORTS DIRECTORY -->
+            <!-- ============================================================== -->
+            <section id="sec-reports" class="portal-section">
+                <div class="glass-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-white m-0">Official Reports Directory</h5>
+                            <small class="text-secondary">Authoritative 10-section structured reports and server-side PDF exports</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary" id="reportSearchInput" placeholder="Search report..." style="width: 220px;">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Assessment ID</th>
+                                    <th>Student</th>
+                                    <th>Version</th>
+                                    <th>Status</th>
+                                    <th>Reviewed</th>
+                                    <th>Generated At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportsTableBody">
+                                <tr><td colspan="8" class="text-center text-muted">Loading reports...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 6: COUNSELLORS & ASSIGNMENTS -->
+            <!-- ============================================================== -->
+            <section id="sec-counsellors" class="portal-section">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="glass-card h-100">
+                            <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-user-doctor text-primary me-2"></i>Active Counsellors</h6>
+                            <div class="list-group list-group-flush bg-transparent" id="counsellorsRosterList">
+                                <div class="text-muted small">Loading roster...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="glass-card h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="fw-bold text-white m-0"><i class="fa-solid fa-link text-info me-2"></i>Student-Counsellor Assignments</h6>
+                                    <small class="text-secondary">Manage active clinical and academic assignments</small>
+                                </div>
+                                <button class="btn btn-sm btn-primary" id="openAssignModalBtn">
+                                    <i class="fa-solid fa-plus me-1"></i>New Assignment
+                                </button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Assignment ID</th>
+                                            <th>Assessment ID</th>
+                                            <th>Student</th>
+                                            <th>Counsellor</th>
+                                            <th>Status</th>
+                                            <th>Assigned Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="assignmentsTableBody">
+                                        <tr><td colspan="7" class="text-center text-muted">Loading assignments...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 7: COUNSELLING & FOLLOW-UPS -->
+            <!-- ============================================================== -->
+            <section id="sec-counselling" class="portal-section">
+                <div class="glass-card">
+                    <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-calendar-check text-warning me-2"></i>Consultations & Follow-ups</h5>
+                    <p class="text-secondary small">Comprehensive institutional log of counsellor clinical notes and scheduled follow-ups.</p>
+                    <div class="alert alert-secondary bg-dark text-white border-secondary small">
+                        Clinical consultation notes and follow-ups are securely logged per assessment and integrated into Section 9 of the official report.
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 8: USERS & ROLES -->
+            <!-- ============================================================== -->
+            <section id="sec-users" class="portal-section">
+                <div class="glass-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-white m-0">System Users & Role Management</h5>
+                            <small class="text-secondary">Provision accounts, manage role assignments, and toggle active credentials</small>
+                        </div>
+                        <button class="btn btn-primary btn-sm fw-semibold" id="openCreateUserModalBtn">
+                            <i class="fa-solid fa-user-plus me-1"></i>Provision User
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr><td colspan="8" class="text-center text-muted">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 9: AUDIT LOGS -->
+            <!-- ============================================================== -->
+            <section id="sec-audit" class="portal-section">
+                <div class="glass-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                        <div>
+                            <h5 class="fw-bold text-white m-0">Institutional Security Audit Trail</h5>
+                            <small class="text-secondary">Immutable event logs for compliance, security tracking, and administrative actions</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary" id="auditActionFilter" placeholder="Filter action..." style="width: 180px;">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Audit ID</th>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Action</th>
+                                    <th>Assessment ID</th>
+                                    <th>Entity</th>
+                                    <th>Status</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTableBody">
+                                <tr><td colspan="8" class="text-center text-muted">Loading audit trail...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 10: NOTIFICATIONS -->
+            <!-- ============================================================== -->
+            <section id="sec-notifications" class="portal-section">
+                <div class="glass-card">
+                    <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-bell text-info me-2"></i>Institutional System Notifications</h5>
+                    <div class="list-group list-group-flush bg-transparent">
+                        <div class="list-group-item bg-transparent text-white border-secondary py-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold text-success"><i class="fa-solid fa-circle-check me-2"></i>System Operational</span>
+                                <span class="small text-secondary">Real-time</span>
+                            </div>
+                            <div class="small text-secondary mt-1">Iris ML analysis pipeline, YOLOv8 segmentation, and PDF generation workers are active and healthy.</div>
+                        </div>
+                        <div class="list-group-item bg-transparent text-white border-secondary py-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold text-primary"><i class="fa-solid fa-shield-halved me-2"></i>Security Hardening Active</span>
+                                <span class="small text-secondary">Verified</span>
+                            </div>
+                            <div class="small text-secondary mt-1">PBKDF2-HMAC password hashing, HS256 JWT sessions, and Anti-IDOR role authorization are strictly enforced.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 11: SETTINGS -->
+            <!-- ============================================================== -->
+            <section id="sec-settings" class="portal-section">
+                <div class="glass-card">
+                    <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-sliders text-primary me-2"></i>Institutional Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">System Name</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" value="IrisIQ Cognitive Biometric Platform" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">API Release Version</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" value="v1.0.0 (Official Architecture)" readonly>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ============================================================== -->
+            <!-- SECTION 12: PROFILE -->
+            <!-- ============================================================== -->
+            <section id="sec-profile" class="portal-section">
+                <div class="glass-card">
+                    <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-user-shield text-warning me-2"></i>Administrator Profile</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small">Admin Username</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="profileUsername" value="admin" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small">Role</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" value="System Administrator" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small">Session Authority</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" value="HS256 Cryptographic Bearer" readonly>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <!-- Recent Activity -->
-
-    <div class="col-lg-4">
-
-        <div class="activity-card">
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-
-                <h5>
-
-                    <i class="fa-solid fa-bolt text-warning"></i>
-
-                    Recent Activity
-
-                </h5>
-
-                <span class="badge bg-success">
-
-                    Live
-
-                </span>
-
+    <!-- MODAL: PROVISION USER -->
+    <div class="modal fade" id="createUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-user-plus text-primary me-2"></i>Provision New User</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Username *</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="newUsername" required minlength="3">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Password *</label>
+                            <input type="password" class="form-control bg-dark text-white border-secondary" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Role *</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="newRole" required>
+                                <option value="Student">Student</option>
+                                <option value="Counselor">Counselor</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Full Name (Optional)</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="newFullName">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Email (Optional)</label>
+                            <input type="email" class="form-control bg-dark text-white border-secondary" id="newEmail">
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn-sm fw-semibold" id="submitCreateUserBtn">Create User</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div id="activityList">
-
-            </div>
-
         </div>
-
     </div>
 
-</div>
+    <!-- MODAL: ASSIGN COUNSELLOR -->
+    <div class="modal fade" id="assignCounsellorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-link text-info me-2"></i>Assign Counsellor to Assessment</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignCounsellorForm">
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Assessment ID *</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary mono" id="assignAssessmentId" placeholder="ASM-YYYYMMDD-XXXXXX" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Student ID (Optional / Auto-resolved)</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary mono" id="assignStudentId" placeholder="STU-XXXX">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Select Counsellor *</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="assignCounsellorSelect" required>
+                                <option value="">Select a registered counsellor...</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn-sm fw-semibold" id="submitAssignBtn">Confirm Assignment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- MODAL: STUDENT DEEP DETAIL INSPECTION -->
+    <div class="modal fade" id="studentDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-user-graduate text-primary me-2"></i>Student Details</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="studentDetailBody">
+                    Loading student details...
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- MODAL: ASSESSMENT DEEP DETAIL INSPECTION -->
+    <div class="modal fade" id="assessmentDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-list-check text-info me-2"></i>Assessment Deep Case Inspection</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="assessmentDetailBody">
+                    Loading case details...
+                </div>
+            </div>
+        </div>
+    </div>
 
-<footer class="dashboard-footer">
-
-    <strong>AI Iris Recognition System</strong>
-
-    <span>| Version 2.0 |</span>
-
-    <span>Powered by TensorFlow • OpenCV • FastAPI</span>
-
-    <span>| © 2026</span>
-
-</footer>
-
-    </main>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="auth_client.js"></script>
-<script src="dashboard.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="auth_client.js"></script>
+    <script src="dashboard.js"></script>
 </body>
-
 </html>

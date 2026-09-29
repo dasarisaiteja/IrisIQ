@@ -1,0 +1,464 @@
+IRIS PROJECT – BACKEND DETAILED REQUIREMENTS
+API + database + authentication + scan workflow + AI processing + report/PDF + role authorization
+1. Objective
+Build a secure backend that supports the public website, three roles (Admin/Student/Counsellor), student registration, assessment creation, separate left/right eye scans, AI/analysis processing, report data and PDF generation, counselling/follow-up, audit/error logging and role-based authorization.
+2. Recommended Architecture
+Authentication/Authorization service.
+Student management module.
+Assessment module.
+Eye Scan module.
+AI/Analysis integration module.
+Report module.
+PDF generation module.
+Counsellor/assignment/counselling module.
+Public contact/enquiry module if required.
+Audit/logging module.
+3. Roles & Permissions
+Role
+Permissions
+Admin
+Full management: users, students, assessments, scans/status, reports, counsellors, assignments, settings
+Student
+Own profile, own assessment, own scan status/flow, own report/PDF
+Counsellor
+Assigned students, reports, counselling notes, follow-up; no unrelated students unless explicitly permitted
+4. Authentication APIs
+Method
+Endpoint (suggested)
+Purpose
+POST
+/api/auth/login
+Role-based login
+POST
+/api/auth/logout
+Invalidate/close session if applicable
+POST
+/api/auth/refresh
+Refresh access token if using refresh tokens
+GET
+/api/auth/me
+Return current user/role
+POST
+/api/auth/forgot-password
+Optional
+POST
+/api/auth/reset-password
+Optional
+Use JWT/session strategy agreed with deployment.
+Every protected endpoint validates authentication and role.
+Never trust role/user IDs sent only by the client.
+Password storage must use a strong one-way password hash.
+Do not return passwords or sensitive authentication data.
+5. Student Registration
+Method
+Endpoint
+Purpose
+POST
+/api/students
+Create student
+GET
+/api/students/{studentId}
+Get student
+GET
+/api/students
+Admin list/search/filter
+PUT
+/api/students/{studentId}
+Update approved student fields
+PATCH
+/api/students/{studentId}/status
+Change status if business rules allow
+Current minimum registration fields: Student ID and Student Name. Additional fields should be added only when approved.
+6. Registration API Rules
+Validate Student ID and Student Name.
+Student ID uniqueness must be enforced at database level.
+Return generated/internal Student key and Assessment ID when assessment is created.
+Return a clear success response for frontend navigation.
+Do not create duplicate students because of double-click/retry.
+Store created_by and created_at.
+7. Assessment APIs
+Method
+Endpoint
+Purpose
+POST
+/api/assessments
+Create assessment for a student
+GET
+/api/assessments/{assessmentId}
+Get assessment/status
+GET
+/api/assessments/{assessmentId}/status
+Get workflow status
+GET
+/api/students/{studentId}/assessments
+Student/admin assessment history
+8. Assessment State Machine
+Status
+Meaning
+Next Allowed
+REGISTERED
+Student created
+Start scan
+SCAN_PENDING
+Waiting for scans
+Left/right scan
+LEFT_SCAN_COMPLETED
+Left eye confirmed
+Right scan
+RIGHT_SCAN_COMPLETED
+Right eye confirmed
+Left scan / process if left complete
+SCAN_COMPLETED
+Both confirmed
+Analysis
+PROCESSING
+AI/analysis running
+Poll/status
+ANALYSIS_COMPLETED
+Results stored
+Report generation/view
+REPORT_GENERATING
+PDF/report building
+Status
+REPORT_READY
+Report available
+View/download
+FAILED
+Controlled failure
+Retry according to failure type
+9. Eye Scan APIs
+Method
+Endpoint
+Purpose
+POST
+/api/assessments/{assessmentId}/scan/left
+Upload/process left eye
+POST
+/api/assessments/{assessmentId}/scan/right
+Upload/process right eye
+GET
+/api/assessments/{assessmentId}/scan/status
+Return both eye statuses
+GET
+/api/assessments/{assessmentId}/scan/{eye}
+Return approved metadata/status
+POST
+/api/assessments/{assessmentId}/scan/{eye}/retry
+Retry failed scan if allowed
+10. Eye Scan Backend Rules
+Validate assessment exists and user has access.
+Accept only approved file/payload formats and enforce size limits.
+Identify eye explicitly as LEFT or RIGHT; never infer from frontend labels alone.
+Store scan metadata and secure file/object reference.
+Prevent duplicate processing for the same scan request.
+Mark scan Completed only after actual processing/validation succeeds.
+Both eyes must belong to the same assessment.
+Record timestamps, processing duration and safe error codes.
+Do not expose raw sensitive files publicly.
+11. Suggested Eye Scan Data
+Field
+Purpose
+scan_id
+Unique scan record
+assessment_id
+Parent assessment
+eye_side
+LEFT/RIGHT
+file_reference
+Secure storage reference
+status
+Pending/Processing/Completed/Failed
+result_reference
+AI/processing output reference if applicable
+error_code
+Safe technical/business error
+error_message
+Safe user-facing message
+created_at
+Creation time
+completed_at
+Completion time
+12. Analysis / AI Processing
+Method
+Endpoint
+Purpose
+POST
+/api/assessments/{assessmentId}/process
+Start analysis after both scans
+GET
+/api/assessments/{assessmentId}/process/status
+Get processing status
+GET
+/api/assessments/{assessmentId}/results
+Return final structured analysis
+Backend must verify both scans are completed before starting analysis.
+Use the AI service/model according to the actual project implementation.
+Persist raw/structured results needed for audit and report generation.
+Processing should be asynchronous if it can take significant time.
+Use idempotency or status checks to prevent duplicate analysis jobs.
+Record model/service version if available.
+13. Report Data Contract
+The report API should return structured JSON in addition to a PDF reference. Example logical structure:
+Section
+Data
+student
+id, name, approved profile fields
+assessment
+assessment_id, date, status
+eye_scan
+left result/status, right result/status
+overall_result
+combined assessment result
+behaviour
+categories, scores/levels, descriptions
+personality
+traits, scores/levels, descriptions
+subjects_interest
+preferences, categories, descriptions
+recommendations
+approved assessment recommendations
+counselling
+assigned counsellor, reviewed status, notes/follow-up where permitted
+report_meta
+report id, version, generated date, PDF reference
+Exact fields must be mapped from the approved IRIS report/PDF. Do not invent missing report fields.
+14. Report APIs
+Method
+Endpoint
+Purpose
+POST
+/api/assessments/{assessmentId}/report/generate
+Generate report after analysis
+GET
+/api/assessments/{assessmentId}/report
+Get structured report
+GET
+/api/assessments/{assessmentId}/report/pdf
+Return/open PDF
+GET
+/api/reports
+Admin list/search/filter
+GET
+/api/reports/{reportId}
+Admin/counsellor report detail as authorized
+15. PDF Generation
+Generate PDF from stored structured report data or an approved server-side template.
+PDF must contain the same approved sections/values shown in the report UI.
+Store secure PDF reference and generation status.
+Avoid generating multiple duplicate PDFs for the same version unless regeneration is requested.
+Record report version and generated timestamp.
+Return appropriate content type/download response or secure file URL according to deployment.
+16. Counsellor APIs
+Method
+Endpoint
+Purpose
+GET
+/api/counsellors/students
+Assigned student list
+POST
+/api/assessments/{assessmentId}/assign-counsellor
+Assign counsellor
+GET
+/api/counsellors/{counsellorId}/students
+Assigned students
+POST
+/api/assessments/{assessmentId}/counselling-notes
+Add note
+GET
+/api/assessments/{assessmentId}/counselling-notes
+Get notes if authorized
+POST
+/api/assessments/{assessmentId}/follow-ups
+Create follow-up
+PUT
+/api/follow-ups/{followUpId}
+Update follow-up
+PATCH
+/api/assessments/{assessmentId}/reviewed
+Mark report reviewed
+17. Admin APIs
+Module
+Suggested APIs
+Dashboard
+/api/admin/dashboard/summary
+Students
+/api/students, /api/students/{id}
+Assessments
+/api/assessments, /api/assessments/{id}
+Reports
+/api/reports, /api/reports/{id}
+Counsellors
+/api/counsellors
+Assignments
+/api/assessments/{id}/assign-counsellor
+Users/Roles
+/api/users, /api/roles
+Audit
+/api/admin/audit-logs
+18. Student APIs
+Method
+Endpoint
+Purpose
+GET
+/api/student/me
+Own profile
+GET
+/api/student/assessment
+Own current assessment
+GET
+/api/student/assessment/status
+Own scan/process status
+GET
+/api/student/report
+Own report
+GET
+/api/student/report/pdf
+Own PDF
+19. Database – Core Tables
+Table
+Main Responsibility
+users
+Authentication identity and role
+roles
+Role definitions
+students
+Student master data
+assessments
+Assessment/workflow record
+eye_scans
+Left/right scan records
+analysis_results
+Structured AI/assessment results
+reports
+Report metadata/version/status
+report_sections
+Optional normalized report sections
+counsellor_assignments
+Student/assessment → counsellor
+counselling_notes
+Counsellor notes
+follow_ups
+Counselling follow-up tasks
+audit_logs
+Important actions
+processing_logs
+AI/scan/report processing events
+20. Suggested Relationships
+One Student can have multiple Assessments over time.
+One Assessment has exactly the required LEFT and RIGHT scan records.
+One Assessment has one current/final analysis result set per report version.
+One Assessment can have one or more report versions if regeneration/versioning is required.
+One Assessment can be assigned to a Counsellor.
+Counselling notes/follow-ups belong to an assessment/student context.
+21. API Response Standards
+Case
+Expected Response
+Success
+Consistent success envelope + data + message where useful
+Validation
+4xx + field-level validation details
+Unauthorized
+401
+Forbidden
+403
+Not Found
+404
+Conflict
+409 for duplicate/invalid state
+Server Error
+500 without leaking stack traces
+Processing
+Return status/job reference where asynchronous
+22. Security Requirements
+Role-based authorization on every protected endpoint.
+Validate ownership for Student APIs.
+Counsellor can access only assigned/authorized students.
+Use secure password hashing.
+HTTPS in deployment.
+Validate uploaded scan files.
+Do not expose raw storage paths or secrets.
+Sanitize logs and never log passwords/tokens.
+Rate-limit authentication and sensitive endpoints where appropriate.
+Use CORS restricted to approved frontend origins.
+23. Error Handling
+Failure
+Backend Behavior
+Duplicate Student ID
+409 + clear code
+Invalid Scan
+4xx/processable error + scan status Failed
+Camera/Upload failure
+Return safe error; allow retry
+AI unavailable
+Set processing failure/retry state; log technical detail
+Report failure
+Set report failure state; allow controlled regeneration
+Unauthorized
+401
+Wrong role
+403
+Invalid assessment state
+409 with current state
+24. Logging & Audit
+Log registration, login outcome (without password), scan submission, scan completion/failure, analysis start/end, report generation, counsellor assignment, report review and important admin actions.
+Include user ID, role, assessment ID, timestamp and correlation/request ID where possible.
+Keep technical stack traces server-side only.
+25. Backend End-to-End Sequence
+Admin/student creates registration.
+Backend validates Student ID and creates/gets student record.
+Backend creates Assessment ID.
+Frontend uploads LEFT scan; backend validates/stores/processes it.
+Frontend uploads RIGHT scan; backend validates/stores/processes it.
+Backend confirms both scans completed.
+Process endpoint creates AI/analysis job.
+AI result is stored in analysis_results.
+Report generation maps analysis data to official report structure.
+Report metadata/PDF is stored securely.
+Student/Admin/Counsellor retrieves only the report permitted by role.
+26. Backend Acceptance Criteria
+Three roles authenticate and are authorized correctly.
+Registration creates a valid student and assessment.
+Left/right scans are separately stored and tied to the same assessment.
+Analysis cannot start before both scans complete.
+Processing status can be queried.
+Structured report API returns complete approved report data.
+PDF can be generated/retrieved.
+Counsellor assignment/notes/follow-up work.
+Student can retrieve only own data.
+Errors are consistent and safe.
+Database constraints prevent duplicate/invalid relationships.
+Postman collection/API documentation is supplied to frontend developer.
+27. Frontend ↔ Backend Contract
+Frontend Event
+Backend Responsibility
+Frontend Result
+Register
+Validate/create student + assessment
+Navigate to Scan
+Left Scan
+Validate/store/process left scan
+Left Completed
+Right Scan
+Validate/store/process right scan
+Right Completed
+Continue
+Verify both + create process job
+Show Processing
+Status Poll
+Return assessment/process status
+Update UI
+Report
+Return structured report
+Render report
+PDF
+Return secure PDF
+Open/download
+Counsellor Note
+Authorize/save note
+Show success
+Assign Counsellor
+Authorize/update assignment
+Update dashboard
+28. Important Official Report Rule
+The exact report fields, scores, descriptions, charts and recommendations must be taken from the approved IRIS PDF/report template. Before production, backend and frontend developers must create a field-by-field mapping document so every PDF field has a source in the database/analysis response. No developer should invent assessment meaning or hard-code results.
+END OF IRIS BACKEND DETAILED REQUIREMENTS

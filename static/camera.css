@@ -1,107 +1,271 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+/* IrisIQ Dual-Eye Biometric Scanner Styling (Phase 3) */
+:root {
+    --bg-dark: #081120;
+    --card-bg: rgba(15, 23, 42, 0.85);
+    --border-glass: rgba(255, 255, 255, 0.12);
+    --primary-accent: #3b82f6;
+    --cyan-accent: #0ea5e9;
+    --accent-glow: rgba(59, 130, 246, 0.35);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
 }
 
-body{
-
-    background:#eef2f7;
-
-    font-family:Arial,Helvetica,sans-serif;
-
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Live Camera */
-
-#video{
-
-    width:100%;
-
-    max-width:100%;
-
-    height:500px;
-
-    object-fit:cover;
-
-    border:4px solid #0d6efd;
-
-    border-radius:15px;
-
-    background:#000;
-
+body {
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 10% 15%, rgba(59, 130, 246, 0.18) 0%, transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(14, 165, 233, 0.18) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+    min-height: 100vh;
+    color: var(--text-main);
+    overflow-x: hidden;
 }
 
-/* Preview */
-
-#preview{
-
-    max-width:450px;
-
-    width:100%;
-
-    border-radius:12px;
-
-    border:3px solid #198754;
-
-    box-shadow:0 5px 20px rgba(0,0,0,.2);
-
+.scanner-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
-/* Table */
-
-.table th{
-
-    width:45%;
-
-    vertical-align:middle;
-
+.brand-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.table td{
-
-    vertical-align:middle;
-
-    font-weight:bold;
-
+/* Stepper */
+.stepper {
+    position: relative;
+    width: 100%;
 }
 
-/* Cards */
-
-.card{
-
-    border-radius:20px;
-
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
-/* Button */
-
-#captureBtn{
-
-    font-size:22px;
-
-    font-weight:bold;
-
-    padding:14px;
-
+.step-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 2px solid #475569;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+    transition: all 0.3s ease;
 }
 
-/* Loading */
-
-#loading{
-
-    margin-top:20px;
-
+.step.completed .step-icon {
+    background: #059669;
+    border-color: #10b981;
+    color: #fff;
 }
 
-/* Responsive */
+.step.current .step-icon {
+    background: #2563eb;
+    border-color: #60a5fa;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
 
-@media(max-width:768px){
+.step.locked .step-icon {
+    background: #0f172a;
+    border-color: #334155;
+    color: #475569;
+}
 
-    #video{
+.step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
 
-        height:320px;
+.step.current .step-label {
+    color: #fff;
+}
 
-    }
+.step-line {
+    flex-grow: 1;
+    height: 2px;
+    background: #334155;
+    margin: 0 10px;
+    position: relative;
+    top: -12px;
+    z-index: 1;
+}
 
+.step-line.active {
+    background: #10b981;
+}
+
+.step-line.locked {
+    background: #1e293b;
+}
+
+/* Live Video Viewport */
+.camera-viewport-container {
+    width: 100%;
+    background: #000;
+    min-height: 440px;
+    max-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+#video {
+    width: 100%;
+    height: 480px;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+/* Iris Targeting Reticle */
+.targeting-reticle {
+    width: 240px;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.reticle-circle {
+    width: 190px;
+    height: 190px;
+    border: 2.5px dashed rgba(59, 130, 246, 0.85);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.35);
+    animation: rotateDashes 18s linear infinite;
+}
+
+@keyframes rotateDashes {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.reticle-crosshair-h {
+    position: absolute;
+    top: 50%;
+    left: -15px;
+    right: -15px;
+    height: 1px;
+    background: rgba(59, 130, 246, 0.6);
+}
+
+.reticle-crosshair-v {
+    position: absolute;
+    left: 50%;
+    top: -15px;
+    bottom: -15px;
+    width: 1px;
+    background: rgba(59, 130, 246, 0.6);
+}
+
+.reticle-pupil-target {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgba(14, 165, 233, 0.9);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.reticle-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(15, 23, 42, 0.85);
+    padding: 3px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #60a5fa;
+}
+
+/* Live Pulse Indicator */
+.live-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ef4444;
+    display: inline-block;
+    box-shadow: 0 0 8px #ef4444;
+    animation: livePulse 1.4s infinite alternate;
+}
+
+@keyframes livePulse {
+    0% { transform: scale(0.85); opacity: 0.6; }
+    100% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Eye Cards */
+.eye-section-card {
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid var(--border-glass) !important;
+    border-radius: 18px;
+    transition: all 0.3s ease;
+}
+
+.eye-section-card.active-card {
+    border-color: rgba(59, 130, 246, 0.6) !important;
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+}
+
+.eye-section-card.completed-card {
+    border-color: rgba(16, 185, 129, 0.5) !important;
+}
+
+.eye-badge-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.camera-error-overlay {
+    background: rgba(15, 23, 42, 0.95);
+    z-index: 10;
+}
+
+.letter-spacing-1 {
+    letter-spacing: 0.05em;
+}
+
+.xsmall {
+    font-size: 10px;
+}
+
+.pointer-events-none {
+    pointer-events: none;
 }

@@ -56,6 +56,10 @@ def get_cors_configuration() -> Tuple[List[str], bool]:
         # Development mode default
         allowed_origins = list(DEFAULT_DEV_ORIGINS)
 
+    # In production mode, strictly prohibit wildcard '*' origins
+    if environment == "production":
+        allowed_origins = [o for o in allowed_origins if o != "*"]
+
     # Enforce W3C Credential Safety Rule
     if "*" in allowed_origins:
         allow_credentials = False

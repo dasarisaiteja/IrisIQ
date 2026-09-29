@@ -1,286 +1,192 @@
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
+/**
+ * IrisIQ Official Student Registration (Phase 2)
+ * Handles student registration form submission to POST /api/students,
+ * displays generated Assessment ID, and routes to the eye scanning step.
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("studentRegistrationForm");
+    const studentIdInput = document.getElementById("student_id");
+    const studentNameInput = document.getElementById("student_name");
+    const registerBtn = document.getElementById("registerBtn");
+    const registerSpinner = document.getElementById("registerSpinner");
+    const registerIcon = document.getElementById("registerIcon");
+    const resetBtn = document.getElementById("resetBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
 
-let employeeData = null;
-let captureCount = 0;
-const totalImages = 40;
+    const alertBox = document.getElementById("alertBox");
+    const alertMsg = document.getElementById("alertMsg");
+    const alertIcon = document.getElementById("alertIcon");
 
-let isCapturing = false;
+    const formSection = document.getElementById("formSection");
+    const successSection = document.getElementById("successSection");
+    const successStudentId = document.getElementById("successStudentId");
+    const successStudentName = document.getElementById("successStudentName");
+    const successAssessmentId = document.getElementById("successAssessmentId");
+    const startScanBtn = document.getElementById("startScanBtn");
+    const registerAnotherBtn = document.getElementById("registerAnotherBtn");
 
-// ======================================================
-// START CAMERA
-// ======================================================
+    let isSubmitting = false;
+    let latestRegistration = null;
 
-async function startCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                width: 1280,
-                height: 720,
-                facingMode: "user"
+    // Helper: Show Alert
+    function showAlert(message, type = "danger") {
+        if (!alertBox || !alertMsg) return;
+        alertBox.className = `alert alert-${type} mb-4 border border-${type} border-opacity-50`;
+        alertMsg.textContent = message;
+
+        if (alertIcon) {
+            alertIcon.className = type === "success" 
+                ? "fa-solid fa-circle-check fs-5 text-success" 
+                : "fa-solid fa-circle-exclamation fs-5 text-danger";
+        }
+        alertBox.classList.remove("d-none");
+    }
+
+    // Helper: Hide Alert
+    function hideAlert() {
+        if (alertBox) {
+            alertBox.classList.add("d-none");
+        }
+    }
+
+    // Helper: Set Submitting State
+    function setSubmitting(submitting) {
+        isSubmitting = submitting;
+        if (registerBtn) {
+            registerBtn.disabled = submitting;
+        }
+        if (registerSpinner) {
+            if (submitting) {
+                registerSpinner.classList.remove("d-none");
+                if (registerIcon) registerIcon.classList.add("d-none");
+            } else {
+                registerSpinner.classList.add("d-none");
+                if (registerIcon) registerIcon.classList.remove("d-none");
+            }
+        }
+    }
+
+    // Handle Form Submit
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        if (isSubmitting) return;
+
+        const studentId = studentIdInput.value.trim();
+        const studentName = studentNameInput.value.trim();
+
+        // Client-side validations
+        if (!studentId) {
+            showAlert("Please enter a valid Student ID.");
+            studentIdInput.focus();
+            return;
+        }
+
+        const idPattern = /^[A-Za-z0-9_-]+$/;
+        if (!idPattern.test(studentId)) {
+            showAlert("Student ID must contain only alphanumeric characters, hyphens, or underscores.");
+            studentIdInput.focus();
+            return;
+        }
+
+        if (!studentName || studentName.length < 2) {
+            showAlert("Please enter the student's full name (at least 2 characters).");
+            studentNameInput.focus();
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            const response = await fetch("/api/students", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    student_name: studentName
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.status === 201 || (response.ok && data.status)) {
+                // Success
+                latestRegistration = {
+                    student_id: data.student ? data.student.student_id : studentId,
+                    student_name: data.student ? data.student.student_name : studentName,
+                    assessment_id: data.assessment ? data.assessment.assessment_id : "--"
+                };
+
+                // Populate Success View
+                successStudentId.textContent = latestRegistration.student_id;
+                successStudentName.textContent = latestRegistration.student_name;
+                successAssessmentId.textContent = latestRegistration.assessment_id;
+
+                // Toggle views
+                formSection.classList.add("d-none");
+                successSection.classList.remove("d-none");
+                hideAlert();
+            } else if (response.status === 409) {
+                // Conflict - Duplicate student_id
+                showAlert(data.detail || `Student ID '${studentId}' is already registered in the system.`, "danger");
+            } else if (response.status === 403) {
+                showAlert(data.detail || "You do not have permission to register this student.", "danger");
+            } else if (response.status === 400) {
+                showAlert(data.detail || "Invalid registration data. Please check your inputs.", "danger");
+            } else {
+                showAlert(data.detail || data.message || "An error occurred during registration. Please try again.", "danger");
+            }
+        } catch (error) {
+            console.error("Student registration network error:", error);
+            showAlert("Network error connecting to IrisIQ API server. Please check your connection and retry.", "danger");
+        } finally {
+            setSubmitting(false);
+        }
+    });
+
+    // Reset Action
+    if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+            form.reset();
+            hideAlert();
+            studentIdInput.focus();
+        });
+    }
+
+    // Cancel Action
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+            if (window.history.length > 1) {
+                window.location.href = "dashboard.html";
+            } else {
+                form.reset();
+                hideAlert();
             }
         });
-        video.srcObject = stream;
-        await video.play();
-    } catch (err) {
-        alert("Camera Error : " + err.message);
-    }
-}
-
-startCamera();
-
-// ======================================================
-// UI HELPERS
-// ======================================================
-
-function updateCaptureUI(count, total) {
-    const safeCount = Math.min(count, total);
-    const percent = Math.min(100, Math.floor((safeCount / total) * 100));
-
-    const counterEl = document.getElementById("counter");
-    if (counterEl) counterEl.innerHTML = safeCount + " / " + total;
-
-    const barEl = document.getElementById("progressBar");
-    if (barEl) {
-        barEl.style.width = percent + "%";
-        barEl.innerHTML = percent + "%";
     }
 
-    const statusEl = document.getElementById("status");
-    if (statusEl) {
-        statusEl.innerHTML = "Captured " + safeCount + " / " + total;
-    }
-}
-
-// ======================================================
-// REGISTER BUTTON
-// ======================================================
-
-document.getElementById("registerBtn").onclick = function () {
-    if (isCapturing) {
-        return;
+    // "Start Eye Scan" CTA Action
+    if (startScanBtn) {
+        startScanBtn.addEventListener("click", () => {
+            if (!latestRegistration) return;
+            // Navigates to camera.html with the new assessment_id and student_id context
+            const scanUrl = `camera.html?assessment_id=${encodeURIComponent(latestRegistration.assessment_id)}&student_id=${encodeURIComponent(latestRegistration.student_id)}`;
+            window.location.href = scanUrl;
+        });
     }
 
-    if (employee_code.value.trim() === "") {
-        alert("Enter Employee Code");
-        return;
+    // "Register Another Student" Action
+    if (registerAnotherBtn) {
+        registerAnotherBtn.addEventListener("click", () => {
+            form.reset();
+            latestRegistration = null;
+            successSection.classList.add("d-none");
+            formSection.classList.remove("d-none");
+            hideAlert();
+            studentIdInput.focus();
+        });
     }
-    if (user_name.value.trim() === "") {
-        alert("Enter Employee Name");
-        return;
-    }
-    if (department.value.trim() === "") {
-        alert("Enter Department");
-        return;
-    }
-    if (designation.value.trim() === "") {
-        alert("Enter Designation");
-        return;
-    }
-    if (gender.value === "") {
-        alert("Select Gender");
-        return;
-    }
-    if (dob.value === "") {
-        alert("Select Date Of Birth");
-        return;
-    }
-    if (blood_group.value === "") {
-        alert("Select Blood Group");
-        return;
-    }
-    if (mobile.value.trim() === "") {
-        alert("Enter Mobile");
-        return;
-    }
-    if (email.value.trim() === "") {
-        alert("Enter Email");
-        return;
-    }
-
-    employeeData = {
-        employee_code: employee_code.value.trim(),
-        user_name: user_name.value.trim(),
-        department: department.value.trim(),
-        designation: designation.value.trim(),
-        gender: gender.value,
-        age: age.value,
-        dob: dob.value,
-        blood_group: blood_group.value,
-        mobile: mobile.value.trim(),
-        email: email.value.trim(),
-        address: address.value.trim()
-    };
-
-    startAutoCapture();
-};
-
-// ======================================================
-// CAPTURE SINGLE FRAME (SEQUENTIAL PROMISE)
-// ======================================================
-
-function captureSingleFrame() {
-    return new Promise((resolve) => {
-        if (!isCapturing || captureCount >= totalImages) {
-            return resolve({ done: true });
-        }
-
-        canvas.width = video.videoWidth || 1280;
-        canvas.height = video.videoHeight || 720;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0);
-
-        canvas.toBlob(async (blob) => {
-            if (!blob || !isCapturing || captureCount >= totalImages) {
-                return resolve({ done: true });
-            }
-
-            const form = new FormData();
-            form.append("employee_code", employeeData.employee_code);
-            form.append("file", blob, (captureCount + 1) + ".jpg");
-
-            try {
-                const response = await fetch("/register-frame", {
-                    method: "POST",
-                    body: form
-                });
-
-                const result = await response.json();
-
-                // If backend indicates all 40 are completed
-                if (result.completed) {
-                    captureCount = totalImages;
-                    updateCaptureUI(totalImages, totalImages);
-                    return resolve({ done: true });
-                }
-
-                if (result.saved) {
-                    // Update with accurate server count if provided, or increment safely
-                    const newCount = typeof result.count === "number" ? result.count : (captureCount + 1);
-                    captureCount = Math.min(totalImages, newCount);
-                    updateCaptureUI(captureCount, totalImages);
-
-                    if (captureCount >= totalImages) {
-                        return resolve({ done: true });
-                    }
-                    return resolve({ done: false, success: true });
-                } else {
-                    console.warn("Register frame not saved:", result.message || result.detail || result);
-                    return resolve({ done: false, success: false });
-                }
-            } catch (err) {
-                console.error("Frame capture error:", err);
-                return resolve({ done: false, success: false });
-            }
-        }, "image/jpeg", 0.95);
-    });
-}
-
-// ======================================================
-// AUTO CAPTURE CONTROLLER
-// ======================================================
-
-async function startAutoCapture() {
-    isCapturing = true;
-    captureCount = 0;
-    sessionStorage.removeItem("lastScanInfo");
-
-    const registerBtn = document.getElementById("registerBtn");
-    registerBtn.disabled = true;
-
-    document.getElementById("status").innerHTML = "Capturing Iris Images...";
-    document.getElementById("counter").innerHTML = "0 / " + totalImages;
-    document.getElementById("progressBar").style.width = "0%";
-    document.getElementById("progressBar").innerHTML = "0%";
-
-    // Strictly sequential frame capture loop (prevents concurrent backlog / overcounting)
-    while (isCapturing && captureCount < totalImages) {
-        const res = await captureSingleFrame();
-        if (res.done || captureCount >= totalImages) {
-            break;
-        }
-
-        // Brief delay between frames (250ms)
-        await new Promise((r) => setTimeout(r, res.success ? 200 : 350));
-    }
-
-    isCapturing = false;
-
-    // Proceed to saving employee and training
-    document.getElementById("status").innerHTML = "Saving Customer & Training AI Model...";
-    updateCaptureUI(totalImages, totalImages);
-
-    await saveEmployee();
-}
-
-// ======================================================
-// SAVE EMPLOYEE
-// ======================================================
-
-async function saveEmployee() {
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0);
-
-    return new Promise((resolve) => {
-        canvas.toBlob(async (blob) => {
-            const form = new FormData();
-            form.append("employee_code", employeeData.employee_code);
-            form.append("user_name", employeeData.user_name);
-            form.append("department", employeeData.department);
-            form.append("designation", employeeData.designation);
-            form.append("gender", employeeData.gender);
-            form.append("age", employeeData.age);
-            form.append("dob", employeeData.dob);
-            form.append("blood_group", employeeData.blood_group);
-            form.append("mobile", employeeData.mobile);
-            form.append("email", employeeData.email);
-            form.append("address", employeeData.address);
-            form.append("file", blob, "employee.jpg");
-
-            try {
-                document.getElementById("status").innerHTML = "Creating Customer Profile...";
-
-                const response = await fetch("/enroll", {
-                    method: "POST",
-                    body: form
-                });
-
-                const result = await response.json();
-                console.log("Enroll Result:", result);
-
-                if (result.status) {
-                    sessionStorage.setItem("employee_code", employeeData.employee_code);
-
-                    if (result.scan_info && typeof result.scan_info === "object") {
-                        sessionStorage.setItem("lastScanInfo", JSON.stringify(result.scan_info));
-                    }
-
-                    document.getElementById("status").innerHTML = "Registration Successful";
-                    document.getElementById("counter").innerHTML = totalImages + " / " + totalImages;
-                    document.getElementById("progressBar").style.width = "100%";
-                    document.getElementById("progressBar").innerHTML = "100%";
-
-                    alert("Customer Registered Successfully");
-
-                    setTimeout(() => {
-                        window.location.href = "/static/camera.html";
-                    }, 1000);
-                } else {
-                    const msg = result.message || result.detail || "Registration failed";
-                    alert(msg);
-                    document.getElementById("status").innerHTML = "Registration failed: " + msg;
-                    document.getElementById("registerBtn").disabled = false;
-                }
-            } catch (err) {
-                console.error("Enroll API error:", err);
-                alert("API Error : " + err.message);
-                document.getElementById("status").innerHTML = "API Error: " + err.message;
-                document.getElementById("registerBtn").disabled = false;
-            } finally {
-                resolve();
-            }
-        }, "image/jpeg", 0.95);
-    });
-}
+});

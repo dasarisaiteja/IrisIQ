@@ -3,7 +3,9 @@ Authentication API Router.
 Exposes endpoints for user login, token issuance, user registration, and self-profile queries.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, status
+import time
+from fastapi import APIRouter, HTTPException, Depends, status, Request
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
 
@@ -14,7 +16,15 @@ from security.auth import (
     get_user_by_username,
     get_current_user,
     require_admin,
+    bearer_scheme,
+    decode_access_token,
+    revoke_token,
     JWT_EXPIRE_MINUTES
+)
+from security.rate_limiter import (
+    check_login_rate_limit,
+    record_login_failure,
+    record_login_success
 )
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -34,17 +44,23 @@ class RegisterRequest(BaseModel):
 
 
 @router.post("/login")
-def login(req: LoginRequest):
+def login(req: LoginRequest, request: Request):
     """
     Authenticates a user and returns a signed JWT access token.
+    Enforces reverse-proxy-aware brute-force rate limiting.
     """
+    check_login_rate_limit(request)
+
     user = authenticate_user(req.username, req.password)
     if not user:
+        record_login_failure(request)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
             headers={"WWW-Authenticate": "Bearer"}
         )
+
+    record_login_success(request)
 
     token = create_access_token(
         subject=user["username"],
@@ -63,6 +79,29 @@ def login(req: LoginRequest):
         "role": user["role"],
         "full_name": user.get("full_name", ""),
         "expires_in": JWT_EXPIRE_MINUTES * 60
+    }
+
+
+@router.post("/logout")
+def logout(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme)
+):
+    """
+    Logs out the current user session and revokes the JWT access token server-side.
+    """
+    if credentials and credentials.credentials:
+        token = credentials.credentials
+        try:
+            payload = decode_access_token(token)
+            exp = payload.get("exp", int(time.time()) + 3600)
+            revoke_token(token, exp)
+        except HTTPException:
+            # Token was already invalid, expired, or revoked
+            pass
+
+    return {
+        "status": True,
+        "message": "Logged out successfully"
     }
 
 

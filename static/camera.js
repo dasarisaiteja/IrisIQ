@@ -1,1884 +1,660 @@
-console.log("========== IRIS CAMERA START ==========");
+/**
+ * IrisIQ Official Dual-Eye Biometric Scanner Controller (Phase 3)
+ * Orchestrates camera stream, reticle guidance, and uploads frames
+ * to official backend endpoints:
+ * - POST /api/assessments/{assessmentId}/scan/left
+ * - POST /api/assessments/{assessmentId}/scan/right
+ * - POST /api/assessments/{assessmentId}/scan/{eye}/retry
+ * - GET /api/assessments/{assessmentId}/scan/status
+ *
+ * Backend is strictly authoritative for scan completion state.
+ */
 
-// Enforce staff-only biometric scanning requirement
-const currentRole = (typeof window !== "undefined" && window.IrisAuth && typeof window.IrisAuth.getRole === "function")
-    ? window.IrisAuth.getRole()
-    : null;
+document.addEventListener("DOMContentLoaded", () => {
+    // URL Context & State
+    const urlParams = new URLSearchParams(window.location.search);
+    const assessmentId = urlParams.get("assessment_id") || sessionStorage.getItem("iris_active_assessment_id");
+    const studentIdParam = urlParams.get("student_id") || sessionStorage.getItem("iris_active_student_id");
 
-if (currentRole === "Student") {
-    alert("Counselor/Admin access required for biometric scanning.");
-    window.location.href = "/static/student_profile.html";
-    throw new Error("Student role not permitted on camera scanning page");
-}
+    // DOM Elements - Header & Metadata
+    const displayAssessmentId = document.getElementById("displayAssessmentId");
+    const displayStudentId = document.getElementById("displayStudentId");
+    const displayStudentName = document.getElementById("displayStudentName");
+    const displayWorkflowStatus = document.getElementById("displayWorkflowStatus");
+    const displayWorkflowStatusBadge = document.getElementById("displayWorkflowStatusBadge");
+    const displayGatingStatus = document.getElementById("displayGatingStatus");
 
-function extractApiErrorMessage(data, fallbackMessage) {
-    if (data && typeof data === "object") {
-        if (typeof data.message === "string" && data.message.trim() !== "") {
-            return data.message;
+    // DOM Elements - Stepper
+    const stepLeft = document.getElementById("stepLeft");
+    const stepLeftIcon = document.getElementById("stepLeftIcon");
+    const stepLineRight = document.getElementById("stepLineRight");
+    const stepRight = document.getElementById("stepRight");
+    const stepRightIcon = document.getElementById("stepRightIcon");
+
+    // DOM Elements - Camera
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const cameraErrorOverlay = document.getElementById("cameraErrorOverlay");
+    const cameraErrorMessage = document.getElementById("cameraErrorMessage");
+    const retryCameraBtn = document.getElementById("retryCameraBtn");
+    const cameraResolution = document.getElementById("cameraResolution");
+    const activeEyeIndicator = document.getElementById("activeEyeIndicator");
+    const reticleLabel = document.getElementById("reticleLabel");
+
+    // DOM Elements - Global Alert
+    const globalAlert = document.getElementById("globalAlert");
+    const globalAlertMsg = document.getElementById("globalAlertMsg");
+    const globalAlertIcon = document.getElementById("globalAlertIcon");
+
+    // DOM Elements - Left Eye Card
+    const leftEyeCard = document.getElementById("leftEyeCard");
+    const leftStatusBadge = document.getElementById("leftStatusBadge");
+    const leftScanDetails = document.getElementById("leftScanDetails");
+    const leftQualityScore = document.getElementById("leftQualityScore");
+    const leftQualityBar = document.getElementById("leftQualityBar");
+    const leftErrorBox = document.getElementById("leftErrorBox");
+    const leftErrorText = document.getElementById("leftErrorText");
+    const captureLeftBtn = document.getElementById("captureLeftBtn");
+    const retryLeftBtn = document.getElementById("retryLeftBtn");
+    const leftSpinner = document.getElementById("leftSpinner");
+
+    // DOM Elements - Right Eye Card
+    const rightEyeCard = document.getElementById("rightEyeCard");
+    const rightStatusBadge = document.getElementById("rightStatusBadge");
+    const rightScanDetails = document.getElementById("rightScanDetails");
+    const rightQualityScore = document.getElementById("rightQualityScore");
+    const rightQualityBar = document.getElementById("rightQualityBar");
+    const rightErrorBox = document.getElementById("rightErrorBox");
+    const rightErrorText = document.getElementById("rightErrorText");
+    const captureRightBtn = document.getElementById("captureRightBtn");
+    const retryRightBtn = document.getElementById("retryRightBtn");
+    const rightSpinner = document.getElementById("rightSpinner");
+
+    // DOM Elements - Gating & Advancement
+    const scanGatingBanner = document.getElementById("scanGatingBanner");
+    const continueAnalysisBtn = document.getElementById("continueAnalysisBtn");
+    const analysisSpinner = document.getElementById("analysisSpinner");
+    const continueAnalysisIcon = document.getElementById("continueAnalysisIcon");
+    const continueAnalysisText = document.getElementById("continueAnalysisText");
+    const analysisSubtext = document.getElementById("analysisSubtext");
+
+    // DOM Elements - Analysis Stepper & Panels
+    const stepLineAnalysis = document.getElementById("stepLineAnalysis");
+    const stepAnalysis = document.getElementById("stepAnalysis");
+    const stepAnalysisIcon = document.getElementById("stepAnalysisIcon");
+    const processingStatusBox = document.getElementById("processingStatusBox");
+    const processingProgressBar = document.getElementById("processingProgressBar");
+    const processingStatusMsg = document.getElementById("processingStatusMsg");
+    const analysisResultsBox = document.getElementById("analysisResultsBox");
+    const resEngineVer = document.getElementById("resEngineVer");
+    const resAvgQuality = document.getElementById("resAvgQuality");
+    const resSimilarity = document.getElementById("resSimilarity");
+    const resPupilDelta = document.getElementById("resPupilDelta");
+    const resLeftDetails = document.getElementById("resLeftDetails");
+    const resRightDetails = document.getElementById("resRightDetails");
+    const resEyeColor = document.getElementById("resEyeColor");
+    const analysisErrorBox = document.getElementById("analysisErrorBox");
+    const analysisErrorMsg = document.getElementById("analysisErrorMsg");
+    const retryAnalysisBtn = document.getElementById("retryAnalysisBtn");
+    const proceedReportBtn = document.getElementById("proceedReportBtn");
+
+    let mediaStream = null;
+    let isProcessing = false;
+    let activeEye = "LEFT"; // Default focus is Left eye
+
+    // Helper: Show Global Alert
+    function showGlobalAlert(message, type = "danger") {
+        if (!globalAlert || !globalAlertMsg) return;
+        globalAlert.className = `alert alert-${type} mb-4 border border-${type} border-opacity-50`;
+        globalAlertMsg.textContent = message;
+        if (globalAlertIcon) {
+            globalAlertIcon.className = type === "success" 
+                ? "fa-solid fa-circle-check fs-5 text-success" 
+                : "fa-solid fa-circle-exclamation fs-5 text-danger";
         }
-        if (typeof data.detail === "string" && data.detail.trim() !== "") {
-            return data.detail;
+        globalAlert.classList.remove("d-none");
+    }
+
+    // Helper: Hide Global Alert
+    function hideGlobalAlert() {
+        if (globalAlert) globalAlert.classList.add("d-none");
+    }
+
+    // Helper: Set Active Eye Focus
+    function setActiveEyeFocus(eye) {
+        activeEye = eye;
+        if (eye === "LEFT") {
+            leftEyeCard.classList.add("active-card");
+            rightEyeCard.classList.remove("active-card");
+            activeEyeIndicator.textContent = "LEFT EYE ACTIVE";
+            activeEyeIndicator.className = "badge bg-primary px-3 py-1 rounded-pill fw-bold";
+            reticleLabel.textContent = "Align LEFT Eye in Target Ring";
+            reticleLabel.style.color = "#60a5fa";
+        } else {
+            rightEyeCard.classList.add("active-card");
+            leftEyeCard.classList.remove("active-card");
+            activeEyeIndicator.textContent = "RIGHT EYE ACTIVE";
+            activeEyeIndicator.className = "badge bg-info px-3 py-1 rounded-pill fw-bold";
+            reticleLabel.textContent = "Align RIGHT Eye in Target Ring";
+            reticleLabel.style.color = "#38bdf8";
         }
-        if (Array.isArray(data.detail) && data.detail.length > 0) {
-            const items = data.detail.map(d => {
-                if (typeof d === "string") return d;
-                if (d && typeof d === "object" && typeof d.msg === "string") return d.msg;
-                return null;
-            }).filter(Boolean);
-            if (items.length > 0) {
-                return items.join("; ");
+    }
+
+    // 1. Initialize & Start Camera
+    async function startCamera() {
+        if (cameraErrorOverlay) cameraErrorOverlay.classList.add("d-none");
+
+        try {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
             }
-        }
-        if (data.detail && typeof data.detail === "object") {
-            const nested = data.detail.message || data.detail.error || data.detail.msg;
-            if (typeof nested === "string" && nested.trim() !== "") {
-                return nested;
+
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280, min: 640 },
+                    height: { ideal: 720, min: 480 },
+                    facingMode: "user"
+                },
+                audio: false
+            });
+
+            video.srcObject = mediaStream;
+            await video.play();
+
+            const track = mediaStream.getVideoTracks()[0];
+            const settings = track.getSettings();
+            if (settings.width && settings.height) {
+                cameraResolution.textContent = `${settings.width}x${settings.height}`;
+            } else {
+                cameraResolution.textContent = "HD Active";
+            }
+        } catch (err) {
+            console.error("Camera access error:", err);
+            let userMessage = "Could not access video input device. Please check browser camera permissions.";
+            if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+                userMessage = "Camera permission was denied. Please allow camera access in your browser settings to proceed with eye scanning.";
+            } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+                userMessage = "No camera found on your device. Please connect a webcam or enable your built-in camera.";
+            } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+                userMessage = "Camera is currently in use by another application or tab. Please close other camera apps and retry.";
+            }
+
+            if (cameraErrorMessage) cameraErrorMessage.textContent = userMessage;
+            if (cameraErrorOverlay) {
+                cameraErrorOverlay.classList.remove("d-none");
+                cameraErrorOverlay.classList.add("d-flex");
             }
         }
     }
-    return fallbackMessage;
-}
 
-const employeeCode =
-    sessionStorage.getItem("employee_code");
-
-console.log(
-    "Employee Code:",
-    employeeCode
-);
-
-if (!employeeCode) {
-
-    alert(
-        "Customer not registered."
-    );
-
-    window.location.href =
-        "/static/register.html";
-
-    throw new Error(
-        "Employee code missing"
-    );
-}
-
-
-/* =====================================================
-   DOM ELEMENTS
-===================================================== */
-
-const video =
-    document.getElementById("video");
-
-const canvas =
-    document.getElementById("canvas");
-
-const btn =
-    document.getElementById("captureBtn");
-
-const loading =
-    document.getElementById("loading");
-
-const scanStatus =
-    document.getElementById("scanStatus");
-
-const confidence =
-    document.getElementById("confidence");
-
-const eyeColor =
-    document.getElementById("eyeColor");
-
-const pupilRadius =
-    document.getElementById("pupilRadius");
-
-const irisRadius =
-    document.getElementById("irisRadius");
-
-const preview =
-    document.getElementById("preview");
-
-
-/* =====================================================
-   VALIDATE DOM
-===================================================== */
-
-if (!video) {
-
-    alert(
-        "Camera video element not found."
-    );
-
-    throw new Error(
-        "video element missing"
-    );
-}
-
-if (!canvas) {
-
-    alert(
-        "Camera canvas element not found."
-    );
-
-    throw new Error(
-        "canvas element missing"
-    );
-}
-
-if (!btn) {
-
-    alert(
-        "Scan button not found."
-    );
-
-    throw new Error(
-        "capture button missing"
-    );
-}
-
-
-/* =====================================================
-   INITIAL STATE
-===================================================== */
-
-btn.disabled = true;
-
-if (loading) {
-    loading.style.display = "none";
-}
-
-/* =====================================================
-   POST-REGISTRATION SCAN INFO HAND-OFF
-===================================================== */
-
-let hasPostRegistrationInfo = false;
-
-function applyPostRegistrationScanInfo() {
-    const raw = sessionStorage.getItem("lastScanInfo");
-    if (!raw) {
-        return false;
+    if (retryCameraBtn) {
+        retryCameraBtn.addEventListener("click", () => {
+            startCamera();
+        });
     }
 
-    try {
-        const info = JSON.parse(raw);
-        if (info && typeof info === "object") {
-            hasPostRegistrationInfo = true;
+    // 2. Fetch and Sync Backend Assessment Scan Status
+    async function refreshScanStatus() {
+        if (!assessmentId) return;
 
-            if (scanStatus) {
-                scanStatus.innerHTML = "Registered";
+        try {
+            const response = await fetch(`/api/assessments/${encodeURIComponent(assessmentId)}/scan/status`);
+            if (response.status === 404) {
+                showGlobalAlert(`Assessment '${assessmentId}' was not found. Please register or select an active assessment.`, "danger");
+                return;
+            }
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                showGlobalAlert(errData.detail || "Failed to load assessment status.", "danger");
+                return;
             }
 
-            if (confidence) {
-                if (
-                    info.confidence !== null &&
-                    info.confidence !== undefined &&
-                    info.confidence !== "" &&
-                    !isNaN(Number(info.confidence))
-                ) {
-                    confidence.innerHTML =
-                        (Number(info.confidence) * 100).toFixed(2) + "%";
-                } else {
-                    confidence.innerHTML = "--";
-                }
-            }
-
-            if (eyeColor) {
-                if (
-                    info.eye_color !== null &&
-                    info.eye_color !== undefined &&
-                    String(info.eye_color).trim() !== ""
-                ) {
-                    eyeColor.innerHTML = String(info.eye_color);
-                } else {
-                    eyeColor.innerHTML = "--";
-                }
-            }
-
-            if (pupilRadius) {
-                if (
-                    info.pupil_radius !== null &&
-                    info.pupil_radius !== undefined &&
-                    info.pupil_radius !== "" &&
-                    !isNaN(Number(info.pupil_radius))
-                ) {
-                    pupilRadius.innerHTML = String(info.pupil_radius);
-                } else {
-                    pupilRadius.innerHTML = "--";
-                }
-            }
-
-            if (irisRadius) {
-                if (
-                    info.iris_radius !== null &&
-                    info.iris_radius !== undefined &&
-                    info.iris_radius !== "" &&
-                    !isNaN(Number(info.iris_radius))
-                ) {
-                    irisRadius.innerHTML = String(info.iris_radius);
-                } else {
-                    irisRadius.innerHTML = "--";
-                }
-            }
-            return true;
+            const data = await response.json();
+            updateUIFromStatus(data);
+        } catch (err) {
+            console.error("Status refresh error:", err);
         }
-    } catch (err) {
-        console.warn("Failed to parse lastScanInfo from sessionStorage:", err);
-    } finally {
-        // Consumed once so refreshing camera.html safely reverts to Ready / --
-        sessionStorage.removeItem("lastScanInfo");
     }
-    return false;
-}
 
-if (typeof window !== "undefined") {
-    window.applyPostRegistrationScanInfo = applyPostRegistrationScanInfo;
-}
+    // 3. Update UI strictly from Backend Authoritative Status
+    function updateUIFromStatus(data) {
+        displayAssessmentId.textContent = data.assessment_id;
+        displayStudentId.textContent = data.student_id;
+        displayStudentName.textContent = data.student_name;
+        displayWorkflowStatus.textContent = data.workflow_status;
 
-// Apply immediately on load
-applyPostRegistrationScanInfo();
+        // Workflow Status Badge Colors
+        if (data.workflow_status === "SCAN_COMPLETED") {
+            displayWorkflowStatusBadge.className = "badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-2 fw-semibold small";
+            displayWorkflowStatusBadge.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> SCAN_COMPLETED`;
+            displayGatingStatus.textContent = "Completed & Verified";
+            displayGatingStatus.className = "text-success fw-bold";
+        } else if (data.workflow_status.includes("COMPLETED")) {
+            displayWorkflowStatusBadge.className = "badge bg-warning-subtle text-warning border border-warning border-opacity-25 px-3 py-2 fw-semibold small";
+            displayWorkflowStatusBadge.innerHTML = `<i class="fa-solid fa-hourglass-half me-1"></i> ${data.workflow_status}`;
+            displayGatingStatus.textContent = "1 of 2 Scans Completed";
+            displayGatingStatus.className = "text-warning fw-bold";
+        } else {
+            displayWorkflowStatusBadge.className = "badge bg-primary-subtle text-primary border border-primary border-opacity-25 px-3 py-2 fw-semibold small";
+            displayWorkflowStatusBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin-pulse me-1"></i> ${data.workflow_status}`;
+            displayGatingStatus.textContent = "Dual Scan Required";
+            displayGatingStatus.className = "text-info fw-bold";
+        }
 
-if (scanStatus && !hasPostRegistrationInfo) {
-    scanStatus.innerHTML =
-        "Starting Camera...";
-}
+        const left = data.scans?.left || {};
+        const right = data.scans?.right || {};
 
+        // Update LEFT EYE card
+        if (left.status === "Completed") {
+            leftStatusBadge.className = "badge bg-success-subtle text-success px-3 py-2 rounded-pill small fw-semibold";
+            leftStatusBadge.innerHTML = `<i class="fa-solid fa-check me-1"></i> Completed`;
+            leftEyeCard.classList.add("completed-card");
+            leftScanDetails.classList.remove("d-none");
+            leftQualityScore.textContent = `${Math.round(left.quality_score || 0)}%`;
+            leftQualityBar.style.width = `${Math.round(left.quality_score || 0)}%`;
+            leftErrorBox.classList.add("d-none");
 
-let cameraStream = null;
+            captureLeftBtn.classList.add("d-none");
+            retryLeftBtn.classList.remove("d-none");
 
-let isScanning = false;
+            // Stepper Left Eye
+            stepLeft.className = "step completed";
+            stepLeftIcon.innerHTML = `<i class="fa-solid fa-check"></i>`;
+            stepLineRight.className = "step-line active";
+        } else if (left.status === "Failed") {
+            leftStatusBadge.className = "badge bg-danger-subtle text-danger px-3 py-2 rounded-pill small fw-semibold";
+            leftStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> Failed`;
+            leftEyeCard.classList.remove("completed-card");
+            leftScanDetails.classList.remove("d-none");
+            leftErrorBox.classList.remove("d-none");
+            leftErrorText.textContent = left.error_message || "Scan quality insufficient. Please retry.";
+            retryLeftBtn.classList.remove("d-none");
+        } else {
+            leftStatusBadge.className = "badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill small fw-semibold";
+            leftStatusBadge.textContent = "Pending";
+            leftEyeCard.classList.remove("completed-card");
+            leftScanDetails.classList.add("d-none");
+            captureLeftBtn.classList.remove("d-none");
+            retryLeftBtn.classList.add("d-none");
+        }
 
+        // Update RIGHT EYE card
+        if (right.status === "Completed") {
+            rightStatusBadge.className = "badge bg-success-subtle text-success px-3 py-2 rounded-pill small fw-semibold";
+            rightStatusBadge.innerHTML = `<i class="fa-solid fa-check me-1"></i> Completed`;
+            rightEyeCard.classList.add("completed-card");
+            rightScanDetails.classList.remove("d-none");
+            rightQualityScore.textContent = `${Math.round(right.quality_score || 0)}%`;
+            rightQualityBar.style.width = `${Math.round(right.quality_score || 0)}%`;
+            rightErrorBox.classList.add("d-none");
 
-/* =====================================================
-   LIST CAMERAS
-===================================================== */
+            captureRightBtn.classList.add("d-none");
+            retryRightBtn.classList.remove("d-none");
 
-async function listCameras() {
+            // Stepper Right Eye
+            stepRight.className = "step completed";
+            stepRightIcon.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        } else if (right.status === "Failed") {
+            rightStatusBadge.className = "badge bg-danger-subtle text-danger px-3 py-2 rounded-pill small fw-semibold";
+            rightStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> Failed`;
+            rightEyeCard.classList.remove("completed-card");
+            rightScanDetails.classList.remove("d-none");
+            rightErrorBox.classList.remove("d-none");
+            rightErrorText.textContent = right.error_message || "Scan quality insufficient. Please retry.";
+            retryRightBtn.classList.remove("d-none");
+        } else {
+            rightStatusBadge.className = "badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill small fw-semibold";
+            rightStatusBadge.textContent = "Pending";
+            rightEyeCard.classList.remove("completed-card");
+            rightScanDetails.classList.add("d-none");
+            captureRightBtn.classList.remove("d-none");
+            retryRightBtn.classList.add("d-none");
+        }
 
-    try {
+        // Auto-switch focus to Right eye if Left is already completed
+        if (left.status === "Completed" && right.status !== "Completed") {
+            setActiveEyeFocus("RIGHT");
+        }
 
-        if (
-            !navigator.mediaDevices ||
-            !navigator.mediaDevices.enumerateDevices
-        ) {
+        // Gating & Advancement Logic (strictly backend authoritative)
+        if (["ANALYSIS_COMPLETED", "REPORT_GENERATING", "REPORT_READY"].includes(data.workflow_status)) {
+            continueAnalysisBtn.disabled = true;
+            continueAnalysisBtn.classList.remove("pulse-btn");
+            await loadAndRenderAnalysis();
+        } else if (data.workflow_status === "PROCESSING") {
+            continueAnalysisBtn.disabled = true;
+            if (processingStatusBox) processingStatusBox.classList.remove("d-none");
+            pollAnalysisStatus();
+        } else if (data.scans?.both_completed) {
+            continueAnalysisBtn.disabled = false;
+            continueAnalysisBtn.classList.add("pulse-btn");
+            scanGatingBanner.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Both eye scans verified by backend. Ready to proceed.`;
+            scanGatingBanner.className = "small text-success fw-bold mb-3";
+        } else {
+            continueAnalysisBtn.disabled = true;
+            continueAnalysisBtn.classList.remove("pulse-btn");
+            scanGatingBanner.innerHTML = `<i class="fa-solid fa-lock me-1"></i> Both Left and Right eye scans must be backend-verified before advancing.`;
+            scanGatingBanner.className = "small text-secondary mb-3";
+        }
+    }
 
-            console.warn(
-                "enumerateDevices not supported"
-            );
-
+    // 4. Capture Canvas Frame & Upload to Endpoint
+    async function captureAndUpload(eye, isRetry = false) {
+        if (!assessmentId) {
+            showGlobalAlert("No assessment context found. Please register or select an assessment.", "danger");
             return;
         }
 
-        const devices =
-            await navigator.mediaDevices
-                .enumerateDevices();
+        if (isProcessing) return;
+        hideGlobalAlert();
 
-        console.log(
-            "========== CAMERAS =========="
-        );
-
-        devices
-            .filter(
-                device =>
-                    device.kind === "videoinput"
-            )
-            .forEach(
-                (device, index) => {
-
-                    console.log(
-                        "Camera",
-                        index + 1,
-                        ":",
-                        device.label ||
-                            "Unnamed Camera",
-                        device.deviceId
-                    );
-
-                }
-            );
-
-    }
-    catch (err) {
-
-        console.error(
-            "Camera List Error:",
-            err
-        );
-
-    }
-}
-
-
-/* =====================================================
-   WAIT FOR VIDEO METADATA
-===================================================== */
-
-async function waitForVideoMetadata() {
-
-    const timeout = 10000;
-
-    const start =
-        Date.now();
-
-    while (
-        Date.now() - start <
-        timeout
-    ) {
-
-        if (
-            video.readyState >=
-                HTMLMediaElement.HAVE_METADATA &&
-            video.videoWidth > 0 &&
-            video.videoHeight > 0
-        ) {
-
-            return true;
+        if (!video.videoWidth || !video.videoHeight) {
+            showGlobalAlert("Camera feed is not ready. Please wait for camera initialization.", "warning");
+            return;
         }
 
-        await new Promise(
-            resolve =>
-                setTimeout(
-                    resolve,
-                    100
-                )
-        );
-    }
+        isProcessing = true;
+        const spinner = (eye === "LEFT") ? leftSpinner : rightSpinner;
+        const btn = isRetry 
+            ? ((eye === "LEFT") ? retryLeftBtn : retryRightBtn)
+            : ((eye === "LEFT") ? captureLeftBtn : captureRightBtn);
 
-    return false;
-}
+        btn.disabled = true;
+        if (spinner) spinner.classList.remove("d-none");
 
+        try {
+            // Draw current video frame to hidden canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            
+            // Mirror frame correctly since video has scaleX(-1) preview
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
 
-/* =====================================================
-   WAIT FOR REAL VIDEO FRAME
-===================================================== */
+            // Convert to JPEG Blob
+            const blob = await new Promise((resolve) => {
+                canvas.toBlob((b) => resolve(b), "image/jpeg", 0.95);
+            });
 
-async function waitForVideoFrame() {
-
-    const timeout = 10000;
-
-    const start =
-        Date.now();
-
-    while (
-        Date.now() - start <
-        timeout
-    ) {
-
-        if (
-            video.readyState >=
-                HTMLMediaElement.HAVE_CURRENT_DATA &&
-            video.videoWidth > 0 &&
-            video.videoHeight > 0
-        ) {
-
-            /*
-             * Prefer browser's real video-frame callback.
-             */
-
-            if (
-                "requestVideoFrameCallback"
-                in video
-            ) {
-
-                try {
-
-                    await new Promise(
-                        resolve => {
-
-                            video.requestVideoFrameCallback(
-                                () => resolve()
-                            );
-
-                        }
-                    );
-
-                }
-                catch (err) {
-
-                    console.warn(
-                        "requestVideoFrameCallback failed:",
-                        err
-                    );
-
-                }
-
-            }
-            else {
-
-                await new Promise(
-                    resolve =>
-                        requestAnimationFrame(
-                            resolve
-                        )
-                );
-
-                await new Promise(
-                    resolve =>
-                        requestAnimationFrame(
-                            resolve
-                        )
-                );
-
-                await new Promise(
-                    resolve =>
-                        requestAnimationFrame(
-                            resolve
-                        )
-                );
+            if (!blob) {
+                throw new Error("Failed to encode frame from camera.");
             }
 
-            return true;
-        }
+            const formData = new FormData();
+            formData.append("file", blob, `${eye.toLowerCase()}_scan.jpg`);
 
-        await new Promise(
-            resolve =>
-                setTimeout(
-                    resolve,
-                    100
-                )
-        );
+            const endpoint = isRetry
+                ? `/api/assessments/${encodeURIComponent(assessmentId)}/scan/${eye.toLowerCase()}/retry`
+                : `/api/assessments/${encodeURIComponent(assessmentId)}/scan/${eye.toLowerCase()}`;
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.status === 200 || response.ok) {
+                if (result.status) {
+                    showGlobalAlert(`${eye} eye scan captured and verified successfully!`, "success");
+                } else {
+                    showGlobalAlert(result.message || `${eye} eye scan failed quality verification.`, "danger");
+                }
+            } else if (response.status === 409) {
+                showGlobalAlert(result.detail || `Conflict: A completed scan already exists for ${eye} eye. Use Rescan if replacement is needed.`, "warning");
+            } else if (response.status === 400 || response.status === 413) {
+                showGlobalAlert(result.detail || "Invalid image upload. Please retry capture.", "danger");
+            } else if (response.status === 403) {
+                showGlobalAlert(result.detail || "You are not authorized to upload scans for this assessment.", "danger");
+            } else {
+                showGlobalAlert(result.detail || "An unexpected error occurred while processing scan.", "danger");
+            }
+
+            // Always synchronize backend authoritative status
+            await refreshScanStatus();
+
+        } catch (err) {
+            console.error(`Upload error for ${eye} eye:`, err);
+            showGlobalAlert(`Network or capture error during ${eye} scan: ${err.message}`, "danger");
+        } finally {
+            isProcessing = false;
+            btn.disabled = false;
+            if (spinner) spinner.classList.add("d-none");
+        }
     }
 
-    return false;
-}
+    // 5. Button Listeners
+    if (captureLeftBtn) {
+        captureLeftBtn.addEventListener("click", () => {
+            setActiveEyeFocus("LEFT");
+            captureAndUpload("LEFT", false);
+        });
+    }
 
+    if (retryLeftBtn) {
+        retryLeftBtn.addEventListener("click", () => {
+            setActiveEyeFocus("LEFT");
+            captureAndUpload("LEFT", true);
+        });
+    }
 
-/* =====================================================
-   START CAMERA
-===================================================== */
+    if (captureRightBtn) {
+        captureRightBtn.addEventListener("click", () => {
+            setActiveEyeFocus("RIGHT");
+            captureAndUpload("RIGHT", false);
+        });
+    }
 
-async function startCamera() {
+    if (retryRightBtn) {
+        retryRightBtn.addEventListener("click", () => {
+            setActiveEyeFocus("RIGHT");
+            captureAndUpload("RIGHT", true);
+        });
+    }
 
-    try {
+    // =========================================================
+    // 5. PHASE 4: OFFICIAL BILATERAL ANALYSIS PROCESSING
+    // =========================================================
 
-        console.log(
-            "========== STARTING CAMERA =========="
-        );
+    async function startAnalysisProcessing() {
+        if (!assessmentId) return;
 
-        if (
-            !navigator.mediaDevices ||
-            !navigator.mediaDevices.getUserMedia
-        ) {
+        hideGlobalAlert();
+        if (analysisErrorBox) analysisErrorBox.classList.add("d-none");
+        if (processingStatusBox) processingStatusBox.classList.remove("d-none");
 
-            throw new Error(
-                "Camera API is not supported by this browser."
-            );
+        continueAnalysisBtn.disabled = true;
+        continueAnalysisBtn.classList.remove("pulse-btn");
+        if (analysisSpinner) analysisSpinner.classList.remove("d-none");
+        if (continueAnalysisIcon) continueAnalysisIcon.classList.add("d-none");
+        if (continueAnalysisText) continueAnalysisText.textContent = "Processing Analysis...";
+
+        try {
+            const resp = await fetch(`/api/assessments/${encodeURIComponent(assessmentId)}/process`, {
+                method: "POST",
+                headers: authClient.getAuthHeaders()
+            });
+
+            const result = await resp.json();
+
+            if (!resp.ok) {
+                throw new Error(result.detail || "Analysis processing failed.");
+            }
+
+            if (result.workflow_status === "ANALYSIS_COMPLETED" || result.status === true) {
+                await loadAndRenderAnalysis();
+            } else if (result.workflow_status === "PROCESSING") {
+                pollAnalysisStatus();
+            }
+        } catch (err) {
+            console.error("Analysis process error:", err);
+            if (processingStatusBox) processingStatusBox.classList.add("d-none");
+            if (analysisErrorBox) {
+                analysisErrorBox.classList.remove("d-none");
+                if (analysisErrorMsg) analysisErrorMsg.textContent = err.message;
+            }
+            continueAnalysisBtn.disabled = false;
+            if (analysisSpinner) analysisSpinner.classList.add("d-none");
+            if (continueAnalysisIcon) continueAnalysisIcon.classList.remove("d-none");
+            if (continueAnalysisText) continueAnalysisText.textContent = "Retry Analysis";
         }
+    }
 
-
-        /*
-         * Stop old stream.
-         */
-
-        if (cameraStream) {
-
-            cameraStream
-                .getTracks()
-                .forEach(
-                    track =>
-                        track.stop()
-                );
-
-            cameraStream = null;
-        }
-
-
-        /*
-         * Request camera.
-         */
-
-        cameraStream =
-            await navigator.mediaDevices
-                .getUserMedia({
-
-                    video: {
-
-                        width: {
-                            ideal: 1280
-                        },
-
-                        height: {
-                            ideal: 720
-                        },
-
-                        facingMode: {
-                            ideal: "user"
-                        }
-
-                    },
-
-                    audio: false
-
+    async function pollAnalysisStatus() {
+        let attempts = 0;
+        const maxAttempts = 30; // 30 * 1.5s = 45s max
+        const interval = setInterval(async () => {
+            attempts++;
+            try {
+                const resp = await fetch(`/api/assessments/${encodeURIComponent(assessmentId)}/process/status`, {
+                    headers: authClient.getAuthHeaders()
                 });
-
-
-        console.log(
-            "Camera permission granted"
-        );
-
-
-        /*
-         * Attach stream.
-         */
-
-        video.srcObject =
-            cameraStream;
-
-
-        /*
-         * Required video settings.
-         */
-
-        video.muted = true;
-
-        video.autoplay = true;
-
-        video.playsInline = true;
-
-        video.setAttribute(
-            "autoplay",
-            ""
-        );
-
-        video.setAttribute(
-            "muted",
-            ""
-        );
-
-        video.setAttribute(
-            "playsinline",
-            ""
-        );
-
-
-        /*
-         * Get camera track.
-         */
-
-        const track =
-            cameraStream
-                .getVideoTracks()[0];
-
-        if (!track) {
-
-            throw new Error(
-                "Camera video track not found."
-            );
-        }
-
-
-        console.log(
-            "Camera Track:",
-            {
-                label:
-                    track.label,
-
-                enabled:
-                    track.enabled,
-
-                readyState:
-                    track.readyState,
-
-                settings:
-                    track.getSettings()
+                if (!resp.ok) {
+                    clearInterval(interval);
+                    throw new Error("Unable to check analysis status.");
+                }
+                const data = await resp.json();
+                if (data.workflow_status === "ANALYSIS_COMPLETED") {
+                    clearInterval(interval);
+                    await loadAndRenderAnalysis();
+                } else if (data.workflow_status === "FAILED") {
+                    clearInterval(interval);
+                    throw new Error(data.safe_error_message || "Analysis processing failed on backend.");
+                }
+            } catch (err) {
+                clearInterval(interval);
+                if (processingStatusBox) processingStatusBox.classList.add("d-none");
+                if (analysisErrorBox) {
+                    analysisErrorBox.classList.remove("d-none");
+                    if (analysisErrorMsg) analysisErrorMsg.textContent = err.message;
+                }
+                continueAnalysisBtn.disabled = false;
+                if (analysisSpinner) analysisSpinner.classList.add("d-none");
+                if (continueAnalysisIcon) continueAnalysisIcon.classList.remove("d-none");
+                if (continueAnalysisText) continueAnalysisText.textContent = "Retry Analysis";
             }
-        );
 
+            if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                if (processingStatusBox) processingStatusBox.classList.add("d-none");
+                showGlobalAlert("Analysis processing is taking longer than expected. Please refresh or retry.", "warning");
+                continueAnalysisBtn.disabled = false;
+                if (analysisSpinner) analysisSpinner.classList.add("d-none");
+            }
+        }, 1500);
+    }
 
-        /*
-         * Wait for metadata.
-         */
-
-        const metadataReady =
-            await waitForVideoMetadata();
-
-        if (!metadataReady) {
-
-            throw new Error(
-                "Camera metadata was not received."
-            );
-        }
-
-
-        /*
-         * Start playback.
-         */
-
+    async function loadAndRenderAnalysis() {
         try {
-
-            await video.play();
-
-        }
-        catch (playError) {
-
-            console.warn(
-                "Initial video.play() warning:",
-                playError
-            );
-
-            await new Promise(
-                resolve =>
-                    setTimeout(
-                        resolve,
-                        300
-                    )
-            );
-
-            await video.play();
-        }
-
-
-        /*
-         * Wait for real frame.
-         */
-
-        const ready =
-            await waitForVideoFrame();
-
-        if (!ready) {
-
-            throw new Error(
-                "Camera started but no video frame was received."
-            );
-        }
-
-
-        console.log(
-            "========== CAMERA READY =========="
-        );
-
-        console.log(
-            "Video Width:",
-            video.videoWidth
-        );
-
-        console.log(
-            "Video Height:",
-            video.videoHeight
-        );
-
-        console.log(
-            "Video ReadyState:",
-            video.readyState
-        );
-
-
-        /*
-         * Enable scan.
-         */
-
-        btn.disabled = false;
-
-        if (scanStatus && !hasPostRegistrationInfo) {
-
-            scanStatus.innerHTML =
-                "Ready";
-        }
-
-    }
-    catch (err) {
-
-        console.error(
-            "Camera Error:",
-            err
-        );
-
-        btn.disabled = true;
-
-        if (scanStatus) {
-
-            scanStatus.innerHTML =
-                "Camera Error";
-        }
-
-        alert(
-            "Camera Error: " +
-            (
-                err.message ||
-                err
-            )
-        );
-    }
-}
-
-
-/* =====================================================
-   CAPTURE FRAME
-===================================================== */
-
-async function captureFrame() {
-
-    console.log(
-        "========== CAPTURE FRAME START =========="
-    );
-
-
-    if (!cameraStream) {
-
-        throw new Error(
-            "Camera stream is not available."
-        );
-    }
-
-
-    if (!cameraStream.active) {
-
-        throw new Error(
-            "Camera stream is not active."
-        );
-    }
-
-
-    const track =
-        cameraStream
-            .getVideoTracks()[0];
-
-
-    if (!track) {
-
-        throw new Error(
-            "Camera video track not found."
-        );
-    }
-
-
-    if (
-        track.readyState !==
-        "live"
-    ) {
-
-        throw new Error(
-            "Camera track is not live."
-        );
-    }
-
-
-    console.log(
-        "Camera Track:",
-        {
-            label:
-                track.label,
-
-            enabled:
-                track.enabled,
-
-            readyState:
-                track.readyState,
-
-            muted:
-                track.muted,
-
-            settings:
-                track.getSettings()
-        }
-    );
-
-
-    /*
-     * Wait for a real camera frame.
-     */
-
-    const ready =
-        await waitForVideoFrame();
-
-
-    if (!ready) {
-
-        throw new Error(
-            "Camera frame is not ready."
-        );
-    }
-
-
-    console.log(
-        "Video State:",
-        {
-            readyState:
-                video.readyState,
-
-            videoWidth:
-                video.videoWidth,
-
-            videoHeight:
-                video.videoHeight,
-
-            paused:
-                video.paused
-        }
-    );
-
-
-    if (
-        video.videoWidth <= 0 ||
-        video.videoHeight <= 0
-    ) {
-
-        throw new Error(
-            "Invalid camera frame size."
-        );
-    }
-
-
-    /*
-     * =================================================
-     * DIRECT CAMERA FRAME CAPTURE
-     * =================================================
-     *
-     * ImageCapture avoids the black-frame problem
-     * that can happen with drawImage(video).
-     */
-
-    let capturedBitmap = null;
-
-
-    if (
-        typeof ImageCapture !==
-        "undefined"
-    ) {
-
-        try {
-
-            console.log(
-                "Trying ImageCapture.grabFrame()..."
-            );
-
-
-            const imageCapture =
-                new ImageCapture(
-                    track
-                );
-
-
-            capturedBitmap =
-                await imageCapture
-                    .grabFrame();
-
-
-            console.log(
-                "ImageCapture SUCCESS:",
-                capturedBitmap.width,
-                "x",
-                capturedBitmap.height
-            );
-
-        }
-        catch (imageCaptureError) {
-
-            console.warn(
-                "ImageCapture failed:",
-                imageCaptureError
-            );
-
-            capturedBitmap = null;
+            const resp = await fetch(`/api/assessments/${encodeURIComponent(assessmentId)}/analysis`, {
+                headers: authClient.getAuthHeaders()
+            });
+            if (!resp.ok) {
+                const errData = await resp.json();
+                throw new Error(errData.detail || "Failed to load analysis results.");
+            }
+            const data = await resp.json();
+            const analysis = data.analysis;
+
+            // Hide processing and error boxes
+            if (processingStatusBox) processingStatusBox.classList.add("d-none");
+            if (analysisErrorBox) analysisErrorBox.classList.add("d-none");
+
+            // Populate results card
+            if (analysisResultsBox) analysisResultsBox.classList.remove("d-none");
+            if (resEngineVer) resEngineVer.textContent = analysis.model_metadata?.pipeline_version || data.model_version || "iris-analysis-v1.0";
+            if (resAvgQuality) resAvgQuality.textContent = `${analysis.bilateral_analysis?.average_quality_score ?? '--'}%`;
+            if (resSimilarity) resSimilarity.textContent = `${analysis.bilateral_analysis?.bilateral_geometric_similarity ?? '--'}`;
+            const pDelta = analysis.bilateral_analysis?.pupil_radius_delta;
+            if (resPupilDelta) resPupilDelta.textContent = (pDelta !== null && pDelta !== undefined) ? `${pDelta} px` : "--";
+
+            const leftIrisR = analysis.left_eye?.iris_circle?.[2];
+            const leftPupilR = analysis.left_eye?.pupil_circle?.[2];
+            if (resLeftDetails) resLeftDetails.textContent = `Iris r=${leftIrisR || '--'}, Pupil r=${leftPupilR || '--'}`;
+
+            const rightIrisR = analysis.right_eye?.iris_circle?.[2];
+            const rightPupilR = analysis.right_eye?.pupil_circle?.[2];
+            if (resRightDetails) resRightDetails.textContent = `Iris r=${rightIrisR || '--'}, Pupil r=${rightPupilR || '--'}`;
+
+            const detColor = analysis.bilateral_analysis?.detected_left_color || analysis.left_eye?.color?.eye_color || "Brown";
+            if (resEyeColor) resEyeColor.textContent = detColor;
+
+            // Update continueAnalysis button
+            continueAnalysisBtn.disabled = true;
+            continueAnalysisBtn.classList.remove("pulse-btn", "btn-success");
+            continueAnalysisBtn.classList.add("btn-secondary");
+            if (analysisSpinner) analysisSpinner.classList.add("d-none");
+            if (continueAnalysisIcon) {
+                continueAnalysisIcon.classList.remove("d-none", "fa-brain");
+                continueAnalysisIcon.classList.add("fa-check");
+            }
+            if (continueAnalysisText) continueAnalysisText.textContent = "Analysis Completed";
+            if (analysisSubtext) analysisSubtext.textContent = "Dual-eye biometric analysis verified and persisted.";
+
+            // Stepper update for Step 4
+            if (stepLineAnalysis) stepLineAnalysis.className = "step-line active";
+            if (stepAnalysis) {
+                stepAnalysis.className = "step completed";
+                if (stepAnalysisIcon) stepAnalysisIcon.innerHTML = `<i class="fa-solid fa-check"></i>`;
+            }
+
+            if (scanGatingBanner) {
+                scanGatingBanner.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Bilateral analysis completed and verified.`;
+                scanGatingBanner.className = "small text-success fw-bold mb-3";
+            }
+
+            // Enable official report view
+            if (proceedReportBtn) {
+                proceedReportBtn.disabled = false;
+                proceedReportBtn.onclick = () => {
+                    window.location.href = `official_report.html?assessment_id=${encodeURIComponent(assessmentId)}`;
+                };
+            }
+
+        } catch (err) {
+            console.error("Error loading analysis:", err);
+            showGlobalAlert(`Error loading analysis: ${err.message}`, "danger");
         }
     }
 
-
-    /*
-     * =================================================
-     * CANVAS
-     * =================================================
-     */
-
-    canvas.width =
-        capturedBitmap
-            ? capturedBitmap.width
-            : video.videoWidth;
-
-
-    canvas.height =
-        capturedBitmap
-            ? capturedBitmap.height
-            : video.videoHeight;
-
-
-    const ctx =
-        canvas.getContext(
-            "2d",
-            {
-                alpha: false,
-                willReadFrequently: true
-            }
-        );
-
-
-    if (!ctx) {
-
-        throw new Error(
-            "Unable to create canvas context."
-        );
+    if (continueAnalysisBtn) {
+        continueAnalysisBtn.addEventListener("click", () => {
+            startAnalysisProcessing();
+        });
     }
 
-
-    /*
-     * Clear previous image.
-     */
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-
-    /*
-     * =================================================
-     * DRAW CAMERA FRAME
-     * =================================================
-     */
-
-    if (capturedBitmap) {
-
-        console.log(
-            "Drawing ImageCapture frame..."
-        );
-
-
-        ctx.drawImage(
-            capturedBitmap,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-    }
-    else {
-
-        console.log(
-            "ImageCapture unavailable."
-        );
-
-        console.log(
-            "Using video frame fallback..."
-        );
-
-
-        /*
-         * Wait for another real frame.
-         */
-
-        if (
-            "requestVideoFrameCallback"
-            in video
-        ) {
-
-            await new Promise(
-                resolve => {
-
-                    video.requestVideoFrameCallback(
-                        () => resolve()
-                    );
-
-                }
-            );
-
-        }
-        else {
-
-            await new Promise(
-                resolve =>
-                    requestAnimationFrame(
-                        resolve
-                    )
-            );
-
-            await new Promise(
-                resolve =>
-                    requestAnimationFrame(
-                        resolve
-                    )
-            );
-        }
-
-
-        /*
-         * Draw actual video frame.
-         */
-
-        ctx.drawImage(
-            video,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
+    if (retryAnalysisBtn) {
+        retryAnalysisBtn.addEventListener("click", () => {
+            startAnalysisProcessing();
+        });
     }
 
-
-    /*
-     * =================================================
-     * CHECK PIXELS
-     * =================================================
-     */
-
-    const sampleWidth =
-        Math.min(
-            canvas.width,
-            320
-        );
-
-
-    const sampleHeight =
-        Math.min(
-            canvas.height,
-            240
-        );
-
-
-    const imageData =
-        ctx.getImageData(
-            0,
-            0,
-            sampleWidth,
-            sampleHeight
-        );
-
-
-    let total = 0;
-
-    let maxValue = 0;
-
-    let minValue = 255;
-
-
-    for (
-        let i = 0;
-        i < imageData.data.length;
-        i += 4
-    ) {
-
-        const r =
-            imageData.data[i];
-
-        const g =
-            imageData.data[i + 1];
-
-        const b =
-            imageData.data[i + 2];
-
-
-        const value =
-            (
-                r +
-                g +
-                b
-            ) / 3;
-
-
-        total += value;
-
-
-        if (
-            value >
-            maxValue
-        ) {
-
-            maxValue =
-                value;
-        }
-
-
-        if (
-            value <
-            minValue
-        ) {
-
-            minValue =
-                value;
-        }
+    // Card click focus helpers
+    if (leftEyeCard) {
+        leftEyeCard.addEventListener("click", (e) => {
+            if (!e.target.closest("button")) {
+                setActiveEyeFocus("LEFT");
+            }
+        });
     }
 
-
-    const pixelCount =
-        imageData.data.length /
-        4;
-
-
-    const average =
-        total /
-        pixelCount;
-
-
-    console.log(
-        "========== CAPTURE CHECK =========="
-    );
-
-
-    console.log(
-        "Canvas:",
-        canvas.width,
-        "x",
-        canvas.height
-    );
-
-
-    console.log(
-        "Average Brightness:",
-        average.toFixed(2)
-    );
-
-
-    console.log(
-        "Min:",
-        minValue
-    );
-
-
-    console.log(
-        "Max:",
-        maxValue
-    );
-
-
-    /*
-     * =================================================
-     * BLACK FRAME PROTECTION
-     * =================================================
-     */
-
-    if (
-        average < 5 ||
-        maxValue < 10
-    ) {
-
-        throw new Error(
-            "Camera frame is black. Please wait for the live camera preview and try again."
-        );
+    if (rightEyeCard) {
+        rightEyeCard.addEventListener("click", (e) => {
+            if (!e.target.closest("button")) {
+                setActiveEyeFocus("RIGHT");
+            }
+        });
     }
 
-
-    /*
-     * =================================================
-     * CONVERT TO JPEG
-     * =================================================
-     */
-
-    const blob =
-        await new Promise(
-            resolve => {
-
-                canvas.toBlob(
-                    resolve,
-                    "image/jpeg",
-                    0.95
-                );
-
-            }
-        );
-
-
-    if (!blob) {
-
-        throw new Error(
-            "Image conversion failed."
-        );
+    // Initial Execution
+    if (!assessmentId) {
+        showGlobalAlert("No active Assessment ID found. Please register a student or select an assessment from Dashboard.", "warning");
+    } else {
+        refreshScanStatus();
     }
 
-
-    if (
-        blob.size < 1000
-    ) {
-
-        throw new Error(
-            "Captured image is too small."
-        );
-    }
-
-
-    console.log(
-        "Captured JPEG Size:",
-        blob.size,
-        "bytes"
-    );
-
-
-    /*
-     * Close ImageBitmap.
-     */
-
-    if (
-        capturedBitmap &&
-        typeof capturedBitmap.close ===
-            "function"
-    ) {
-
-        capturedBitmap.close();
-    }
-
-
-    console.log(
-        "========== CAPTURE FRAME SUCCESS =========="
-    );
-
-
-    return blob;
-}
-
-
-/* =====================================================
-   RESET UI
-===================================================== */
-
-function resetScanUI() {
-
-    if (loading) {
-
-        loading.style.display =
-            "none";
-    }
-
-
-    if (scanStatus) {
-
-        scanStatus.innerHTML =
-            "Ready";
-    }
-
-
-    if (confidence) {
-
-        confidence.innerHTML =
-            "--";
-    }
-
-
-    if (eyeColor) {
-
-        eyeColor.innerHTML =
-            "--";
-    }
-
-
-    if (pupilRadius) {
-
-        pupilRadius.innerHTML =
-            "--";
-    }
-
-
-    if (irisRadius) {
-
-        irisRadius.innerHTML =
-            "--";
-    }
-}
-
-
-/* =====================================================
-   SCAN BUTTON
-===================================================== */
-
-btn.onclick =
-    async () => {
-
-        /*
-         * Prevent double click.
-         */
-
-        if (isScanning) {
-
-            console.log(
-                "Scan already running."
-            );
-
-            return;
-        }
-
-
-        isScanning = true;
-
-        btn.disabled = true;
-
-
-        try {
-
-            /*
-             * Make sure camera is ready.
-             */
-
-            const ready =
-                await waitForVideoFrame();
-
-
-            if (!ready) {
-
-                throw new Error(
-                    "Camera frame is not ready."
-                );
-            }
-
-
-            if (loading) {
-
-                loading.style.display =
-                    "block";
-            }
-
-
-            if (scanStatus) {
-
-                scanStatus.innerHTML =
-                    "Capturing...";
-            }
-
-
-            /*
-             * Capture image.
-             */
-
-            const blob =
-                await captureFrame();
-
-
-            /*
-             * Preview captured image.
-             */
-
-            if (preview) {
-
-                if (
-                    preview.dataset.objectUrl
-                ) {
-
-                    URL.revokeObjectURL(
-                        preview.dataset.objectUrl
-                    );
-                }
-
-
-                const objectUrl =
-                    URL.createObjectURL(
-                        blob
-                    );
-
-
-                preview.dataset.objectUrl =
-                    objectUrl;
-
-
-                preview.src =
-                    objectUrl;
-
-
-                preview.style.display =
-                    "block";
-            }
-
-
-            if (scanStatus) {
-
-                scanStatus.innerHTML =
-                    "Scanning...";
-            }
-
-
-            /*
-             * =================================================
-             * DETECT
-             * =================================================
-             */
-
-            const form =
-                new FormData();
-
-
-            form.append(
-                "file",
-                blob,
-                "camera.jpg"
-            );
-
-
-            console.log(
-                "========== CALLING /detect =========="
-            );
-
-
-            const response =
-                await fetch(
-                    "/detect",
-                    {
-                        method: "POST",
-                        body: form,
-                        cache: "no-store"
-                    }
-                );
-
-
-            const text =
-                await response.text();
-
-
-            console.log(
-                "DETECT HTTP STATUS:",
-                response.status
-            );
-
-
-            console.log(
-                "DETECT RESPONSE:",
-                text
-            );
-
-
-            let data;
-
-
-            try {
-
-                data =
-                    JSON.parse(text);
-
-            }
-            catch (jsonError) {
-
-                throw new Error(
-                    "Invalid response from /detect."
-                );
-            }
-
-
-            console.log(
-                "DETECT DATA:",
-                data
-            );
-
-
-            /*
-             * Detection failed.
-             */
-
-            if (
-                !response.ok ||
-                !data ||
-                !data.status
-            ) {
-
-                if (loading) {
-
-                    loading.style.display =
-                        "none";
-                }
-
-
-                if (scanStatus) {
-
-                    scanStatus.innerHTML =
-                        "Not Detected";
-                }
-
-
-                if (confidence) {
-
-                    confidence.innerHTML =
-                        "--";
-                }
-
-
-                if (eyeColor) {
-
-                    eyeColor.innerHTML =
-                        "--";
-                }
-
-
-                if (pupilRadius) {
-
-                    pupilRadius.innerHTML =
-                        "--";
-                }
-
-
-                if (irisRadius) {
-
-                    irisRadius.innerHTML =
-                        "--";
-                }
-
-
-                const errorMsg = extractApiErrorMessage(
-                    data,
-                    "YOLO detection failed. Please position your eye correctly and try again."
-                );
-
-                throw new Error(errorMsg);
-            }
-
-
-            /*
-             * =================================================
-             * DETECTION SUCCESS
-             * =================================================
-             */
-
-            if (scanStatus) {
-
-                scanStatus.innerHTML =
-                    "Detected";
-            }
-
-
-            /*
-             * Confidence.
-             */
-
-            if (
-                data.detection &&
-                data.detection.confidence !==
-                    undefined
-            ) {
-
-                if (confidence) {
-
-                    confidence.innerHTML =
-                        (
-                            Number(
-                                data
-                                    .detection
-                                    .confidence
-                            ) * 100
-                        ).toFixed(2) +
-                        "%";
-                }
-            }
-
-
-            /*
-             * Eye Color.
-             */
-
-            if (
-                data.color_analysis &&
-                data.color_analysis.eye_color
-            ) {
-
-                if (eyeColor) {
-
-                    eyeColor.innerHTML =
-                        data
-                            .color_analysis
-                            .eye_color;
-                }
-
-            }
-            else {
-
-                if (eyeColor) {
-
-                    eyeColor.innerHTML =
-                        "--";
-                }
-            }
-
-
-            /*
-             * Pupil radius.
-             */
-
-            if (
-                data.features &&
-                data.features.pupil_radius !==
-                    undefined
-            ) {
-
-                if (pupilRadius) {
-
-                    pupilRadius.innerHTML =
-                        data
-                            .features
-                            .pupil_radius;
-                }
-            }
-
-
-            /*
-             * Iris radius.
-             */
-
-            if (
-                data.features &&
-                data.features.iris_radius !==
-                    undefined
-            ) {
-
-                if (irisRadius) {
-
-                    irisRadius.innerHTML =
-                        data
-                            .features
-                            .iris_radius;
-                }
-            }
-
-
-            /*
-             * =================================================
-             * CREATE REPORT ID
-             * =================================================
-             */
-
-            const reportId =
-                "IR-" +
-                new Date()
-                    .toISOString()
-                    .replace(
-                        /[-:.TZ]/g,
-                        ""
-                    ) +
-                "-" +
-                Math.random()
-                    .toString(36)
-                    .substring(
-                        2,
-                        9
-                    )
-                    .toUpperCase();
-
-
-            console.log(
-                "Report ID:",
-                reportId
-            );
-
-
-            /*
-             * =================================================
-             * VERIFY
-             * =================================================
-             */
-
-            const verifyForm =
-                new FormData();
-
-
-            verifyForm.append(
-                "employee_code",
-                employeeCode
-            );
-
-
-            verifyForm.append(
-                "report_id",
-                reportId
-            );
-
-
-            verifyForm.append(
-                "file",
-                blob,
-                "camera.jpg"
-            );
-
-
-            console.log(
-                "========== CALLING /verify =========="
-            );
-
-
-            const verifyResponse =
-                await fetch(
-                    "/verify",
-                    {
-                        method: "POST",
-                        body: verifyForm,
-                        cache: "no-store"
-                    }
-                );
-
-
-            const verifyText =
-                await verifyResponse.text();
-
-
-            console.log(
-                "VERIFY HTTP STATUS:",
-                verifyResponse.status
-            );
-
-
-            console.log(
-                "VERIFY RESPONSE:",
-                verifyText
-            );
-
-
-            let verify;
-
-
-            try {
-
-                verify =
-                    JSON.parse(
-                        verifyText
-                    );
-
-            }
-            catch (jsonError) {
-
-                throw new Error(
-                    "Invalid response from /verify."
-                );
-            }
-
-
-            console.log(
-                "VERIFY DATA:",
-                verify
-            );
-
-
-            if (
-                !verifyResponse.ok ||
-                !verify ||
-                !verify.status
-            ) {
-
-                const verifyErrorMsg = extractApiErrorMessage(
-                    verify,
-                    "Biometric verification failed."
-                );
-
-                throw new Error(verifyErrorMsg);
-            }
-
-
-            /*
-             * =================================================
-             * STORE REPORT DATA
-             * =================================================
-             */
-
-            sessionStorage.setItem(
-                "irisReport",
-                JSON.stringify({
-
-                    report_id:
-                        reportId,
-
-                    detect:
-                        data,
-
-                    verify:
-                        verify
-
-                })
-            );
-
-
-            sessionStorage.setItem(
-                "iris_report_id",
-                reportId
-            );
-
-
-            /*
-             * =================================================
-             * OPEN REPORT
-             * =================================================
-             */
-
-            console.log(
-                "Opening report:",
-                reportId
-            );
-
-
-            window.location.href =
-                "/static/report.html?report_id=" +
-                encodeURIComponent(
-                    reportId
-                );
-
-        }
-        catch (err) {
-
-            console.error(
-                "========== SCAN ERROR ==========",
-                err
-            );
-
-
-            if (loading) {
-
-                loading.style.display =
-                    "none";
-            }
-
-
-            if (scanStatus) {
-
-                scanStatus.innerHTML =
-                    "Scan Failed";
-            }
-
-
-            alert(
-                err.message ||
-                "Scan failed. Please try again."
-            );
-
-        }
-        finally {
-
-            isScanning = false;
-
-
-            /*
-             * Enable again if camera is active.
-             */
-
-            if (
-                cameraStream &&
-                cameraStream.active
-            ) {
-
-                btn.disabled = false;
-            }
-        }
-    };
-
-
-/* =====================================================
-   CAMERA CLEANUP
-===================================================== */
-
-window.addEventListener(
-    "beforeunload",
-    () => {
-
-        if (cameraStream) {
-
-            cameraStream
-                .getTracks()
-                .forEach(
-                    track =>
-                        track.stop()
-                );
-        }
-
-
-        if (
-            preview &&
-            preview.dataset.objectUrl
-        ) {
-
-            URL.revokeObjectURL(
-                preview.dataset.objectUrl
-            );
-        }
-
-    }
-);
-
-
-/* =====================================================
-   START
-===================================================== */
-
-listCameras();
-
-startCamera();
-
-
-console.log(
-    "========== IRIS CAMERA JS LOADED =========="
-);
+    startCamera();
+});

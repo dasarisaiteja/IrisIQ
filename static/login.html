@@ -491,16 +491,19 @@
         function getRedirectTarget(role) {
             const params = new URLSearchParams(window.location.search);
             const explicitRedirect = params.get("redirect");
-            if (explicitRedirect && explicitRedirect.startsWith("/static/") && !explicitRedirect.includes("login.html")) {
-                // If student tried to redirect to camera, protect them
-                if (role === "Student" && explicitRedirect.includes("camera.html")) {
-                    return "/static/student_profile.html";
+            if (explicitRedirect && !explicitRedirect.includes("login.html")) {
+                let target = explicitRedirect;
+                if (!target.startsWith("/") && !target.startsWith("http")) {
+                    target = "/static/" + target;
                 }
-                return explicitRedirect;
+                return target;
             }
 
             if (role === "Student") {
-                return "/static/student_profile.html";
+                return "/static/student_dashboard.html";
+            }
+            if (role === "Counselor" || role === "Counsellor") {
+                return "/static/counsellor_dashboard.html";
             }
             return "/static/dashboard.html";
         }

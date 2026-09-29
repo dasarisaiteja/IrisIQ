@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal | IrisIQ Assessment Intelligence</title>
+
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="camera.css?v=20260929_1">
+
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+        }
+        .portal-container {
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+        }
+        .mono-text {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+        .workflow-step.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .workflow-step.completed {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+        }
+        .workflow-step.active .step-circle {
+            background: #3b82f6;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+        }
+        .workflow-step.completed .step-circle {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .table-custom {
+            color: #e2e8f0;
+            margin-bottom: 0;
+        }
+        .table-custom th {
+            background: rgba(0, 0, 0, 0.35);
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.85rem 1rem;
+        }
+        .table-custom td {
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
+            font-size: 0.85rem;
+        }
+        .table-custom tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .scan-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="py-4 px-3">
+    <div class="portal-container">
+
+        <!-- Top Navigation Bar -->
+        <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+            <div class="d-flex align-items-center gap-3">
+                <div class="brand-avatar" style="width: 44px; height: 44px; border-radius: 10px; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-graduation-cap text-primary fs-4"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h1 class="h5 text-white fw-bold mb-0">Student Assessment Portal</h1>
+                        <span class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30 small">OFFICIAL</span>
+                    </div>
+                    <p class="text-secondary small mb-0">Biometric Assessment Workflow, Scans & Official Reports</p>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <div id="navAuthContainer">
+                    <!-- Auth client dynamically injects user info and logout -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Unauthorized Guard Box -->
+        <div id="unauthorizedBox" class="glass-card p-5 text-center my-5 border-danger border-opacity-30 d-none">
+            <div class="text-danger fs-1 mb-3">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h4 class="text-white fw-bold mb-2">Access Restricted</h4>
+            <p class="text-secondary small mb-4" style="max-width: 480px; margin: 0 auto;">
+                This portal requires active Student credentials. You are currently authenticated with an unauthorized role.
+            </p>
+            <a href="login.html" class="btn btn-primary btn-sm rounded-pill px-4">
+                Switch Account
+            </a>
+        </div>
+
+        <!-- Main Portal Workspace -->
+        <main id="portalWorkspace" class="d-flex flex-column gap-4">
+
+            <!-- Profile Summary Card -->
+            <div class="glass-card p-4">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: rgba(59, 130, 246, 0.15); border: 2px solid rgba(59, 130, 246, 0.4);">
+                                <i class="fa-solid fa-user-graduate text-primary fs-3"></i>
+                            </div>
+                            <div>
+                                <h2 class="h5 text-white fw-bold mb-1" id="profileStudentName">Loading Student Profile...</h2>
+                                <div class="d-flex flex-wrap align-items-center gap-3 text-secondary small">
+                                    <span>Student ID: <span id="profileStudentId" class="text-info mono-text fw-bold">--</span></span>
+                                    <span>Registered: <span id="profileRegisteredAt" class="text-light">--</span></span>
+                                    <span id="profileDemographicsBadge" class="badge bg-secondary bg-opacity-25 text-light d-none">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <button type="button" id="refreshDashboardBtn" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                            <i class="fa-solid fa-rotate me-1"></i> Refresh Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Active Assessment Hub -->
+            <div class="glass-card p-4" id="activeAssessmentCard">
+                <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom border-secondary border-opacity-20 gap-2">
+                    <div>
+                        <div class="text-secondary xsmall text-uppercase fw-bold">Active Assessment Case</div>
+                        <h3 class="h5 text-white fw-bold mb-0">
+                            Assessment: <span id="activeAsmId" class="text-info mono-text">--</span>
+                        </h3>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="activeAsmBadge" class="badge bg-secondary bg-opacity-25 text-light px-3 py-2 fs-6">
+                            Checking Status...
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 4-Stage Workflow Progression Indicator -->
+                <div class="row g-2 mb-4" id="workflowTracker">
+                    <div class="col-md-3 col-6">
+                        <div class="workflow-step completed" id="stepRegistration">
+                            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+                            <div>
+                                <div class="text-white small fw-bold">1. Registration</div>
+                                <div class="text-secondary xsmall">Profile created</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="workflow-step" id="stepScan">
+                            <div class="step-circle" id="stepScanCircle">2</div>
+                            <div>
+                                <div class="text-white small fw-bold">2. Dual-Eye Scan</div>
+                                <div class="text-secondary xsmall" id="stepScanDesc">Pending scans</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="workflow-step" id="stepAnalysis">
+                            <div class="step-circle" id="stepAnalysisCircle">3</div>
+                            <div>
+                                <div class="text-white small fw-bold">3. AI Analysis</div>
+                                <div class="text-secondary xsmall" id="stepAnalysisDesc">Bilateral features</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="workflow-step" id="stepReport">
+                            <div class="step-circle" id="stepReportCircle">4</div>
+                            <div>
+                                <div class="text-white small fw-bold">4. Official Report</div>
+                                <div class="text-secondary xsmall" id="stepReportDesc">Report & PDF</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dual Eye Scan Status Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="scan-box">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-white small">
+                                    <i class="fa-solid fa-eye text-primary me-2"></i>LEFT Eye Scan
+                                </span>
+                                <span id="leftScanBadge" class="badge bg-secondary bg-opacity-25 text-light">PENDING</span>
+                            </div>
+                            <div class="text-secondary xsmall">
+                                Scan ID: <span id="leftScanId" class="mono-text text-light">--</span>
+                            </div>
+                            <div class="text-secondary xsmall mt-1">
+                                Status: <span id="leftScanStatusText" class="text-light">Awaiting image acquisition</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="scan-box">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-white small">
+                                    <i class="fa-solid fa-eye text-primary me-2"></i>RIGHT Eye Scan
+                                </span>
+                                <span id="rightScanBadge" class="badge bg-secondary bg-opacity-25 text-light">PENDING</span>
+                            </div>
+                            <div class="text-secondary xsmall">
+                                Scan ID: <span id="rightScanId" class="mono-text text-light">--</span>
+                            </div>
+                            <div class="text-secondary xsmall mt-1">
+                                Status: <span id="rightScanStatusText" class="text-light">Awaiting image acquisition</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Action Hub: Contextual Call to Action -->
+                <div class="p-3 rounded-3 text-center" style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15);" id="actionHub">
+                    <div id="actionHubLoading" class="py-2 text-secondary small">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        Determining next workflow action...
+                    </div>
+
+                    <div id="actionHubContent" class="d-none">
+                        <!-- Dynamically populated buttons -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Assessment History Table -->
+            <div class="glass-card">
+                <div class="p-4 pb-3 border-bottom border-secondary border-opacity-20 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="h6 text-white fw-bold mb-0">Assessment Case History</h4>
+                        <p class="text-secondary xsmall mb-0">Track all assessments registered under your student account</p>
+                    </div>
+                    <span id="historyCountBadge" class="badge bg-secondary bg-opacity-25 text-light">0 Cases</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Assessment ID</th>
+                                <th>Date</th>
+                                <th>Workflow Stage</th>
+                                <th>Dual Eye Status</th>
+                                <th>Analysis</th>
+                                <th>Official Report</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessmentHistoryTbody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-secondary">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                    Loading assessment history...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center mt-5">
+            <p class="text-secondary small mb-0">
+                IrisIQ Autonomous Assessment System &copy; 2026. Strictly adhering to Official IRIS Backend & Frontend Requirements.
+            </p>
+        </footer>
+
+    </div>
+</div>
+
+<!-- MODAL: ASSESSMENT CASE DETAILS -->
+<div class="modal fade" id="assessmentDetailModal" tabindex="-1" aria-labelledby="assessmentDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-card border-secondary border-opacity-30 text-light">
+            <div class="modal-header border-secondary border-opacity-20">
+                <h5 class="modal-title fw-bold text-white" id="assessmentDetailModalLabel">
+                    <i class="fa-solid fa-list-check text-primary me-2"></i>Assessment Case Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="assessmentDetailModalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary border-opacity-20">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="auth_client.js?v=20260928_3"></script>
+<script src="student_dashboard.js?v=20260929_1"></script>
+
+</body>
+</html>

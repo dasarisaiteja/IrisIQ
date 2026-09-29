@@ -133,11 +133,52 @@ def create_access_token(
     return token
 
 
+def revoke_token(token: str, expires_at: int):
+    """
+    Revokes a JWT token by storing its SHA-256 hash in the revoked_tokens table.
+    """
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT OR IGNORE INTO revoked_tokens (token_hash, revoked_at, expires_at)
+            VALUES (?, ?, ?);
+        """, (token_hash, now_str, expires_at))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def is_token_revoked(token: str) -> bool:
+    """
+    Checks if a token hash exists in the revoked_tokens table.
+    """
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT 1 FROM revoked_tokens WHERE token_hash = ? LIMIT 1;", (token_hash,))
+        row = cur.fetchone()
+        return row is not None
+    except sqlite3.OperationalError:
+        return False
+    finally:
+        conn.close()
+
+
 def decode_access_token(token: str) -> Dict[str, Any]:
     """
     Decodes and validates a JWT token signature and expiration.
-    Raises HTTPException(401) on missing, expired, or invalid tokens.
+    Raises HTTPException(401) on missing, expired, revoked, or invalid tokens.
     """
+    if is_token_revoked(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     try:
         key = get_jwt_secret_key()
         payload = jwt.decode(

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Assessment Report | IrisIQ</title>
+    
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="camera.css?v=20260929_1">
+    
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .report-container {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .card-header-custom {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 1.25rem;
+        }
+        .section-badge {
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .metric-tile {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0.6rem;
+            padding: 0.75rem 1rem;
+        }
+        .metric-label {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .pending-card {
+            background: rgba(245, 158, 11, 0.04);
+            border: 1px dashed rgba(245, 158, 11, 0.35);
+            border-radius: 0.85rem;
+        }
+        .pending-badge {
+            background: rgba(245, 158, 11, 0.18);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .mono-text {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .glass-card {
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+                box-shadow: none !important;
+            }
+            .text-white {
+                color: #0f172a !important;
+            }
+            .text-secondary {
+                color: #475569 !important;
+            }
+            .metric-tile {
+                background: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+            .metric-value {
+                color: #0f172a !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="report-wrapper py-4 px-3">
+    <div class="report-container">
+        
+        <!-- Top Navigation Bar (No Print) -->
+        <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 no-print">
+            <div class="d-flex align-items-center gap-2">
+                <a href="#" id="backToScanBtn" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Scanner
+                </a>
+                <a href="dashboard.html" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-chart-line me-1"></i> Dashboard
+                </a>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div id="navAuthContainer">
+                    <!-- Auth Client container -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic State Containers -->
+        
+        <!-- 1. LOADING STATE -->
+        <div id="reportLoadingBox" class="glass-card p-5 text-center my-5">
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+            <h4 class="text-white fw-bold mb-1">Loading Official Assessment Report</h4>
+            <p class="text-secondary small mb-0">Retrieving verified bilateral biometric measurements and assessment records...</p>
+        </div>
+
+        <!-- 2. GENERATING STATE -->
+        <div id="reportGeneratingBox" class="glass-card p-5 text-center my-5 d-none">
+            <div class="spinner-border text-info mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+            <h4 class="text-white fw-bold mb-1">Compiling Official 10-Section Report</h4>
+            <p class="text-secondary small mb-3">Synthesizing bilateral iris geometry, quality metrics, and generating server-side PDF...</p>
+            <div class="progress bg-dark" style="height: 6px; max-width: 360px; margin: 0 auto;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <!-- 3. ERROR / UNAUTHORIZED STATE -->
+        <div id="reportErrorBox" class="glass-card p-5 text-center my-5 d-none border-danger border-opacity-30">
+            <div class="mb-3 text-danger">
+                <i class="fa-solid fa-circle-exclamation fs-1"></i>
+            </div>
+            <h4 id="reportErrorTitle" class="text-white fw-bold mb-2">Unable to Load Report</h4>
+            <p id="reportErrorMsg" class="text-danger text-opacity-80 small mb-4" style="max-width: 500px; margin: 0 auto;">
+                An unexpected error occurred while loading the assessment report.
+            </p>
+            <div class="d-flex justify-content-center gap-2">
+                <button type="button" id="retryLoadBtn" class="btn btn-primary btn-sm rounded-pill px-4">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Retry
+                </button>
+                <a href="dashboard.html" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+                    Return to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. REPORT CONTENT (SHOWN WHEN REPORT_READY) -->
+        <main id="reportContent" class="d-none">
+
+            <!-- Executive Action Bar (No Print) -->
+            <div class="glass-card p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3 no-print">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-2 rounded bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30">
+                        <i class="fa-solid fa-file-shield fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h2 class="h5 text-white fw-bold mb-0">Official Biometric Assessment Report</h2>
+                            <span id="headerReportVersion" class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30 mono-text">v1.0</span>
+                        </div>
+                        <div class="text-secondary small">
+                            Status: <span id="headerReportStatusBadge" class="badge bg-success-subtle text-success fw-bold">REPORT READY</span>
+                            &bull; Assessment: <span id="headerAssessmentId" class="text-info mono-text">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" id="printReportBtn" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                        <i class="fa-solid fa-print me-1"></i> Print
+                    </button>
+                    <button type="button" id="downloadPdfBtn" class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold shadow-sm">
+                        <span id="downloadPdfSpinner" class="spinner-border spinner-border-sm me-1 d-none" role="status"></span>
+                        <i id="downloadPdfIcon" class="fa-solid fa-file-pdf me-1"></i> Download PDF
+                    </button>
+                    <button type="button" id="reviewModalBtn" class="btn btn-outline-info btn-sm rounded-pill px-3 d-none">
+                        <i class="fa-solid fa-user-doctor me-1"></i> Counsellor Review
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Report Document Body -->
+            <div class="d-flex flex-column gap-4">
+
+                <!-- HEADER & SUMMARY BANNER -->
+                <div class="glass-card p-4">
+                    <div class="row align-items-center g-3">
+                        <div class="col-lg-8">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="brand-avatar" style="width: 52px; height: 52px; border-radius: 12px; background: rgba(37,99,235,0.15); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa-solid fa-eye text-primary fs-3"></i>
+                                </div>
+                                <div>
+                                    <h1 class="h4 text-white fw-bold mb-1">IRIS BIOMETRIC ASSESSMENT REPORT</h1>
+                                    <p class="text-secondary small mb-0">Official Bilateral Iris Acquisition & Multi-Domain Evaluation</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <div class="mono-text xsmall text-secondary">REPORT ID: <span id="docReportId" class="text-light fw-bold">--</span></div>
+                            <div class="mono-text xsmall text-secondary">ASSESSMENT ID: <span id="docAssessmentId" class="text-info fw-bold">--</span></div>
+                            <div class="mono-text xsmall text-secondary">GENERATED: <span id="docGeneratedAt" class="text-light">--</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 & 2: STUDENT PROFILE & ASSESSMENT TIMELINE -->
+                <div class="row g-3">
+                    <!-- Section 1: Student Information -->
+                    <div class="col-lg-6">
+                        <div class="glass-card h-100">
+                            <div class="card-header-custom d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-id-card text-primary"></i>
+                                    <h3 class="h6 text-white fw-bold mb-0">1. Student Details</h3>
+                                </div>
+                                <span class="badge bg-secondary bg-opacity-25 text-light section-badge">Profile</span>
+                            </div>
+                            <div class="p-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Student ID</div>
+                                            <div id="stuIdVal" class="metric-value text-info">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Full Name</div>
+                                            <div id="stuNameVal" class="metric-value text-white text-truncate">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Age / Gender</div>
+                                            <div id="stuAgeGenderVal" class="metric-value text-light">-- / --</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Institution / School</div>
+                                            <div id="stuSchoolVal" class="metric-value text-light text-truncate">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Course / Stream</div>
+                                            <div id="stuCourseStreamVal" class="metric-value text-light text-truncate">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Location</div>
+                                            <div id="stuLocationVal" class="metric-value text-light text-truncate">--</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Assessment Overview -->
+                    <div class="col-lg-6">
+                        <div class="glass-card h-100">
+                            <div class="card-header-custom d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-list-check text-info"></i>
+                                    <h3 class="h6 text-white fw-bold mb-0">2. Assessment Overview</h3>
+                                </div>
+                                <span class="badge bg-secondary bg-opacity-25 text-light section-badge">Timeline</span>
+                            </div>
+                            <div class="p-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Assessment ID</div>
+                                            <div id="asmIdVal" class="metric-value text-info">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Workflow Status</div>
+                                            <div id="asmStatusVal" class="metric-value text-success">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Assessment Date</div>
+                                            <div id="asmDateVal" class="metric-value text-light small mono-text">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">Completion Date</div>
+                                            <div id="asmCompletedVal" class="metric-value text-light small mono-text">--</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="metric-tile">
+                                            <div class="metric-label">AI Processing Pipeline</div>
+                                            <div id="asmEngineVal" class="metric-value text-light small mono-text">iris-analysis-v1.0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: BILATERAL DUAL-EYE BIOMETRICS -->
+                <div class="glass-card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-eye text-primary"></i>
+                            <h3 class="h6 text-white fw-bold mb-0">3. Bilateral Eye Scan Biometric Results</h3>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-20 text-primary section-badge border border-primary border-opacity-25">Iris-Derived Biometrics</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-4">
+                            <!-- Left Eye Column -->
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-black bg-opacity-40 border border-secondary border-opacity-20 h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-20">
+                                        <div class="fw-bold text-white d-flex align-items-center gap-2">
+                                            <span class="badge bg-primary px-2 py-1">LEFT</span>
+                                            <span>Left Eye Acquisition</span>
+                                        </div>
+                                        <span id="leftScanStatusBadge" class="badge bg-success-subtle text-success small">Completed</span>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Quality Score</div>
+                                                <div id="leftQualityVal" class="metric-value text-success">--%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Sharpness / Blur</div>
+                                                <div id="leftBlurVal" class="metric-value text-white">--</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Detected Color</div>
+                                                <div id="leftColorVal" class="metric-value text-warning">--</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Pupil / Iris Ratio</div>
+                                                <div id="leftRatioVal" class="metric-value text-white">--</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Pupil Radius</div>
+                                                <div id="leftPupilRVal" class="metric-value text-light">-- px</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Iris Radius</div>
+                                                <div id="leftIrisRVal" class="metric-value text-light">-- px</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Scan Reference</div>
+                                                <div id="leftScanIdVal" class="metric-value text-secondary xsmall mono-text text-truncate">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Eye Column -->
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 bg-black bg-opacity-40 border border-secondary border-opacity-20 h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-20">
+                                        <div class="fw-bold text-white d-flex align-items-center gap-2">
+                                            <span class="badge bg-info text-dark px-2 py-1">RIGHT</span>
+                                            <span>Right Eye Acquisition</span>
+                                        </div>
+                                        <span id="rightScanStatusBadge" class="badge bg-success-subtle text-success small">Completed</span>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Quality Score</div>
+                                                <div id="rightQualityVal" class="metric-value text-success">--%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Sharpness / Blur</div>
+                                                <div id="rightBlurVal" class="metric-value text-white">--</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Detected Color</div>
+                                                <div id="rightColorVal" class="metric-value text-warning">--</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Pupil / Iris Ratio</div>
+                                                <div id="rightRatioVal" class="metric-value text-white">--</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Pupil Radius</div>
+                                                <div id="rightPupilRVal" class="metric-value text-light">-- px</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Iris Radius</div>
+                                                <div id="rightIrisRVal" class="metric-value text-light">-- px</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="metric-tile">
+                                                <div class="metric-label">Scan Reference</div>
+                                                <div id="rightScanIdVal" class="metric-value text-secondary xsmall mono-text text-truncate">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: OVERALL BIOMETRIC RESULT -->
+                <div class="glass-card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-arrows-split-up-and-left text-success"></i>
+                            <h3 class="h6 text-white fw-bold mb-0">4. Overall Biometric Synthesis & Bilateral Symmetry</h3>
+                        </div>
+                        <span class="badge bg-success bg-opacity-20 text-success section-badge border border-success border-opacity-25">Verified CV Analysis</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-3 col-6">
+                                <div class="metric-tile text-center">
+                                    <div class="metric-label">Combined Quality</div>
+                                    <div id="overallQualityVal" class="metric-value text-success fs-4">--%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="metric-tile text-center">
+                                    <div class="metric-label">Geometric Match</div>
+                                    <div id="overallSimilarityVal" class="metric-value text-info fs-4">--</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="metric-tile text-center">
+                                    <div class="metric-label">Pupil Diameter Delta</div>
+                                    <div id="overallPupilDeltaVal" class="metric-value text-white fs-4">-- px</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="metric-tile text-center">
+                                    <div class="metric-label">Color Agreement</div>
+                                    <div id="overallColorMatchVal" class="metric-value text-warning fs-4">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded bg-black bg-opacity-30 border border-secondary border-opacity-15">
+                            <div class="d-flex align-items-center gap-2 text-secondary xsmall fw-bold mb-1">
+                                <i class="fa-solid fa-microscope text-primary"></i>
+                                <span>FACTUAL BIOMETRIC SUMMARY</span>
+                            </div>
+                            <p id="biometricSummaryText" class="small text-light mb-0">
+                                Bilateral iris scans verified with high geometric similarity. All physical concentric boundaries confirmed.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTIONS 5, 6, 7, 8: QUESTIONNAIRE & ACADEMIC SECTIONS (PENDING) -->
+                <div class="glass-card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-clipboard-question text-warning"></i>
+                            <h3 class="h6 text-white fw-bold mb-0">Questionnaire & Academic Profile Domains</h3>
+                        </div>
+                        <span class="badge bg-warning bg-opacity-20 text-warning section-badge border border-warning border-opacity-25">Input Status</span>
+                    </div>
+                    <div class="p-4 d-flex flex-column gap-3">
+                        
+                        <!-- Section 5: Behaviour -->
+                        <div class="pending-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="fw-bold text-white small">5. Behavioral Patterns & Work Styles</div>
+                                <span class="badge pending-badge">Questionnaire assessment pending</span>
+                            </div>
+                            <p class="text-secondary small mb-0">
+                                Psychometric behavioral questionnaire has not been administered for this assessment. In strict compliance with IRIS scientific standards, behavioral traits are never inferred from physical iris scans.
+                            </p>
+                        </div>
+
+                        <!-- Section 6: Personality -->
+                        <div class="pending-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="fw-bold text-white small">6. Personality Profile (Big Five Dimensions)</div>
+                                <span class="badge pending-badge">Questionnaire assessment pending</span>
+                            </div>
+                            <p class="text-secondary small mb-0">
+                                Big Five OCEAN standardized psychometric assessment pending. IRIS strictly prohibits deriving psychological or personality traits from biometric eye photographs.
+                            </p>
+                        </div>
+
+                        <!-- Section 7: Subjects & Interests -->
+                        <div class="pending-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="fw-bold text-white small">7. Academic Subject Mastery & Student Interests</div>
+                                <span class="badge pending-badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3);">Academic records pending</span>
+                            </div>
+                            <p class="text-secondary small mb-0">
+                                Academic grade transcripts and subject interest inventories have not been submitted for this student profile.
+                            </p>
+                        </div>
+
+                        <!-- Section 8: Recommendations -->
+                        <div class="pending-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="fw-bold text-white small">8. Educational Stream & Career Recommendations</div>
+                                <span class="badge pending-badge">Assessment recommendations pending</span>
+                            </div>
+                            <p class="text-secondary small mb-0">
+                                Stream and career recommendations require prerequisite questionnaire responses and academic records before algorithmic catalog matching can execute.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION 9: COUNSELLING & REVIEW -->
+                <div class="glass-card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-user-doctor text-info"></i>
+                            <h3 class="h6 text-white fw-bold mb-0">9. Counsellor Review & Follow-up Guidance</h3>
+                        </div>
+                        <span id="counsellingReviewBadge" class="badge bg-secondary bg-opacity-25 text-light section-badge">Pending Review</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="metric-tile">
+                                    <div class="metric-label">Assigned Counsellor</div>
+                                    <div id="counsellorIdVal" class="metric-value text-white">Unassigned</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="metric-tile">
+                                    <div class="metric-label">Assignment Timestamp</div>
+                                    <div id="counsellorAssignedAtVal" class="metric-value text-light small mono-text">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded bg-black bg-opacity-30 border border-secondary border-opacity-15 h-100">
+                                    <div class="text-secondary xsmall fw-bold mb-2 text-uppercase">Counselling Notes</div>
+                                    <div id="counsellingNotesList" class="small text-light">
+                                        <p class="text-secondary fst-italic mb-0">No clinical notes recorded for this assessment.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded bg-black bg-opacity-30 border border-secondary border-opacity-15 h-100">
+                                    <div class="text-secondary xsmall fw-bold mb-2 text-uppercase">Scheduled Follow-ups</div>
+                                    <div id="followUpsList" class="small text-light">
+                                        <p class="text-secondary fst-italic mb-0">No follow-up sessions scheduled.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 10: REPORT METADATA & DISCLAIMER -->
+                <div class="glass-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-20">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-secondary"></i>
+                            <h3 class="h6 text-white fw-bold mb-0">10. Audit Metadata & Regulatory Notice</h3>
+                        </div>
+                        <span class="mono-text xsmall text-secondary">Pipeline: <span id="pipelineVerVal">iris-analysis-v1.0</span></span>
+                    </div>
+
+                    <p class="xsmall text-secondary text-justify mb-0">
+                        <strong>SCIENTIFIC TRANSPARENCY NOTICE:</strong> This official report provides objective biometric measurements of human iris characteristics extracted via computer-vision algorithms. Physical iris geometry, pigmentation, and focus metrics do NOT evaluate human cognitive capacity, neurological cell distribution, psychiatric health, or personality traits. Any future academic or career recommendations require validated standardized psychometric inventories and academic grade submissions.
+                    </p>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center mt-5 no-print">
+            <p class="text-secondary small mb-0">
+                IrisIQ Autonomous Assessment System &copy; 2026. Strictly adhering to Official IRIS Backend & Frontend Requirements.
+            </p>
+        </footer>
+
+    </div>
+</div>
+
+<!-- Counsellor Review Modal (No Print) -->
+<div class="modal fade no-print" id="counsellorReviewModal" tabindex="-1" aria-labelledby="counsellorReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-secondary border-opacity-30 text-light">
+            <div class="modal-header border-secondary border-opacity-20">
+                <h5 class="modal-title fw-bold text-white" id="counsellorReviewModalLabel">
+                    <i class="fa-solid fa-user-doctor text-info me-2"></i>Counsellor Report Review
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="counsellorReviewForm">
+                    <div class="mb-3">
+                        <label for="reviewNotesInput" class="form-label small fw-bold text-secondary">Counselling / Guidance Notes</label>
+                        <textarea class="form-control bg-dark text-light border-secondary border-opacity-25" id="reviewNotesInput" rows="3" placeholder="Enter clinical observations, student strengths, or recommendations..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="followUpDateInput" class="form-label small fw-bold text-secondary">Schedule Follow-up Consultation (Optional)</label>
+                        <input type="date" class="form-control bg-dark text-light border-secondary border-opacity-25" id="followUpDateInput">
+                    </div>
+                    <div class="mb-3">
+                        <label for="followUpNotesInput" class="form-label small fw-bold text-secondary">Follow-up Objective (Optional)</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary border-opacity-25" id="followUpNotesInput" placeholder="e.g. Review academic records, discuss questionnaire">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-secondary border-opacity-20">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="submitReviewBtn" class="btn btn-info btn-sm rounded-pill px-4 fw-bold">
+                    <span id="submitReviewSpinner" class="spinner-border spinner-border-sm me-1 d-none" role="status"></span>
+                    Sign-off & Mark Reviewed
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="auth_client.js?v=20260928_3"></script>
+<script src="official_report.js?v=20260929_1"></script>
+
+</body>
+</html>

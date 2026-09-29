@@ -1,3 +1,5 @@
+@import url('design-system.css');
+
 :root {
     --primary: #1e40af;
     --primary-light: #3b82f6;
@@ -16,7 +18,7 @@
 body {
     background: var(--page-bg);
     color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--iris-font-sans);
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -43,16 +45,38 @@ body {
 
 .cover-page {
     background: linear-gradient(135deg, #0b1329 0%, #1e293b 60%, #1e3a8a 100%);
-    color: #fff;
+    color: #ffffff !important;
     padding: 70px 50px;
     position: relative;
     overflow: hidden;
+}
+
+.cover-page h1,
+.cover-page h2,
+.cover-page h3,
+.cover-page h4,
+.cover-page h5,
+.cover-page h6,
+.cover-page .display-5,
+.cover-page strong {
+    color: #ffffff !important;
+}
+
+.cover-page h5.text-info {
+    color: #38bdf8 !important;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.cover-page small,
+.cover-page .text-secondary {
+    color: #94a3b8 !important;
 }
 
 .cover-badge {
     display: inline-block;
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff !important;
     padding: 6px 16px;
     border-radius: 30px;
     font-size: 13px;

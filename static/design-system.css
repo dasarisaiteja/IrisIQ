@@ -1,0 +1,714 @@
+/* ==========================================================================
+   IRIS AI ENTERPRISE DESIGN SYSTEM
+   Unified Design Tokens, Typography, Components & Utilities
+   Version: 3.0.0 (Enterprise Redesign)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+    /* --- Brand & Primary Colors --- */
+    --iris-primary: #1d4ed8;
+    --iris-primary-hover: #1e40af;
+    --iris-primary-active: #172554;
+    --iris-primary-subtle: #eff6ff;
+    --iris-primary-border: #bfdbfe;
+
+    /* --- Biometric Accent (Cyan/Teal) --- */
+    --iris-accent: #0ea5e9;
+    --iris-accent-hover: #0284c7;
+    --iris-accent-subtle: #f0f9ff;
+    --iris-accent-border: #bae6fd;
+    --iris-accent-glow: rgba(14, 165, 233, 0.25);
+
+    /* --- Neutral Palette (Slate/Zinc) --- */
+    --iris-dark-950: #070d17;
+    --iris-dark-900: #0b1329;
+    --iris-dark-850: #0f172a;
+    --iris-dark-800: #1e293b;
+    --iris-dark-700: #334155;
+
+    --iris-slate-600: #475569;
+    --iris-slate-500: #64748b;
+    --iris-slate-400: #94a3b8;
+    --iris-slate-300: #cbd5e1;
+    --iris-slate-200: #e2e8f0;
+    --iris-slate-100: #f1f5f9;
+    --iris-slate-50:  #f8fafc;
+    --iris-white:     #ffffff;
+
+    /* --- Semantic Surfaces & Text --- */
+    --iris-bg: var(--iris-slate-50);
+    --iris-surface: #ffffff;
+    --iris-surface-card: #ffffff;
+    --iris-surface-muted: var(--iris-slate-100);
+    
+    --iris-text-heading: #0f172a;
+    --iris-text-body: #334155;
+    --iris-text-secondary: #475569;
+    --iris-text-muted: #64748b;
+    --iris-text-inverse: #ffffff;
+
+    --iris-border: #e2e8f0;
+    --iris-border-light: #f1f5f9;
+    --iris-border-strong: #cbd5e1;
+    --iris-border-focus: #3b82f6;
+
+    /* --- Status Colors --- */
+    --iris-success: #10b981;
+    --iris-success-hover: #059669;
+    --iris-success-subtle: #ecfdf5;
+    --iris-success-border: #a7f3d0;
+    --iris-success-text: #065f46;
+
+    --iris-warning: #f59e0b;
+    --iris-warning-hover: #d97706;
+    --iris-warning-subtle: #fffbeb;
+    --iris-warning-border: #fde68a;
+    --iris-warning-text: #92400e;
+
+    --iris-danger: #ef4444;
+    --iris-danger-hover: #dc2626;
+    --iris-danger-subtle: #fef2f2;
+    --iris-danger-border: #fecaca;
+    --iris-danger-text: #991b1b;
+
+    --iris-info: #0284c7;
+    --iris-info-subtle: #f0f9ff;
+    --iris-info-border: #bae6fd;
+    --iris-info-text: #075985;
+
+    /* --- Typography --- */
+    --iris-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --iris-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --iris-font-mono: 'JetBrains Mono', monospace;
+
+    /* --- Elevation & Shadows --- */
+    --iris-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --iris-shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.06);
+    --iris-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --iris-shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.09), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+    --iris-shadow-xl: 0 20px 35px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    --iris-shadow-glow: 0 0 25px rgba(14, 165, 233, 0.25);
+    --iris-shadow-primary-glow: 0 0 25px rgba(29, 78, 216, 0.25);
+
+    /* --- Radii --- */
+    --iris-radius-sm: 8px;
+    --iris-radius-md: 12px;
+    --iris-radius-lg: 16px;
+    --iris-radius-xl: 22px;
+    --iris-radius-2xl: 28px;
+    --iris-radius-pill: 9999px;
+
+    /* --- Transitions --- */
+    --iris-transition-fast: 0.15s ease;
+    --iris-transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --iris-transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   BASE & RESET
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--iris-font-sans);
+    background-color: var(--iris-bg);
+    color: var(--iris-text-body);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--iris-font-sans);
+    color: var(--iris-text-heading);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+}
+
+/* Dark container overrides & explicit text-white utilities */
+.text-white,
+.text-white h1, .text-white h2, .text-white h3, .text-white h4, .text-white h5, .text-white h6,
+h1.text-white, h2.text-white, h3.text-white, h4.text-white, h5.text-white, h6.text-white,
+.cover-page h1, .cover-page h2, .cover-page h3, .cover-page h4, .cover-page h5, .cover-page h6,
+.hero-section h1, .hero-section h2, .hero-section h3, .hero-section h4, .hero-section h5, .hero-section h6,
+.registration-card-header h1, .registration-card-header h2, .registration-card-header h3,
+.dossier-header h1, .dossier-header h2, .dossier-header h3 {
+    color: #ffffff !important;
+}
+
+p {
+    margin-bottom: 1rem;
+    color: var(--iris-text-secondary);
+}
+
+a {
+    color: var(--iris-primary);
+    text-decoration: none;
+    transition: color var(--iris-transition-fast);
+}
+
+a:hover {
+    color: var(--iris-primary-hover);
+}
+
+/* ==========================================================================
+   BUTTONS (ENTERPRISE STANDARD)
+   ========================================================================== */
+.btn {
+    font-family: var(--iris-font-sans);
+    font-weight: 600;
+    font-size: 0.925rem;
+    padding: 0.65rem 1.35rem;
+    border-radius: var(--iris-radius-md);
+    transition: all var(--iris-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+    border: 1px solid transparent;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+/* Primary Button */
+.btn-primary,
+.btn-iris-primary {
+    background-color: var(--iris-primary);
+    border-color: var(--iris-primary);
+    color: #ffffff;
+    box-shadow: var(--iris-shadow-xs);
+}
+
+.btn-primary:hover,
+.btn-iris-primary:hover {
+    background-color: var(--iris-primary-hover);
+    border-color: var(--iris-primary-hover);
+    color: #ffffff;
+    box-shadow: var(--iris-shadow-sm);
+    transform: translateY(-1px);
+}
+
+/* Biometric Accent Button */
+.btn-info,
+.btn-iris-accent {
+    background-color: var(--iris-accent);
+    border-color: var(--iris-accent);
+    color: #ffffff !important;
+    box-shadow: var(--iris-shadow-xs);
+}
+
+.btn-info:hover,
+.btn-iris-accent:hover {
+    background-color: var(--iris-accent-hover);
+    border-color: var(--iris-accent-hover);
+    box-shadow: var(--iris-shadow-sm), var(--iris-shadow-glow);
+    transform: translateY(-1px);
+}
+
+/* Outline Buttons */
+.btn-outline-primary {
+    color: var(--iris-primary);
+    border-color: var(--iris-primary-border);
+    background-color: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--iris-primary-subtle);
+    border-color: var(--iris-primary);
+    color: var(--iris-primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-outline-info {
+    color: var(--iris-accent);
+    border-color: var(--iris-accent-border);
+    background-color: transparent;
+}
+
+.btn-outline-info:hover {
+    background-color: var(--iris-accent-subtle);
+    border-color: var(--iris-accent);
+    color: var(--iris-accent-hover);
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    color: var(--iris-slate-600);
+    border-color: var(--iris-border);
+    background-color: #ffffff;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--iris-slate-100);
+    border-color: var(--iris-slate-300);
+    color: var(--iris-text-heading);
+}
+
+/* Success Button */
+.btn-success {
+    background-color: var(--iris-success);
+    border-color: var(--iris-success);
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background-color: var(--iris-success-hover);
+    border-color: var(--iris-success-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--iris-shadow-sm);
+}
+
+/* Pill & Size Modifiers */
+.btn-rounded,
+.btn.rounded-pill {
+    border-radius: var(--iris-radius-pill) !important;
+}
+
+.btn-lg {
+    padding: 0.85rem 1.85rem;
+    font-size: 1rem;
+    border-radius: var(--iris-radius-lg);
+}
+
+.btn-sm {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.825rem;
+    border-radius: var(--iris-radius-sm);
+}
+
+/* ==========================================================================
+   CARDS & SURFACES
+   ========================================================================== */
+.card,
+.iris-card {
+    background-color: var(--iris-surface-card);
+    border: 1px solid var(--iris-border);
+    border-radius: var(--iris-radius-lg);
+    box-shadow: var(--iris-shadow-sm);
+    transition: border-color var(--iris-transition-base), box-shadow var(--iris-transition-base), transform var(--iris-transition-base);
+    overflow: hidden;
+}
+
+.card-header,
+.iris-card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--iris-border-light);
+    padding: 1.25rem 1.5rem;
+    font-weight: 700;
+    color: var(--iris-text-heading);
+}
+
+.card-body,
+.iris-card-body {
+    padding: 1.5rem;
+}
+
+.card-footer,
+.iris-card-footer {
+    background-color: var(--iris-slate-50);
+    border-top: 1px solid var(--iris-border-light);
+    padding: 1rem 1.5rem;
+}
+
+/* Interactive Card Elevation */
+.card-hoverable:hover,
+.feature-card:hover,
+.tech-card:hover {
+    border-color: var(--iris-primary-border);
+    box-shadow: var(--iris-shadow-lg);
+    transform: translateY(-4px);
+}
+
+/* ==========================================================================
+   FORM CONTROLS (ENTERPRISE QUALITY)
+   ========================================================================== */
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--iris-text-heading);
+    margin-bottom: 0.45rem;
+    letter-spacing: -0.01em;
+    display: inline-block;
+}
+
+.form-control,
+.form-select {
+    font-family: var(--iris-font-sans);
+    font-size: 0.925rem;
+    padding: 0.65rem 0.95rem;
+    border-radius: var(--iris-radius-md);
+    border: 1.5px solid var(--iris-border);
+    background-color: #ffffff;
+    color: var(--iris-text-heading);
+    transition: border-color var(--iris-transition-fast), box-shadow var(--iris-transition-fast);
+}
+
+.form-control:hover,
+.form-select:hover {
+    border-color: var(--iris-border-strong);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--iris-border-focus);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #ffffff;
+}
+
+.form-control::placeholder {
+    color: var(--iris-slate-400);
+}
+
+textarea.form-control {
+    min-height: 90px;
+    resize: vertical;
+}
+
+/* Form Section Grouping */
+.form-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--iris-text-heading);
+    padding-bottom: 0.65rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--iris-border-light);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.form-section-title i {
+    color: var(--iris-primary);
+    font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   STATUS BADGES
+   ========================================================================== */
+.badge,
+.iris-badge {
+    font-family: var(--iris-font-sans);
+    font-weight: 600;
+    font-size: 0.775rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--iris-radius-pill);
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid transparent;
+}
+
+.badge.bg-primary {
+    background-color: var(--iris-primary-subtle) !important;
+    color: var(--iris-primary) !important;
+    border-color: var(--iris-primary-border);
+}
+
+.badge.bg-info {
+    background-color: var(--iris-accent-subtle) !important;
+    color: var(--iris-info-text) !important;
+    border-color: var(--iris-accent-border);
+}
+
+.badge.bg-success {
+    background-color: var(--iris-success-subtle) !important;
+    color: var(--iris-success-text) !important;
+    border-color: var(--iris-success-border);
+}
+
+.badge.bg-warning {
+    background-color: var(--iris-warning-subtle) !important;
+    color: var(--iris-warning-text) !important;
+    border-color: var(--iris-warning-border);
+}
+
+.badge.bg-danger {
+    background-color: var(--iris-danger-subtle) !important;
+    color: var(--iris-danger-text) !important;
+    border-color: var(--iris-danger-border);
+}
+
+.badge.bg-secondary {
+    background-color: var(--iris-slate-100) !important;
+    color: var(--iris-slate-600) !important;
+    border-color: var(--iris-border);
+}
+
+/* ==========================================================================
+   DATA TABLES (ENTERPRISE)
+   ========================================================================== */
+.table,
+.iris-table {
+    margin-bottom: 0;
+    width: 100%;
+    color: var(--iris-text-body);
+    vertical-align: middle;
+}
+
+.table th {
+    font-size: 0.775rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--iris-text-muted);
+    background-color: var(--iris-slate-50);
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--iris-border);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 0.95rem 1.25rem;
+    border-bottom: 1px solid var(--iris-border-light);
+    font-size: 0.9rem;
+    background-color: #ffffff;
+}
+
+.table tr:hover td {
+    background-color: var(--iris-slate-50);
+}
+
+.table-responsive {
+    border-radius: var(--iris-radius-lg);
+    border: 1px solid var(--iris-border);
+    overflow-x: auto;
+    background-color: #ffffff;
+}
+
+/* ==========================================================================
+   PROGRESS BARS
+   ========================================================================== */
+.progress {
+    height: 10px;
+    background-color: var(--iris-slate-100);
+    border-radius: var(--iris-radius-pill);
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.progress-bar {
+    background-color: var(--iris-primary);
+    border-radius: var(--iris-radius-pill);
+    transition: width 0.4s ease;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.progress-bar.bg-success {
+    background-color: var(--iris-success) !important;
+}
+
+.progress-bar.bg-info {
+    background-color: var(--iris-accent) !important;
+}
+
+/* ==========================================================================
+   OPTICAL BIOMETRIC SCANNING HUD STYLES
+   ========================================================================== */
+.optical-viewport-wrapper {
+    position: relative;
+    border-radius: var(--iris-radius-xl);
+    overflow: hidden;
+    background: #000000;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+    border: 2px solid rgba(14, 165, 233, 0.4);
+}
+
+.optical-hud-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+}
+
+/* Corner Reticle Brackets */
+.reticle-corner {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border-color: #00d4ff;
+    border-style: solid;
+    opacity: 0.85;
+}
+
+.reticle-corner.top-left {
+    top: 18px;
+    left: 18px;
+    border-width: 3px 0 0 3px;
+    border-top-left-radius: 8px;
+}
+
+.reticle-corner.top-right {
+    top: 18px;
+    right: 18px;
+    border-width: 3px 3px 0 0;
+    border-top-right-radius: 8px;
+}
+
+.reticle-corner.bottom-left {
+    bottom: 18px;
+    left: 18px;
+    border-width: 0 0 3px 3px;
+    border-bottom-left-radius: 8px;
+}
+
+.reticle-corner.bottom-right {
+    bottom: 18px;
+    right: 18px;
+    border-width: 0 3px 3px 0;
+    border-bottom-right-radius: 8px;
+}
+
+/* Center Eye Target Guide */
+.optical-target-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 2px dashed rgba(0, 212, 255, 0.65);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2), inset 0 0 20px rgba(0, 212, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.optical-target-circle::before {
+    content: '';
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+}
+
+.optical-target-crosshairs {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 260px;
+    height: 260px;
+    pointer-events: none;
+}
+
+.optical-target-crosshairs::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5) 20%, transparent 40%, transparent 60%, rgba(0, 212, 255, 0.5) 80%, transparent);
+}
+
+.optical-target-crosshairs::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(0, 212, 255, 0.5) 20%, transparent 40%, transparent 60%, rgba(0, 212, 255, 0.5) 80%, transparent);
+}
+
+/* Scanning Laser Beam */
+.scanning-laser-beam {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00d4ff, #ffffff, #00d4ff, transparent);
+    box-shadow: 0 0 15px #00d4ff, 0 0 30px #00d4ff;
+    animation: laserScan 2.6s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 12;
+}
+
+@keyframes laserScan {
+    0% {
+        top: 8%;
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        top: 92%;
+        opacity: 0.2;
+    }
+}
+
+/* Eye Selection Switcher */
+.eye-selector-group {
+    display: inline-flex;
+    background: #ffffff;
+    padding: 4px;
+    border-radius: var(--iris-radius-pill);
+    border: 1px solid var(--iris-border);
+    box-shadow: var(--iris-shadow-xs);
+}
+
+.eye-selector-btn {
+    padding: 8px 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--iris-radius-pill);
+    border: none;
+    background: transparent;
+    color: var(--iris-slate-600);
+    cursor: pointer;
+    transition: all var(--iris-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.eye-selector-btn.active {
+    background: var(--iris-primary);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25);
+}
+
+/* ==========================================================================
+   RESPONSIVE UTILITIES
+   ========================================================================== */
+@media (max-width: 768px) {
+    .btn-lg {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+    }
+
+    .form-section-title {
+        font-size: 0.975rem;
+    }
+
+    .card-body,
+    .iris-card-body {
+        padding: 1.15rem;
+    }
+}

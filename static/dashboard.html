@@ -1,818 +1,491 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Admin Dashboard | Iris AI</title>
-
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-<link rel="stylesheet"
-href="dashboard.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Admin Dashboard | Iris AI</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap & Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <!-- Dashboard Styling -->
+    <link rel="stylesheet" href="dashboard.css?v=20260929_1">
 </head>
-
 <body>
-<main class="main">
 
-<div class="container-fluid">
-<aside class="sidebar">
+<div class="wrapper">
 
-    <div class="logo">
-
-        <div class="logo-icon">
-            <i class="fa-solid fa-eye"></i>
-        </div>
-
-        <div class="logo-text">
-
-            <h4>Iris AI</h4>
-
-            <small>Recognition System</small>
-
-        </div>
-
-    </div>
-
-    <ul class="menu">
-
-        <li class="active">
-
-            <a href="dashboard.html">
-
-                <i class="fa-solid fa-gauge-high"></i>
-
-                <span>Dashboard</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="students.html">
-
-                <i class="fa-solid fa-graduation-cap"></i>
-
-                <span>Students</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="camera.html">
-
-                <i class="fa-solid fa-camera"></i>
-
-                <span>Live Iris Scan</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="register.html">
-
-                <i class="fa-solid fa-user-plus"></i>
-
-                <span>Register Employee</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="assessments.html">
-
-                <i class="fa-solid fa-list-check"></i>
-
-                <span>Assessments</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="student_profile.html">
-
-                <i class="fa-solid fa-user-gear"></i>
-
-                <span>Student Profile</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="ai_profile.html">
-
-                <i class="fa-solid fa-brain"></i>
-
-                <span>AI Profile</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="recommendations.html">
-
-                <i class="fa-solid fa-compass"></i>
-
-                <span>Recommendations</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="student_report.html">
-
-                <i class="fa-solid fa-file-pdf"></i>
-
-                <span>Report V2 (AI Profile)</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="report.html">
-
-                <i class="fa-solid fa-file-lines"></i>
-
-                <span>Report V1 (Biometrics)</span>
-
-            </a>
-
-        </li>
-
-        <li>
-
-            <a href="about.html">
-
-                <i class="fa-solid fa-circle-info"></i>
-
-                <span>About</span>
-
-            </a>
-
-        </li>
-
-    </ul>
-
-    <div class="sidebar-footer">
-
-        <div class="version">
-
-            <strong>AI Iris Recognition</strong>
-
-            <small>Version 2.0</small>
-
-        </div>
-
-    </div>
-
-</aside>
-
-    <header class="topbar">
-
-    <div class="left">
-
-        <button id="toggleSidebar">
-
-            <i class="fa-solid fa-bars"></i>
-
-        </button>
-
-        <div>
-
-            <h2 class="page-title">
-
-                AI Iris Dashboard
-
-            </h2>
-
-            <small class="page-subtitle">
-
-                Employee Recognition & Analytics
-
-            </small>
-
-        </div>
-
-    </div>
-
-    <div class="right">
-
-        <div class="search-box">
-
-            <i class="fa-solid fa-magnifying-glass"></i>
-
-            <input
-                type="text"
-                id="searchEmployee"
-                placeholder="Search Employee...">
-
-        </div>
-
-        <button class="icon-btn" title="Notifications">
-
-            <i class="fa-regular fa-bell"></i>
-
-        </button>
-
-        <div class="profile">
-
-            <img
-                src="images/admin.png"
-                alt="Admin">
-
-            <div>
-
-                <strong>Administrator</strong>
-
-                <small id="todayDate"></small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</header>
-<div class="row g-4 mb-4">
-
-    <!-- Total Employees -->
-
-    <div class="col-xl-3 col-lg-6">
-
-        <div class="stat-card employee-card">
-
-            <div class="card-left">
-
-                <div class="card-icon">
-
-                    <i class="fa-solid fa-users"></i>
-
-                </div>
-
-                <div class="card-content">
-
-                    <span>Total Employees</span>
-
-                    <h2 id="totalUsers">0</h2>
-
-                    <small>Registered Employees</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
-                <i class="fa-solid fa-arrow-trend-up"></i>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- Total Scans -->
-
-    <div class="col-xl-3 col-lg-6">
-
-        <div class="stat-card scan-card">
-
-            <div class="card-left">
-
-                <div class="card-icon">
-
-                    <i class="fa-solid fa-camera"></i>
-
-                </div>
-
-                <div class="card-content">
-
-                    <span>Total Scans</span>
-
-                    <h2 id="totalScans">0</h2>
-
-                    <small>Recognition History</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
+    <!-- ================= ENTERPRISE SIDEBAR ================= -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Logo Header -->
+        <div class="logo">
+            <div class="logo-icon">
                 <i class="fa-solid fa-eye"></i>
-
             </div>
-
+            <div class="logo-text">
+                <h4>Iris <span class="brand-accent">IQ</span></h4>
+                <small>Biometric &amp; AI Intelligence</small>
+            </div>
         </div>
 
-    </div>
+        <!-- Navigation Menu -->
+        <ul class="menu">
+            <li class="menu-category">Core Platform</li>
+            <li class="active">
+                <a href="dashboard.html">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="camera.html">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Live Iris Scan</span>
+                </a>
+            </li>
+            <li>
+                <a href="register.html">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Register Employee</span>
+                </a>
+            </li>
+            <li>
+                <a href="report.html">
+                    <i class="fa-solid fa-file-shield"></i>
+                    <span>Report V1 (Biometrics)</span>
+                </a>
+            </li>
 
-    <!-- Accuracy -->
+            <li class="menu-category">Student &amp; Cognitive AI</li>
+            <li>
+                <a href="students.html">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Students</span>
+                </a>
+            </li>
+            <li>
+                <a href="assessments.html">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Assessments</span>
+                </a>
+            </li>
+            <li>
+                <a href="student_profile.html">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Student Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="ai_profile.html">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>AI Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="recommendations.html">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Recommendations</span>
+                </a>
+            </li>
+            <li>
+                <a href="student_report.html">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Report V2 (AI Profile)</span>
+                </a>
+            </li>
 
-    <div class="col-xl-3 col-lg-6">
+            <li class="menu-category">System</li>
+            <li>
+                <a href="about.html">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>About Iris AI</span>
+                </a>
+            </li>
+        </ul>
 
-        <div class="stat-card accuracy-card">
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="version">
+                <strong>IrisIQ Enterprise Edition</strong>
+                <small>v2.0 &bull; Build 2026.09</small>
+                <div class="system-status">
+                    <span class="pulse-dot-sm"></span>
+                    <span>All Systems Operational</span>
+                </div>
+            </div>
+        </div>
+    </aside>
 
-            <div class="card-left">
+    <!-- ================= MAIN DASHBOARD AREA ================= -->
+    <main class="main" id="mainContent">
 
-                <div class="card-icon">
+        <!-- Top Header Navigation -->
+        <header class="topbar">
+            <div class="left">
+                <button type="button" id="toggleSidebar" aria-label="Toggle Navigation Sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="topbar-title-group">
+                    <div class="topbar-breadcrumb">
+                        <span>Console</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                        <span class="active">Overview</span>
+                    </div>
+                    <h1 class="page-title">Intelligence Dashboard</h1>
+                </div>
+                <div class="system-status-chip d-none d-xl-inline-flex">
+                    <span class="pulse-dot-sm"></span>
+                    <span>Live Biometric Engine</span>
+                </div>
+            </div>
 
-                    <i class="fa-solid fa-shield-check"></i>
-
+            <div class="right">
+                <!-- Search Box -->
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchEmployee" placeholder="Search subject or log...">
                 </div>
 
-                <div class="card-content">
-
-                    <span>Accuracy</span>
-
-                    <h2 id="verifiedUsers">0%</h2>
-
-                    <small>Recognition Accuracy</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
-                <i class="fa-solid fa-chart-line"></i>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- Not Matched -->
-
-    <div class="col-xl-3 col-lg-6">
-
-        <div class="stat-card failed-card">
-
-            <div class="card-left">
-
-                <div class="card-icon">
-
-                    <i class="fa-solid fa-circle-xmark"></i>
-
-                </div>
-
-                <div class="card-content">
-
-                    <span>Not Matched</span>
-
-                    <h2 id="notMatched">0</h2>
-
-                    <small>Verification Failed</small>
-
-                </div>
-
-            </div>
-
-            <div class="card-arrow">
-
-                <i class="fa-solid fa-triangle-exclamation"></i>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- ================= STUDENT INTELLIGENCE METRICS ================= -->
-<div class="row g-3 mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-bold text-dark m-0">
-                <i class="fa-solid fa-graduation-cap text-primary me-2"></i>
-                Student Profiling & Intelligence Overview
-            </h6>
-            <a href="students.html" class="btn btn-sm btn-outline-primary py-1 px-3">
-                <i class="fa-solid fa-users me-1"></i> View Students
-            </a>
-        </div>
-    </div>
-
-    <!-- Total Students -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Total Students</small>
-                <h3 class="fw-bold text-primary m-0" id="totalStudents">0</h3>
-                <small class="text-muted" style="font-size: 11px;">Registered Profiles</small>
-            </div>
-            <div class="p-3 rounded-circle bg-primary-subtle text-primary">
-                <i class="fa-solid fa-users fa-lg"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Completed Assessments -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Completed Assessments</small>
-                <h3 class="fw-bold text-success m-0" id="completedAssessments">0</h3>
-                <small class="text-muted" style="font-size: 11px;">8-Domain Evaluations</small>
-            </div>
-            <div class="p-3 rounded-circle bg-success-subtle text-success">
-                <i class="fa-solid fa-list-check fa-lg"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Profiles Generated -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Profiles Generated</small>
-                <h3 class="fw-bold text-info m-0" id="profilesGenerated">0</h3>
-                <small class="text-muted" style="font-size: 11px;">AI Holistic Profiles</small>
-            </div>
-            <div class="p-3 rounded-circle bg-info-subtle text-info">
-                <i class="fa-solid fa-brain fa-lg"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reports Generated -->
-    <div class="col-xl-3 col-md-6 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Reports Generated</small>
-                <h3 class="fw-bold text-warning m-0" id="reportsGenerated">0</h3>
-                <small class="text-muted" style="font-size: 11px;">V2 Client Reports</small>
-            </div>
-            <div class="p-3 rounded-circle bg-warning-subtle text-warning">
-                <i class="fa-solid fa-file-pdf fa-lg"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Career Recommendations -->
-    <div class="col-xl-4 col-md-4 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Career Recommendations</small>
-                <h4 class="fw-bold text-dark m-0" id="careerRecommendations">0</h4>
-                <small class="text-muted" style="font-size: 11px;">Top & Trending Matches</small>
-            </div>
-            <div class="p-2 rounded bg-light text-primary">
-                <i class="fa-solid fa-briefcase"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stream Recommendations -->
-    <div class="col-xl-4 col-md-4 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Stream Recommendations</small>
-                <h4 class="fw-bold text-dark m-0" id="streamRecommendations">0</h4>
-                <small class="text-muted" style="font-size: 11px;">STEM, Commerce & Arts</small>
-            </div>
-            <div class="p-2 rounded bg-light text-info">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Assessments -->
-    <div class="col-xl-4 col-md-4 col-12">
-        <div class="p-3 bg-white rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
-            <div>
-                <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 11px;">Pending Assessments</small>
-                <h4 class="fw-bold text-secondary m-0" id="pendingAssessments">0</h4>
-                <small class="text-muted" style="font-size: 11px;">Awaiting Student Input</small>
-            </div>
-            <div class="p-2 rounded bg-light text-secondary">
-                <i class="fa-solid fa-hourglass-half"></i>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ================= QUICK ACTIONS ================= -->
-
-<div class="row mt-4 mb-4">
-
-    <div class="col-lg-12">
-
-        <div class="quick-card">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <div>
-
-                    <h5 class="mb-1">
-
-                        <i class="fa-solid fa-bolt text-warning"></i>
-
-                        Quick Actions
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        Frequently used system modules
-
-                    </small>
-
-                </div>
-
-            </div>
-
-            <div class="row g-4">
-
-                <!-- Register -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="register.html" class="quick-btn">
-
-                        <div class="quick-icon bg-primary">
-
-                            <i class="fa-solid fa-user-plus"></i>
-
-                        </div>
-
-                        <h6>Register Employee</h6>
-
-                        <small>Add New Employee</small>
-
-                    </a>
-
-                </div>
-
-                <!-- Scan -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="camera.html" class="quick-btn">
-
-                        <div class="quick-icon bg-success">
-
-                            <i class="fa-solid fa-camera"></i>
-
-                        </div>
-
-                        <h6>Start Scan</h6>
-
-                        <small>Verify Iris</small>
-
-                    </a>
-
-                </div>
-
-                <!-- Reports -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="report.html" class="quick-btn">
-
-                        <div class="quick-icon bg-warning">
-
-                            <i class="fa-solid fa-file-lines"></i>
-
-                        </div>
-
-                        <h6>Reports</h6>
-
-                        <small>View Reports</small>
-
-                    </a>
-
-                </div>
-
-                <!-- About -->
-
-                <div class="col-lg-3 col-md-6">
-
-                    <a href="about.html" class="quick-btn">
-
-                        <div class="quick-icon bg-danger">
-
-                            <i class="fa-solid fa-circle-info"></i>
-
-                        </div>
-
-                        <h6>About System</h6>
-
-                        <small>Technology Details</small>
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-<!-- ================= REPORT ANALYTICS ================= -->
-
-<div class="row mt-4">
-
-    <div class="col-lg-12">
-
-        <div class="chart-card">
-
-            <div class="card-header-custom d-flex justify-content-between align-items-center">
-
-                <div>
-
-                    <h5 class="mb-0">
-
-                        <i class="fa-solid fa-chart-column text-primary"></i>
-
-                        Monthly Scan Reports
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        Monthly employee verification statistics
-
-                    </small>
-
-                </div>
-
-                <span class="badge bg-primary">
-
-                    Live Data
-
-                </span>
-
-            </div>
-
-            <canvas id="reportChart" height="95"></canvas>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- ================= RECENT SCANS ================= -->
-
-<div class="row mt-4">
-
-    <!-- Recent Scans -->
-
-    <div class="col-lg-8">
-
-        <div class="table-card">
-
-            <div class="table-header d-flex justify-content-between align-items-center">
-
-                <div>
-
-                    <h5>
-
-                        <i class="fa-solid fa-clock-rotate-left text-primary"></i>
-
-                        Recent Iris Scans
-
-                    </h5>
-
-                    <small class="text-muted">
-
-                        Latest employee verification history
-
-                    </small>
-
-                </div>
-
-                <button class="btn btn-primary btn-sm">
-
-                    <i class="fa-solid fa-rotate"></i>
-
-                    Refresh
-
+                <!-- Quick Action New Scan Button -->
+                <a href="camera.html" class="btn-iris-primary d-none d-md-inline-flex">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>New Scan</span>
+                </a>
+
+                <!-- Notification Bell -->
+                <button type="button" class="icon-btn" title="System Notifications">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-badge"></span>
                 </button>
 
+                <!-- Profile Card (Dynamic auth_client.js target) -->
+                <div class="profile">
+                    <img src="images/admin.png" alt="Admin" onerror="this.src='https://ui-avatars.com/api/?name=Administrator&background=1d4ed8&color=fff'">
+                    <div class="profile-info">
+                        <strong>Administrator</strong>
+                        <small id="todayDate">2026-09-29</small>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Viewport Content -->
+        <div class="p-3 p-md-4 p-xl-5">
+
+            <!-- ================= KPI STATS ROW ================= -->
+            <div class="row g-3 g-xl-4 mb-4">
+                <!-- Total Employees -->
+                <div class="col-xl-3 col-sm-6">
+                    <div class="stat-card employee-card">
+                        <div>
+                            <div class="card-top-row">
+                                <span class="stat-card-title">Total Employees</span>
+                                <div class="stat-card-icon">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value-wrap">
+                                <h2 class="stat-card-value" id="totalUsers">0</h2>
+                                <span class="kpi-trend kpi-trend-blue">
+                                    <i class="fa-solid fa-id-card"></i> Database
+                                </span>
+                            </div>
+                        </div>
+                        <p class="stat-card-subtext">Enrolled Iris Biometric Identities</p>
+                    </div>
+                </div>
+
+                <!-- Total Scans -->
+                <div class="col-xl-3 col-sm-6">
+                    <div class="stat-card scan-card">
+                        <div>
+                            <div class="card-top-row">
+                                <span class="stat-card-title">Total Scans</span>
+                                <div class="stat-card-icon">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value-wrap">
+                                <h2 class="stat-card-value" id="totalScans">0</h2>
+                                <span class="kpi-trend kpi-trend-cyan">
+                                    <i class="fa-solid fa-bolt"></i> Real-time
+                                </span>
+                            </div>
+                        </div>
+                        <p class="stat-card-subtext">Recognition Inferences Processed</p>
+                    </div>
+                </div>
+
+                <!-- Accuracy -->
+                <div class="col-xl-3 col-sm-6">
+                    <div class="stat-card accuracy-card">
+                        <div>
+                            <div class="card-top-row">
+                                <span class="stat-card-title">Accuracy Rate</span>
+                                <div class="stat-card-icon">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value-wrap">
+                                <h2 class="stat-card-value" id="verifiedUsers">0%</h2>
+                                <span class="kpi-trend kpi-trend-green">
+                                    <i class="fa-solid fa-circle-check"></i> High Match
+                                </span>
+                            </div>
+                        </div>
+                        <p class="stat-card-subtext">Cosine Verification Score</p>
+                    </div>
+                </div>
+
+                <!-- Not Matched / False Rejections -->
+                <div class="col-xl-3 col-sm-6">
+                    <div class="stat-card failed-card">
+                        <div>
+                            <div class="card-top-row">
+                                <span class="stat-card-title">Not Matched</span>
+                                <div class="stat-card-icon">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                </div>
+                            </div>
+                            <div class="stat-card-value-wrap">
+                                <h2 class="stat-card-value" id="notMatched">0</h2>
+                                <span class="kpi-trend kpi-trend-rose">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Flags
+                                </span>
+                            </div>
+                        </div>
+                        <p class="stat-card-subtext">Unverified Biometric Attempts</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="table-responsive">
+            <!-- ================= STUDENT INTELLIGENCE EXECUTIVE HUB ================= -->
+            <div class="executive-hub-card">
+                <div class="executive-hub-header">
+                    <div class="hub-title-group">
+                        <div class="hub-title-icon">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <h5>Student Profiling &amp; Cognitive Analytics Hub</h5>
+                            <small>8-Domain Multi-Modal Assessment, Biometric Profiling &amp; Career Guidance Engine</small>
+                        </div>
+                    </div>
+                    <div class="hub-actions">
+                        <a href="students.html" class="btn btn-sm btn-outline-primary px-3 rounded-pill">
+                            <i class="fa-solid fa-users me-1"></i> Student Directory
+                        </a>
+                        <a href="student_report.html" class="btn btn-sm btn-primary px-3 rounded-pill">
+                            <i class="fa-solid fa-file-pdf me-1"></i> View Report V2
+                        </a>
+                    </div>
+                </div>
 
-                <table class="table table-hover align-middle">
+                <div class="executive-hub-body">
+                    <div class="row g-3">
+                        <!-- Total Students -->
+                        <div class="col-xl-3 col-sm-6">
+                            <div class="hub-metric-tile">
+                                <div>
+                                    <span class="hub-metric-label">Total Students</span>
+                                    <h3 class="hub-metric-val text-primary" id="totalStudents">0</h3>
+                                    <span class="hub-metric-sub">Active Student Profiles</span>
+                                </div>
+                                <div class="hub-metric-icon bg-primary-subtle text-primary">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </div>
+                            </div>
+                        </div>
 
-                    <thead>
+                        <!-- Completed Assessments -->
+                        <div class="col-xl-3 col-sm-6">
+                            <div class="hub-metric-tile">
+                                <div>
+                                    <span class="hub-metric-label">Completed Assessments</span>
+                                    <h3 class="hub-metric-val text-success" id="completedAssessments">0</h3>
+                                    <span class="hub-metric-sub">8-Domain Cognitive Tests</span>
+                                </div>
+                                <div class="hub-metric-icon bg-success-subtle text-success">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                            </div>
+                        </div>
 
-                        <tr>
+                        <!-- Reports Generated -->
+                        <div class="col-xl-3 col-sm-6">
+                            <div class="hub-metric-tile">
+                                <div>
+                                    <span class="hub-metric-label">Reports Generated</span>
+                                    <h3 class="hub-metric-val text-info" id="reportsGenerated">0</h3>
+                                    <span class="hub-metric-sub">V2 Comprehensive Profiles</span>
+                                </div>
+                                <div class="hub-metric-icon bg-info-subtle text-info">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                            </div>
+                        </div>
 
-                            <th>Report ID</th>
+                        <!-- Pending Assessments -->
+                        <div class="col-xl-3 col-sm-6">
+                            <div class="hub-metric-tile">
+                                <div>
+                                    <span class="hub-metric-label">Pending Evaluations</span>
+                                    <h3 class="hub-metric-val text-warning" id="pendingAssessments">0</h3>
+                                    <span class="hub-metric-sub">Awaiting Counselor Review</span>
+                                </div>
+                                <div class="hub-metric-icon bg-warning-subtle text-warning">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                            <th>Employee</th>
+                    <!-- Secondary Telemetry Strip -->
+                    <div class="hub-secondary-strip">
+                        <div class="telemetry-chip">
+                            <i class="fa-solid fa-microchip text-primary"></i>
+                            <span>Cognitive Profiles: <strong id="profilesGenerated">0</strong></span>
+                        </div>
+                        <div class="telemetry-chip">
+                            <i class="fa-solid fa-compass text-info"></i>
+                            <span>Career Pathways: <strong id="careerRecommendations">0</strong></span>
+                        </div>
+                        <div class="telemetry-chip">
+                            <i class="fa-solid fa-route text-success"></i>
+                            <span>Stream Advisories: <strong id="streamRecommendations">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <th>Date</th>
+            <!-- ================= CHARTS SECTION ================= -->
+            <div class="row g-3 g-xl-4 mb-4">
+                <!-- Accuracy Distribution Doughnut Chart -->
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h5 class="chart-title">
+                                <i class="fa-solid fa-chart-pie text-success"></i>
+                                <span>Verification Accuracy Ratio</span>
+                            </h5>
+                            <span class="chart-badge bg-success-subtle text-success">Live Match</span>
+                        </div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="verificationChart"></canvas>
+                            <!-- Compatibility fallback -->
+                            <canvas id="accuracyChart" style="display: none;"></canvas>
+                        </div>
+                    </div>
+                </div>
 
-                            <th>Similarity</th>
+                <!-- Daily / Weekly Scan Volume Chart -->
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h5 class="chart-title">
+                                <i class="fa-solid fa-chart-line text-primary"></i>
+                                <span>Scan Volume Trends</span>
+                            </h5>
+                            <span class="chart-badge bg-primary-subtle text-primary">Daily Cadence</span>
+                        </div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="scanChart"></canvas>
+                            <!-- Compatibility fallback -->
+                            <canvas id="weeklyChart" style="display: none;"></canvas>
+                        </div>
+                    </div>
+                </div>
 
-                            <th>Status</th>
+                <!-- Monthly Reports Bar Chart -->
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h5 class="chart-title">
+                                <i class="fa-solid fa-chart-column text-info"></i>
+                                <span>Monthly Assessment Output</span>
+                            </h5>
+                            <span class="chart-badge bg-info-subtle text-info">Annualized</span>
+                        </div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="reportChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        </tr>
+            <!-- ================= RECENT ACTIVITY & AUDIT TABLE ================= -->
+            <div class="row g-3 g-xl-4">
+                <!-- Recent Biometric Scans Table -->
+                <div class="col-lg-8">
+                    <div class="table-card">
+                        <div class="table-header">
+                            <h5>
+                                <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+                                <span>Recent Biometric Scans &amp; Verification History</span>
+                            </h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="camera.html" class="btn btn-sm btn-primary px-3 rounded-pill">
+                                    <i class="fa-solid fa-camera me-1"></i> Scan Console
+                                </a>
+                            </div>
+                        </div>
 
-                    </thead>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0" id="recentTable">
+                                <thead>
+                                    <tr>
+                                        <th>Scan ID</th>
+                                        <th>Employee / Subject</th>
+                                        <th>Timestamp</th>
+                                        <th>Similarity Confidence</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scanTable">
+                                    <!-- Populated dynamically by dashboard.js loadRecentScans() -->
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                                            Loading verification logs...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-                    <tbody id="scanTable">
-
-                    </tbody>
-
-                </table>
-
+                <!-- Real-time Activity Feed -->
+                <div class="col-lg-4">
+                    <div class="activity-card">
+                        <div class="chart-header">
+                            <h5 class="chart-title">
+                                <i class="fa-solid fa-list-timeline text-indigo me-1"></i>
+                                <span>Audit &amp; Security Feed</span>
+                            </h5>
+                            <span class="chart-badge bg-light text-muted">Auto-sync</span>
+                        </div>
+                        <div id="activityList" class="activity-feed-container">
+                            <!-- Populated dynamically by dashboard.js loadActivity() -->
+                            <p class="text-muted text-center py-4">Loading system activity...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
-
-    </div>
-
-    <!-- Recent Activity -->
-
-    <div class="col-lg-4">
-
-        <div class="activity-card">
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-
-                <h5>
-
-                    <i class="fa-solid fa-bolt text-warning"></i>
-
-                    Recent Activity
-
-                </h5>
-
-                <span class="badge bg-success">
-
-                    Live
-
-                </span>
-
-            </div>
-
-            <div id="activityList">
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-<footer class="dashboard-footer">
-
-    <strong>AI Iris Recognition System</strong>
-
-    <span>| Version 2.0 |</span>
-
-    <span>Powered by TensorFlow • OpenCV • FastAPI</span>
-
-    <span>| © 2026</span>
-
-</footer>
 
     </main>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="auth_client.js"></script>
-<script src="dashboard.js"></script>
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="auth_client.js?v=20260929_1"></script>
+<script src="dashboard.js?v=20260929_1"></script>
 </body>
-
 </html>

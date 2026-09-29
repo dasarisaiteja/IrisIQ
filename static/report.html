@@ -1,1894 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<title>Iris AI Customer Assessment Report</title>
-
-<link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet">
-
-<link rel="stylesheet"
-      href="report.css">
-
-<style>
-
-:root{
-    --ink:#172033;
-    --muted:#667085;
-    --line:#e6eaf0;
-    --soft:#f7f9fc;
-    --primary:#2457d6
-}
-
-*{
-    box-sizing:border-box
-}
-
-body{
-    background:#f3f6fa;
-    color:var(--ink);
-    font-family:Arial,Helvetica,sans-serif
-}
-
-.report-shell{
-    max-width:1200px;
-    margin:auto;
-    padding:24px
-}
-
-.report-header{
-    background:linear-gradient(135deg,#eef4ff,#fff);
-    border:1px solid #dfe7f5;
-    border-radius:22px;
-    padding:24px;
-    box-shadow:0 10px 30px rgba(20,40,80,.08)
-}
-
-.report-card{
-    background:#fff;
-    border:1px solid var(--line)!important;
-    margin-bottom:24px
-}
-
-.card-header{
-    padding:16px 20px
-}
-
-.metric-tile{
-    background:var(--soft);
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:16px;
-    text-align:center;
-    height:100%
-}
-
-.metric-value{
-    font-size:28px;
-    font-weight:800
-}
-
-.report-image{
-    width:100%;
-    height:220px;
-    object-fit:contain;
-    background:#f7f8fa;
-    border-radius:14px;
-    border:1px solid var(--line)
-}
-
-.employee-photo{
-    width:170px;
-    height:170px;
-    object-fit:cover;
-    border-radius:50%;
-    border:5px solid #fff
-}
-
-.image-card{
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:14px;
-    height:100%
-}
-
-.step-circle{
-    width:48px;
-    height:48px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-    font-weight:800;
-    margin:auto
-}
-
-.ai-note{
-    background:#f0f6ff;
-    border-left:4px solid var(--primary);
-    padding:14px 16px;
-    border-radius:10px
-}
-
-.disclaimer{
-    font-size:12px;
-    color:#667085;
-    line-height:1.6
-}
-
-.score-row{
-    margin-bottom:18px
-}
-
-.score-label{
-    display:flex;
-    justify-content:space-between;
-    font-weight:700;
-    margin-bottom:6px
-}
-
-.progress{
-    background:#edf1f6
-}
-
-.report-footer{
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:18px
-}
-
-.no-break,
-.report-card,
-.image-card,
-.metric-tile,
-table{
-    break-inside:avoid;
-    page-break-inside:avoid
-}
-
-.pdf-break{
-    break-before:page;
-    page-break-before:always
-}
-
-@media print{
-
-    body{
-        background:#fff
-    }
-
-    .report-shell{
-        max-width:none;
-        padding:0
-    }
-
-    .no-print{
-        display:none!important
-    }
-
-    .report-card{
-        box-shadow:none!important
-    }
-}
-
-@media(max-width:768px){
-
-    .report-shell{
-        padding:12px
-    }
-
-    .report-header{
-        text-align:center
-    }
-
-    .report-image{
-        height:180px
-    }
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biometric Verification Report | Iris AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-
-
 <body>
 
-<div class="report-shell" id="reportRoot">
+<div class="report-shell">
 
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
-<header class="report-header no-break">
-
-    <div class="row align-items-center g-4">
-
-        <div class="col-lg-8">
-
-            <div class="d-flex align-items-center">
-
-                <img
-                    src="/static/images/logo.jpg"
-                    alt="Logo"
-                    style="
-                        width:78px;
-                        height:78px;
-                        border-radius:16px;
-                        object-fit:cover;
-                        background:#fff;
-                        padding:5px;
-                        margin-right:18px;
-                    "
-                >
-
-                <div>
-
-                    <h2 class="mb-1 fw-bold">
-                        AI IRIS RECOGNITION SYSTEM
-                    </h2>
-
-                    <h5 class="mb-1">
-                        Biometric Identity Verification & AI Assessment Report
-                    </h5>
-
-                    <small class="text-muted">
-                        Artificial Intelligence • Computer Vision • Deep Learning
-                    </small>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-4 text-lg-end">
-
-            <a
-                class="btn btn-outline-primary me-2 no-print"
-                href="student_report.html"
-                title="View AI Student Profile Report"
-            >
-                🎓 View Report V2
+    <!-- Top Action & Navigation Bar -->
+    <header class="report-action-bar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <a href="dashboard.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Staff Console</span>
             </a>
+            <a href="camera.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fa-solid fa-camera"></i>
+                <span>Live Scanner</span>
+            </a>
+        </div>
 
-            <button
-                class="btn btn-outline-dark me-2 no-print"
-                onclick="window.print()"
-            >
-                🖨 Print
+        <div class="d-flex align-items-center gap-3">
+            <div id="navAuthContainer"></div>
+            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="window.print()">
+                <i class="fa-solid fa-print"></i>
+                <span>Print</span>
             </button>
-
-            <button
-                class="btn btn-primary no-print"
-                id="downloadPdf"
-            >
-                📄 Download PDF
+            <button type="button" id="downloadPdf" class="btn btn-primary btn-sm rounded-pill px-3">
+                <i class="fa-solid fa-file-arrow-down"></i>
+                <span>Download PDF</span>
             </button>
-
-            <div class="mt-3">
-
-                <span
-                    id="header_status"
-                    class="badge rounded-pill bg-secondary px-3 py-2"
-                >
-                    LOADING
-                </span>
-
-            </div>
-
         </div>
+    </header>
 
-    </div>
-
-</header>
-
-
-<!-- =====================================================
-     1 + 2 EXECUTIVE SUMMARY / CUSTOMER PROFILE
-===================================================== -->
-
-<section class="row mt-4 g-4">
-
-
-    <!-- 1. EXECUTIVE SUMMARY -->
-
-    <div class="col-lg-8">
-
-        <div class="card report-card shadow-sm rounded-4 no-break">
-
-            <div class="card-header bg-primary text-white">
-
-                <h4 class="mb-0">
-                    1. Executive Summary
-                </h4>
-
-            </div>
-
-
-            <div class="card-body">
-
-                <div class="row g-3">
-
-
-                    <div class="col-md-6">
-
-                        <table class="table table-borderless mb-0">
-
-                            <tr>
-                                <th>Report ID</th>
-                                <td id="report_id">-</td>
-                            </tr>
-
-                            <tr>
-                                <th>Recognition ID</th>
-                                <td id="recognition_id">-</td>
-                            </tr>
-
-                            <tr>
-                                <th>Scan Date</th>
-                                <td id="scan_date">-</td>
-                            </tr>
-
-                            <tr>
-                                <th>Scan Time</th>
-                                <td id="scan_time">-</td>
-                            </tr>
-
-                            <tr>
-                                <th>Eye Side</th>
-                                <td id="eye_side">-</td>
-                            </tr>
-
-                        </table>
-
+    <!-- Main Official Verification Dossier -->
+    <div id="reportRoot" class="report-dossier-card">
+        
+        <!-- Header -->
+        <div class="dossier-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <div class="dossier-brand">
+                        <i class="fa-solid fa-eye text-info"></i>
+                        <span>Iris AI Biometric Verification Platform</span>
                     </div>
-
-
-                    <div class="col-md-6">
-
-                        <table class="table table-borderless mb-0">
-
-                            <tr>
-                                <th>Similarity</th>
-
-                                <td>
-                                    <span
-                                        id="similarity"
-                                        class="badge bg-success"
-                                    >
-                                        -
-                                    </span>
-                                </td>
-
-                            </tr>
-
-
-                            <tr>
-
-                                <th>Match Status</th>
-
-                                <td>
-                                    <span
-                                        id="match_status"
-                                        class="badge bg-secondary"
-                                    >
-                                        -
-                                    </span>
-                                </td>
-
-                            </tr>
-
-
-                            <tr>
-                                <th>Detection</th>
-                                <td id="detection_confidence">-</td>
-                            </tr>
-
-
-                            <tr>
-                                <th>AI Confidence</th>
-                                <td id="confidence">-</td>
-                            </tr>
-
-
-                            <tr>
-                                <th>Processing</th>
-                                <td id="processing_status">-</td>
-                            </tr>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-
-                <hr>
-
-
-                <div class="row g-3">
-
-
-                    <div class="col-md-4">
-
-                        <div class="metric-tile">
-
-                            <div class="text-muted">
-                                Similarity
-                            </div>
-
-                            <div
-                                id="metric_similarity"
-                                class="metric-value text-success"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <div class="metric-tile">
-
-                            <div class="text-muted">
-                                Confidence
-                            </div>
-
-                            <div
-                                id="metric_confidence"
-                                class="metric-value text-primary"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <div class="metric-tile">
-
-                            <div class="text-muted">
-                                Recognition
-                            </div>
-
-                            <div
-                                id="metric_status"
-                                class="metric-value"
-                            >
-                                -
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- 2. CUSTOMER PROFILE -->
-
-    <div class="col-lg-4">
-
-        <div class="card report-card shadow-sm rounded-4 no-break">
-
-            <div class="card-header bg-success text-white">
-
-                <h4 class="mb-0">
-                    2. Customer Profile
-                </h4>
-
-            </div>
-
-
-            <div class="card-body text-center">
-
-                <img
-                    id="employee_photo"
-                    class="employee-photo shadow"
-                    src=""
-                    alt="Customer Photo"
-                >
-
-
-                <h3
-                    id="employee_name"
-                    class="mt-3 fw-bold"
-                >
-                    -
-                </h3>
-
-
-                <p
-                    id="designation"
-                    class="text-muted mb-3"
-                >
-                    -
-                </p>
-
-
-                <table class="table table-borderless text-start">
-
-                    <tr>
-                        <th>Customer ID</th>
-                        <td id="employee_code">-</td>
-                    </tr>
-
-                    <tr>
-                        <th>Department</th>
-                        <td id="department">-</td>
-                    </tr>
-
-                    <tr>
-                        <th>Gender</th>
-                        <td id="gender">-</td>
-                    </tr>
-
-                    <tr>
-                        <th>Age</th>
-                        <td id="age">-</td>
-                    </tr>
-
-                    <tr>
-                        <th>Blood Group</th>
-                        <td id="blood_group">-</td>
-                    </tr>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     3. BIOMETRIC VERIFICATION
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 no-break">
-
-    <div class="card-header bg-dark text-white">
-
-        <h4 class="mb-0">
-            3. Biometric Verification
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div class="row g-3">
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Similarity Score
-                    </div>
-
-                    <div
-                        id="bio_similarity"
-                        class="metric-value text-success"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Verification Confidence
-                    </div>
-
-                    <div
-                        id="bio_confidence"
-                        class="metric-value text-primary"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Decision
-                    </div>
-
-                    <div
-                        id="bio_decision"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <div class="mt-4">
-
-            <div
-                class="progress"
-                style="height:30px"
-            >
-
-                <div
-                    id="similarity_progress"
-                    class="progress-bar"
-                    style="width:0%"
-                >
-                    0%
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <p
-            id="verification_note"
-            class="ai-note mt-4 mb-0"
-        >
-            Verification data loaded from the current report.
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     4. SCAN & IMAGE QUALITY
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 no-break">
-
-    <div class="card-header bg-info text-white">
-
-        <h4 class="mb-0">
-            4. Scan & Image Quality
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div class="row g-3">
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Image Quality
-                    </div>
-
-                    <div
-                        id="image_quality"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Detection Confidence
-                    </div>
-
-                    <div
-                        id="quality_detection"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Eye Visibility
-                    </div>
-
-                    <div
-                        id="eye_visibility"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Scan Status
-                    </div>
-
-                    <div
-                        id="quality_status"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <p
-            id="quality_note"
-            class="text-muted mt-4 mb-0"
-        >
-            -
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     5. IRIS PROCESSING PIPELINE
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 pdf-break">
-
-    <div class="card-header bg-success text-white">
-
-        <h4 class="mb-0">
-            5. Iris Processing Pipeline
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row text-center mb-4">
-
-
-            <div class="col">
-
-                <div class="step-circle bg-primary">
-                    1
-                </div>
-
-                <b>Capture</b>
-
-            </div>
-
-
-            <div class="col-auto align-self-center">
-                →
-            </div>
-
-
-            <div class="col">
-
-                <div class="step-circle bg-info">
-                    2
-                </div>
-
-                <b>YOLO Detection</b>
-
-            </div>
-
-
-            <div class="col-auto align-self-center">
-                →
-            </div>
-
-
-            <div class="col">
-
-                <div class="step-circle bg-warning">
-                    3
-                </div>
-
-                <b>Segmentation</b>
-
-            </div>
-
-
-            <div class="col-auto align-self-center">
-                →
-            </div>
-
-
-            <div class="col">
-
-                <div class="step-circle bg-danger">
-                    4
-                </div>
-
-                <b>Normalization</b>
-
-            </div>
-
-        </div>
-
-
-        <div class="row g-3">
-
-
-            <!-- YOLO -->
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="image-card">
-
-                    <span class="badge bg-info">
-                        STEP 2
-                    </span>
-
-                    <img
-                        id="crop_image"
-                        class="report-image mt-2"
-                        alt="YOLO Detection"
-                    >
-
-                    <h6 class="mt-3">
-                        YOLO Detection
-                    </h6>
-
-                </div>
-
-            </div>
-
-
-            <!-- SEGMENTATION -->
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="image-card">
-
-                    <span class="badge bg-warning text-dark">
-                        STEP 3
-                    </span>
-
-                    <img
-                        id="segment_image"
-                        class="report-image mt-2"
-                        alt="Segmentation"
-                    >
-
-                    <h6 class="mt-3">
-                        Segmentation
-                    </h6>
-
-                </div>
-
-            </div>
-
-
-            <!-- NORMALIZATION -->
-
-            <div class="col-lg-4 col-md-6">
-
-                <div class="image-card">
-
-                    <span class="badge bg-danger">
-                        STEP 4
-                    </span>
-
-                    <img
-                        id="normalized_image"
-                        class="report-image mt-2"
-                        alt="Normalization"
-                    >
-
-                    <h6 class="mt-3">
-                        Normalization
-                    </h6>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     6. IRIS MEASUREMENTS & FEATURES
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 no-break">
-
-    <div class="card-header bg-dark text-white">
-
-        <h4 class="mb-0">
-            6. Iris Measurements & Features
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row g-3">
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Pupil Radius
-                    </div>
-
-                    <div
-                        id="pupil_radius"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Iris Radius
-                    </div>
-
-                    <div
-                        id="iris_radius"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Entropy
-                    </div>
-
-                    <div
-                        id="entropy"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Eye Color
-                    </div>
-
-                    <div
-                        id="eye_color"
-                        class="metric-value"
-                        style="font-size:18px"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <div class="row mt-4 g-3">
-
-
-            <div class="col-md-6">
-
-                <div class="image-card">
-
-                    <b>
-                        LBP Texture
-                    </b>
-
-                    <img
-                        id="lbp_image"
-                        class="report-image mt-2"
-                        alt="LBP Texture"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-6">
-
-                <div class="image-card">
-
-                    <b>
-                        Gabor Frequency
-                    </b>
-
-                    <img
-                        id="gabor_image"
-                        class="report-image mt-2"
-                        alt="Gabor Frequency"
-                    >
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     7. NEURO AI & BRAIN
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 pdf-break">
-
-    <div class="card-header bg-primary text-white">
-
-        <h4 class="mb-0">
-            7. Neuro AI & Brain
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row g-3">
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Neural Feature Strength
-                    </div>
-
-                    <div
-                        id="neuro_strength"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Feature Consistency
-                    </div>
-
-                    <div
-                        id="neuro_consistency"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Pattern Stability
-                    </div>
-
-                    <div
-                        id="neuro_stability"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <p
-            id="neuro_observation"
-            class="mt-4 mb-0"
-        >
-            -
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     8. PERSONALITY
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 pdf-break">
-
-    <div class="card-header bg-primary text-white">
-
-        <h4 class="mb-0">
-            8. Personality
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row g-4">
-
-
-            <div class="col-md-6">
-
-
-                <div class="score-row">
-
-                    <div class="score-label">
-
-                        <span>
-                            Leadership
-                        </span>
-
-                        <span id="leadership_value">
-                            -
-                        </span>
-
-                    </div>
-
-
-                    <div class="progress">
-
-                        <div
-                            id="leadership_bar"
-                            class="progress-bar"
-                            style="width:0%"
-                        ></div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="score-row">
-
-                    <div class="score-label">
-
-                        <span>
-                            Confidence
-                        </span>
-
-                        <span id="confidence_value">
-                            -
-                        </span>
-
-                    </div>
-
-
-                    <div class="progress">
-
-                        <div
-                            id="confidence_bar"
-                            class="progress-bar"
-                            style="width:0%"
-                        ></div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="score-row">
-
-                    <div class="score-label">
-
-                        <span>
-                            Creativity
-                        </span>
-
-                        <span id="creativity_value">
-                            -
-                        </span>
-
-                    </div>
-
-
-                    <div class="progress">
-
-                        <div
-                            id="creativity_bar"
-                            class="progress-bar"
-                            style="width:0%"
-                        ></div>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-            <div class="col-md-6">
-
-
-                <div class="score-row">
-
-                    <div class="score-label">
-
-                        <span>
-                            Adaptability
-                        </span>
-
-                        <span id="adaptability_value">
-                            -
-                        </span>
-
-                    </div>
-
-
-                    <div class="progress">
-
-                        <div
-                            id="adaptability_bar"
-                            class="progress-bar"
-                            style="width:0%"
-                        ></div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="score-row">
-
-                    <div class="score-label">
-
-                        <span>
-                            Decision Orientation
-                        </span>
-
-                        <span id="decision_value">
-                            -
-                        </span>
-
-                    </div>
-
-
-                    <div class="progress">
-
-                        <div
-                            id="decision_bar"
-                            class="progress-bar"
-                            style="width:0%"
-                        ></div>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     9. BEHAVIOUR
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 pdf-break">
-
-    <div class="card-header bg-success text-white">
-
-        <h4 class="mb-0">
-            9. Behaviour
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row g-3">
-
-
-            <div class="col-md-6">
-
-                <table class="table table-hover">
-
-                    <tr>
-                        <th>Leadership</th>
-                        <td id="behaviour_leadership">-</td>
-                    </tr>
-
-                    <tr>
-                        <th>Team Management</th>
-                        <td id="behaviour_team">-</td>
-                    </tr>
-
-                    <tr>
-                        <th>Career</th>
-                        <td id="behaviour_career">-</td>
-                    </tr>
-
-                    <tr>
-                        <th>Habits</th>
-                        <td id="behaviour_habits">-</td>
-                    </tr>
-
-                </table>
-
-            </div>
-
-
-            <div class="col-md-6">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Behaviour Profile
-                    </div>
-
-                    <div
-                        id="behaviour_profile"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                    <p
-                        id="behaviour_note"
-                        class="text-muted mt-2 mb-0"
-                    >
-                        -
+                    <h1 class="dossier-title">Official Identity Verification Dossier</h1>
+                    <p class="dossier-subtitle">
+                        Multi-Feature Optical Iris Verification &bull; Certified Cryptographic Assessment
                     </p>
+                </div>
+                <div>
+                    <span id="header_status" class="badge bg-success rounded-pill px-4 py-2 fs-6">
+                        PROCESSED
+                    </span>
+                </div>
+            </div>
+        </div>
 
+        <!-- Meta Bar -->
+        <div class="dossier-meta-bar">
+            <div class="meta-item">
+                <span class="meta-label">Report ID</span>
+                <span id="report_id" class="meta-val">--</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Recognition Ref</span>
+                <span id="recognition_id" class="meta-val">--</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Scan Date</span>
+                <span id="scan_date" class="meta-val">--</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Scan Time</span>
+                <span id="scan_time" class="meta-val">--</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Eye Orientation</span>
+                <span id="eye_side" class="meta-val">Left</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Processing Engine</span>
+                <span id="processing_status" class="meta-val text-success">Completed</span>
+            </div>
+        </div>
+
+        <!-- Section 1: Verified Subject Identity -->
+        <section class="dossier-section no-break">
+            <h5 class="dossier-section-title">
+                <i class="fa-solid fa-user-check"></i>
+                <span>Enrolled Subject Credentials</span>
+            </h5>
+
+            <div class="subject-identity-card">
+                <img id="employee_photo" class="employee-photo" alt="Employee Photo" src="images/admin.png" onerror="this.src='https://ui-avatars.com/api/?name=Subject&background=1e293b&color=fff'">
+                <div class="identity-details-grid">
+                    <div class="id-field">
+                        <label>Employee Code</label>
+                        <span id="employee_code">--</span>
+                    </div>
+                    <div class="id-field">
+                        <label>Full Legal Name</label>
+                        <span id="employee_name">--</span>
+                    </div>
+                    <div class="id-field">
+                        <label>Department</label>
+                        <span id="department">--</span>
+                    </div>
+                    <div class="id-field">
+                        <label>Designation</label>
+                        <span id="designation">--</span>
+                    </div>
+                    <div class="id-field">
+                        <label>Gender / Age</label>
+                        <span><span id="gender">--</span> / <span id="age">--</span> yrs</span>
+                    </div>
+                    <div class="id-field">
+                        <label>Blood Group</label>
+                        <span id="blood_group">--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Biometric Verification Scoring -->
+        <section class="dossier-section no-break">
+            <h5 class="dossier-section-title">
+                <i class="fa-solid fa-fingerprint"></i>
+                <span>Biometric Decision &amp; Similarity Metrics</span>
+            </h5>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="metric-tile">
+                        <div class="metric-tile-label">Cosine Similarity</div>
+                        <div class="metric-tile-value text-primary" id="similarity">--</div>
+                        <div class="progress mt-3" style="height: 10px;">
+                            <div id="similarity_progress" class="progress-bar bg-primary" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
                 </div>
 
+                <div class="col-md-4">
+                    <div class="metric-tile">
+                        <div class="metric-tile-label">Match Confidence</div>
+                        <div class="metric-tile-value text-success" id="confidence">--</div>
+                        <small class="text-muted mt-2 d-block">Detection: <span id="detection_confidence">--</span></small>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="metric-tile">
+                        <div class="metric-tile-label">Decision Outcome</div>
+                        <div class="metric-tile-value text-dark" id="match_status">--</div>
+                        <small class="text-muted mt-2 d-block">Threshold: 85.0%</small>
+                    </div>
+                </div>
             </div>
 
+            <!-- Verification Assessment Note -->
+            <div class="provenance-alert">
+                <h6><i class="fa-solid fa-circle-check"></i> Verification Note</h6>
+                <p id="verification_note">The scanned biometric representation matched the enrolled reference according to the reported similarity threshold.</p>
+            </div>
 
+            <!-- Compatibility hidden elements for legacy hooks -->
+            <span id="metric_similarity" style="display:none;"></span>
+            <span id="metric_confidence" style="display:none;"></span>
+            <span id="metric_status" style="display:none;"></span>
+            <span id="bio_similarity" style="display:none;"></span>
+            <span id="bio_confidence" style="display:none;"></span>
+            <span id="bio_decision" style="display:none;"></span>
+            <span id="final_decision" style="display:none;"></span>
+            <span id="final_similarity" style="display:none;"></span>
+            <span id="final_confidence" style="display:none;"></span>
+        </section>
+
+        <!-- Section 3: 6-Stage Optical Image Breakdown Grid -->
+        <section class="dossier-section no-break">
+            <h5 class="dossier-section-title">
+                <i class="fa-solid fa-images"></i>
+                <span>Optical Processing Pipeline Imagery</span>
+            </h5>
+
+            <div class="row g-3">
+                <div class="col-md-4 col-sm-6">
+                    <div class="optical-stage-card">
+                        <img id="captured_eye" class="report-image" alt="Captured Eye">
+                        <h6>1. Sensor Capture</h6>
+                        <small>Raw Camera Frame</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="optical-stage-card">
+                        <img id="crop_image" class="report-image" alt="Crop Eye">
+                        <h6>2. YOLO Eye Localization</h6>
+                        <small>Cropped Bounding Box</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="optical-stage-card">
+                        <img id="segment_image" class="report-image" alt="Segmentation">
+                        <h6>3. Iris Segmentation</h6>
+                        <small>Pupillary &amp; Limbic Contours</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="optical-stage-card">
+                        <img id="normalized_image" class="report-image" alt="Normalized Iris">
+                        <h6>4. Polar Normalization</h6>
+                        <small>Daugman Rubber-Sheet Grid</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="optical-stage-card">
+                        <img id="lbp_image" class="report-image" alt="LBP Texture">
+                        <h6>5. LBP Micro-Texture</h6>
+                        <small>Local Binary Patterns</small>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-6">
+                    <div class="optical-stage-card">
+                        <img id="gabor_image" class="report-image" alt="Gabor Filters">
+                        <h6>6. Gabor Wavelet Filters</h6>
+                        <small>2D Spatial Phase Encoding</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Optical Quality & Iris Characteristics -->
+        <section class="dossier-section no-break">
+            <h5 class="dossier-section-title">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Optical Measurements &amp; Physical Features</span>
+            </h5>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 50%;">Image Dimensions</th>
+                            <td><span id="image_width">--</span> &times; <span id="image_height">--</span> px</td>
+                        </tr>
+                        <tr>
+                            <th>Pupil Radius</th>
+                            <td><span id="pupil_radius">--</span> px</td>
+                        </tr>
+                        <tr>
+                            <th>Iris Radius</th>
+                            <td><span id="iris_radius">--</span> px</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 50%;">Eye Color Phenotype</th>
+                            <td><span id="eye_color" class="fw-bold text-primary">--</span></td>
+                        </tr>
+                        <tr>
+                            <th>Information Entropy</th>
+                            <td><span id="entropy">--</span> bits/pixel</td>
+                        </tr>
+                        <tr>
+                            <th>Quality Assessment</th>
+                            <td><span id="quality_status" class="badge bg-success">Usable</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <small class="text-muted d-block mt-2" id="quality_note"></small>
+            <span id="quality_detection" style="display:none;"></span>
+        </section>
+
+        <!-- Section 5: Demonstration Scoring Bars & Cognitive Breakdown -->
+        <section class="dossier-section no-break">
+            <h5 class="dossier-section-title">
+                <i class="fa-solid fa-chart-simple"></i>
+                <span>Demonstration Analytics &amp; Feature Indicators</span>
+            </h5>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="score-row">
+                        <div class="score-label">
+                            <span>Leadership &amp; Assertiveness</span>
+                            <span id="leadership_value">--</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div id="leadership_bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="score-row">
+                        <div class="score-label">
+                            <span>Confidence &amp; Poise</span>
+                            <span id="confidence_value">--</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div id="confidence_bar" class="progress-bar bg-info" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="score-row">
+                        <div class="score-label">
+                            <span>Creativity &amp; Ideation</span>
+                            <span id="creativity_value">--</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div id="creativity_bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="score-row">
+                        <div class="score-label">
+                            <span>Adaptability &amp; Flexibility</span>
+                            <span id="adaptability_value">--</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div id="adaptability_bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="score-row">
+                        <div class="score-label">
+                            <span>Analytical Decision Making</span>
+                            <span id="decision_value">--</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div id="decision_bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="score-row">
+                        <div class="score-label">
+                            <span>Teamwork &amp; Collaboration</span>
+                            <span id="behaviour_team">--</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Provenance & Ethics Disclaimer -->
+            <div class="p-3 rounded-3" style="background: var(--iris-slate-50); border: 1px solid var(--iris-border); font-size: 0.8rem; color: var(--iris-slate-600);">
+                <strong><i class="fa-solid fa-circle-info text-info me-1"></i> Scientific &amp; Ethical Provenance Notice:</strong>
+                Biometric optical scanning is strictly isolated to identity verification. Psychological, behavioral, and cognitive indicators shown above are deterministic demonstration heuristics. No medical, personality, or brain-scan claims are made or implied.
+            </div>
+
+            <!-- Hidden hooks for report.js state preservation -->
+            <div style="display:none;">
+                <span id="neuro_strength"></span>
+                <span id="neuro_consistency"></span>
+                <span id="neuro_stability"></span>
+                <span id="neuro_observation"></span>
+                <span id="behaviour_leadership"></span>
+                <span id="behaviour_career"></span>
+                <span id="behaviour_habits"></span>
+                <span id="behaviour_profile"></span>
+                <span id="behaviour_note"></span>
+                <span id="emotional_stability"></span>
+                <span id="emotional_regulation"></span>
+                <span id="stress_handling"></span>
+                <span id="emotional_note"></span>
+                <span id="social_interaction"></span>
+                <span id="communication_score"></span>
+                <span id="social_confidence"></span>
+                <span id="social_note"></span>
+                <span id="final_observation"></span>
+            </div>
+        </section>
+
+        <!-- Section 6: Verification Pipeline Timeline -->
+        <section class="dossier-section no-break">
+            <h5 class="dossier-section-title">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Execution Timeline &amp; Audit Trail</span>
+            </h5>
+            <div id="timeline" class="py-2"></div>
+        </section>
+
+        <!-- Section 7: Enrolled Multi-Frame Gallery -->
+        <section class="dossier-section no-break">
+            <h5 class="dossier-section-title">
+                <i class="fa-solid fa-grip"></i>
+                <span>Enrolled Reference Images Gallery</span>
+            </h5>
+            <div id="employee_gallery" class="row g-3">
+                <div class="col-12 text-muted">Loading reference images...</div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="p-4 bg-light border-top text-center text-muted small">
+            &copy; 2026 Iris AI Biometric Recognition System &bull; Cryptographically Verified Output &bull; Confidential
         </div>
 
     </div>
-
-</section>
-
-
-<!-- =====================================================
-     10. EMOTIONAL
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 no-break">
-
-    <div class="card-header bg-danger text-white">
-
-        <h4 class="mb-0">
-            10. Emotional
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row g-3">
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Emotional Stability
-                    </div>
-
-                    <div
-                        id="emotional_stability"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Emotional Regulation
-                    </div>
-
-                    <div
-                        id="emotional_regulation"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Stress Handling
-                    </div>
-
-                    <div
-                        id="stress_handling"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <p
-            id="emotional_note"
-            class="mt-4 mb-0"
-        >
-            -
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     11. SOCIAL INTERACTION
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 pdf-break">
-
-    <div class="card-header bg-info text-white">
-
-        <h4 class="mb-0">
-            11. Social Interaction
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row g-3">
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Social Interaction
-                    </div>
-
-                    <div
-                        id="social_interaction"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Communication
-                    </div>
-
-                    <div
-                        id="communication_score"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Confidence
-                    </div>
-
-                    <div
-                        id="social_confidence"
-                        class="metric-value"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <p
-            id="social_note"
-            class="mt-4 mb-0"
-        >
-            -
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     12. FINAL AI ASSESSMENT
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 no-break">
-
-    <div class="card-header bg-dark text-white">
-
-        <h4 class="mb-0">
-            12. Final AI Assessment
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-
-        <div class="row g-3">
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Biometric Decision
-                    </div>
-
-                    <div
-                        id="final_decision"
-                        class="metric-value"
-                        style="font-size:24px"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        Similarity
-                    </div>
-
-                    <div
-                        id="final_similarity"
-                        class="metric-value text-success"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="col-md-4">
-
-                <div class="metric-tile">
-
-                    <div>
-                        AI Confidence
-                    </div>
-
-                    <div
-                        id="final_confidence"
-                        class="metric-value text-primary"
-                    >
-                        -
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <h5 class="fw-bold mt-4">
-            AI Observation
-        </h5>
-
-
-        <p id="final_observation">
-            -
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     VERIFICATION TIMELINE
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 no-break">
-
-    <div class="card-header bg-secondary text-white">
-
-        <h4 class="mb-0">
-            Verification Timeline & Audit
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div id="timeline">
-
-            <div class="timeline-item">
-                ⏳ Loading audit information...
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     ENROLLMENT GALLERY
-===================================================== -->
-
-<section class="card report-card shadow-sm rounded-4 mt-4 no-break">
-
-    <div class="card-header bg-primary text-white">
-
-        <h4 class="mb-0">
-            Enrollment Gallery
-        </h4>
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div
-            class="row g-3"
-            id="employee_gallery"
-        ></div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     FOOTER
-===================================================== -->
-
-<footer class="report-footer mt-4 p-4 text-center">
-
-    <h3 class="fw-bold text-primary">
-        AI Iris Recognition System
-    </h3>
-
-
-    <p>
-        Powered by Computer Vision • YOLO • OpenCV • TensorFlow • CNN
-    </p>
-
-
-    <hr>
-
-
-    <div class="row">
-
-        <div class="col">
-            Version 2.0
-        </div>
-
-        <div class="col">
-            AI Security Platform
-        </div>
-
-        <div class="col">
-            Generated Report
-        </div>
-
-    </div>
-
-
-    <p class="disclaimer mt-3 mb-0">
-
-        © 2026 AI Iris Recognition Platform.
-        All Rights Reserved.
-
-    </p>
-
-</footer>
-
 
 </div>
 
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-</script>
-
-
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
-</script>
-
-
-<script src="auth_client.js"></script>
-<script src="report.js?v=20260909180000"></script>
-
-
+<!-- Scripts -->
+<script src="auth_client.js?v=20260928_3"></script>
+<script src="report.js?v=20260928_3"></script>
 </body>
-
 </html>

@@ -1,213 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Iris AI Scanner</title>
-
+    <title>Optical Biometric Scanner | Iris AI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="camera.css">
-
 </head>
-
 <body>
 
-<div class="container py-4">
+<div class="scanner-shell">
 
-    <!-- Top Navigation & Auth Bar -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <!-- Top Navigation & Authentication Bar -->
+    <header class="scanner-topbar d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
             <a href="dashboard.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Staff Console</span>
             </a>
             <a href="index.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="fa-solid fa-house me-1"></i> Home
+                <i class="fa-solid fa-house"></i>
+                <span>Public Home</span>
             </a>
         </div>
         <div id="navAuthContainer">
             <!-- Populated automatically by auth_client.js -->
         </div>
-    </div>
+    </header>
 
-    <div class="text-center mb-4">
-
-        <h1 class="fw-bold text-primary">
-            <i class="fa-solid fa-eye"></i>
-            Iris AI Recognition
-        </h1>
-
-        <p class="text-secondary fs-5">
-            Secure Biometric Authentication System
-        </p>
-
-    </div>
-
-    <div class="row g-4">
-
-        <div class="col-lg-8">
-
-            <div class="card shadow-lg border-0 rounded-4 h-100">
-
-                <div class="card-header bg-primary text-white">
-
-                    <h4 class="mb-0">
-                        <i class="fa-solid fa-camera"></i>
-                        Live Camera
-                    </h4>
-
-                </div>
-
-                <div class="card-body text-center">
-
-                    <video
-    id="video"
-    autoplay
-    playsinline
-    muted
-    style="
-        width:100%;
-        height:550px;
-        object-fit:cover;
-        background:black;
-        transform: scaleX(-1);
-    ">
-</video>
-
-                    <canvas
-                        id="canvas"
-                        style="display:none;">
-                    </canvas>
-
-                </div>
-
-            </div>
-
+    <!-- Scanner Header Area -->
+    <div class="scanner-title-area d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h1 class="scanner-title">
+                <i class="fa-solid fa-eye"></i>
+                <span>Optical Biometric Scanner</span>
+            </h1>
+            <p class="scanner-subtitle">
+                High-precision Daugman segmentation and deep convolutional tensor verification.
+            </p>
         </div>
 
-        <div class="col-lg-4">
+        <div class="d-flex align-items-center gap-3">
+            <!-- Eye Selector Control -->
+            <div class="eye-selector-wrapper" id="eyeSelector">
+                <button type="button" class="eye-select-pill active" id="eyeLeftBtn" onclick="selectEyeSide('Left')">
+                    <i class="fa-solid fa-eye"></i> Left Eye
+                </button>
+                <button type="button" class="eye-select-pill" id="eyeRightBtn" onclick="selectEyeSide('Right')">
+                    <i class="fa-solid fa-eye"></i> Right Eye
+                </button>
+            </div>
 
-            <div class="card shadow-lg border-0 rounded-4 h-100">
+            <!-- Current Session State Badge -->
+            <span class="badge bg-primary px-3 py-2 fs-6" id="stateBadge">
+                <i class="fa-solid fa-shield-halved me-1"></i> Ready to Scan
+            </span>
+        </div>
+    </div>
 
-                <div class="card-header bg-success text-white">
-
-                    <h4 class="mb-0">
-                        <i class="fa-solid fa-chart-column"></i>
-                        Scan Information
-                    </h4>
-
+    <!-- Main Scanner Console Grid -->
+    <div class="row g-4">
+        
+        <!-- Left: Optical Camera Viewport -->
+        <div class="col-lg-8">
+            <div class="scanner-viewport-card">
+                <div class="scanner-card-header">
+                    <h5>
+                        <i class="fa-solid fa-camera text-info"></i>
+                        <span>Live Sensor Feed</span>
+                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="hud-telemetry-badge" style="font-size: 0.725rem;">
+                            <span class="text-success">&bull;</span> 30 FPS &bull; 1080p
+                        </span>
+                    </div>
                 </div>
 
-                <div class="card-body">
+                <div class="optical-screen">
+                    <!-- Live Camera Video -->
+                    <video id="video" autoplay playsinline muted></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
 
-                    <table class="table table-bordered text-center">
+                    <!-- Laser Sweep Line -->
+                    <div class="laser-sweep" id="laserBeam"></div>
 
-                        <tr>
-                            <th>Status</th>
-                            <td id="scanStatus">Ready</td>
-                        </tr>
-
-                        <tr>
-                            <th>Confidence</th>
-                            <td id="confidence">--</td>
-                        </tr>
-
-                        <tr>
-                            <th>Eye Color</th>
-                            <td id="eyeColor">--</td>
-                        </tr>
-
-                        <tr>
-                            <th>Pupil Radius</th>
-                            <td id="pupilRadius">--</td>
-                        </tr>
-
-                        <tr>
-                            <th>Iris Radius</th>
-                            <td id="irisRadius">--</td>
-                        </tr>
-
-                    </table>
-
-                    <div class="d-grid mt-4">
-
-                        <button
-                            id="captureBtn"
-                            class="btn btn-primary btn-lg">
-
-                            <i class="fa-solid fa-magnifying-glass"></i>
-
-                            Scan Iris
-
-                        </button>
-
-                    </div>
-
-                    <div
-                        id="loading"
-                        class="text-center mt-4"
-                        style="display:none;">
-
-                        <div class="spinner-border text-primary"></div>
-
-                        <div class="mt-3 fw-bold">
-
-                            Scanning Iris...
-
+                    <!-- Optical HUD Reticle & Crosshairs -->
+                    <div class="scanner-hud-overlay">
+                        <div class="d-flex justify-content-between">
+                            <span class="hud-telemetry-badge">
+                                <i class="fa-solid fa-circle-dot text-danger"></i> REC ACTIVE
+                            </span>
+                            <span class="hud-telemetry-badge" id="hudEyeIndicator">
+                                TARGET: LEFT EYE
+                            </span>
                         </div>
 
-                    </div>
+                        <!-- Corner Reticle Brackets -->
+                        <div class="reticle-corner top-left"></div>
+                        <div class="reticle-corner top-right"></div>
+                        <div class="reticle-corner bottom-left"></div>
+                        <div class="reticle-corner bottom-right"></div>
 
+                        <!-- Center Optical Guide -->
+                        <div class="optical-target-circle"></div>
+                        <div class="optical-target-crosshairs"></div>
+
+                        <div class="text-center">
+                            <span class="hud-telemetry-badge" style="background: rgba(0,0,0,0.75);">
+                                POSITION IRIS WITHIN TARGET CIRCLE &bull; MINIMIZE BLINKING
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Real-Time Biometric Telemetry & Trigger -->
+        <div class="col-lg-4">
+            <div class="scanner-telemetry-card">
+                <div class="scanner-card-header">
+                    <h5>
+                        <i class="fa-solid fa-chart-column text-success"></i>
+                        <span>Biometric Telemetry</span>
+                    </h5>
+                    <span class="badge bg-secondary" style="font-size: 0.75rem;">YOLOv8 + CNN</span>
                 </div>
 
-            </div>
+                <div class="telemetry-card-body">
+                    <!-- Telemetry Data Table -->
+                    <table class="biometric-data-table mb-4">
+                        <tr>
+                            <th>Pipeline Status</th>
+                            <td>
+                                <span id="scanStatus" class="text-info fw-bold">Ready</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Cosine Confidence</th>
+                            <td>
+                                <span id="confidence" class="text-white">--</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Eye Color Phenotype</th>
+                            <td>
+                                <span id="eyeColor" class="text-white">--</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Pupil Radius</th>
+                            <td>
+                                <span id="pupilRadius" class="text-white">--</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Iris Radius</th>
+                            <td>
+                                <span id="irisRadius" class="text-white">--</span>
+                            </td>
+                        </tr>
+                    </table>
 
+                    <!-- Scan Trigger Action -->
+                    <div>
+                        <button type="button" id="captureBtn" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Scan &amp; Verify Iris</span>
+                        </button>
+
+                        <!-- Loading Indicator Overlay -->
+                        <div id="loading" class="text-center" style="display:none;">
+                            <div class="spinner-border text-info" role="status"></div>
+                            <div class="mt-3 fw-bold text-white fs-6">
+                                Extracting Gabor &amp; CNN Vectors...
+                            </div>
+                            <small class="text-white-50">Please maintain steady ocular fixation</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <div class="row mt-5">
-
+    <!-- Bottom: Captured Image Verification Preview -->
+    <div class="row mt-4">
         <div class="col-12">
-
-            <div class="card shadow-lg border-0 rounded-4">
-
-                <div class="card-header bg-dark text-white">
-
-                    <h4 class="mb-0">
-
-                        <i class="fa-solid fa-image"></i>
-
-                        Captured Image Preview
-
-                    </h4>
-
+            <div class="preview-card">
+                <div class="scanner-card-header">
+                    <h5>
+                        <i class="fa-solid fa-image text-warning"></i>
+                        <span>Captured Biometric Frame Preview</span>
+                    </h5>
+                    <span class="badge bg-secondary" style="font-size: 0.75rem;">Normalized Image</span>
                 </div>
-
-                <div class="card-body text-center">
-
-                    <img
-                        id="preview"
-                        style="display:none;">
-
+                <div class="card-body text-center p-4">
+                    <img id="preview" style="display:none;" alt="Captured Iris Preview">
+                    <div id="previewEmptyPlaceholder" class="py-4 text-muted">
+                        <i class="fa-regular fa-image fa-3x mb-2 d-block opacity-50"></i>
+                        <span>No biometric frame captured yet. Trigger scan above to view segmented preview.</span>
+                    </div>
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
 </div>
 
+<!-- Helper script for Eye Side Switcher UI state without breaking camera.js -->
+<script>
+function selectEyeSide(side) {
+    const leftBtn = document.getElementById("eyeLeftBtn");
+    const rightBtn = document.getElementById("eyeRightBtn");
+    const hud = document.getElementById("hudEyeIndicator");
+    if (side === 'Left') {
+        leftBtn.classList.add("active");
+        rightBtn.classList.remove("active");
+        if (hud) hud.textContent = "TARGET: LEFT EYE";
+        sessionStorage.setItem("scan_eye_side", "Left");
+    } else {
+        rightBtn.classList.add("active");
+        leftBtn.classList.remove("active");
+        if (hud) hud.textContent = "TARGET: RIGHT EYE";
+        sessionStorage.setItem("scan_eye_side", "Right");
+    }
+}
+
+// Observe preview image visibility to hide placeholder
+const previewImg = document.getElementById("preview");
+const previewEmpty = document.getElementById("previewEmptyPlaceholder");
+if (previewImg && previewEmpty) {
+    const observer = new MutationObserver(() => {
+        if (previewImg.style.display !== "none" && previewImg.src) {
+            previewEmpty.style.display = "none";
+        }
+    });
+    observer.observe(previewImg, { attributes: true, attributeFilter: ["style", "src"] });
+}
+</script>
+
 <script src="auth_client.js?v=20260928_3"></script>
 <script src="camera.js?v=20260928_3"></script>
-
 </body>
 </html>

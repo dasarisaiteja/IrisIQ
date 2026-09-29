@@ -1,702 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Contact | Iris AI</title>
-
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
-<link rel="stylesheet"
-href="index.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Iris AI Biometric Platform</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
 </head>
-
 <body>
 
-<!-- ================= NAVBAR ================= -->
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
-
+<!-- ================= NAVIGATION BAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
-
-        <a class="navbar-brand fw-bold" href="#">
-            <i class="fa-solid fa-eye text-info"></i>
-            IRIS AI
+        <a class="navbar-brand" href="index.html">
+            <i class="fa-solid fa-eye"></i>
+            <span>IRIS <span style="color: var(--iris-accent);">AI</span></span>
         </a>
 
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarMenu">
-
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-
         </button>
 
-        <div class="collapse navbar-collapse"
-             id="navbarMenu">
-
-            <ul class="navbar-nav ms-auto">
-
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
                 <li class="nav-item">
-                    <a class="nav-link"
-                       href="index.html">
-                        Home
-                    </a>
-                </li>
- <li class="nav-item">
-                    <a class="nav-link "
-                       href="about.html">
-                        About
-                    </a>
+                    <a class="nav-link" href="index.html">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link"
-                       href="features.html">
-                        Features
-                    </a>
+                    <a class="nav-link" href="about.html">About</a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link"
-                       href="technology.html">
-                        Technology
-                    </a>
+                    <a class="nav-link" href="features.html">Features</a>
                 </li>
-<li class="nav-item"><a class="nav-link active " href="contact.html">Contact</a></li>
-
-               
-
-                <li class="nav-item ms-2">
-
-                    <a href="register.html"
-                       class="btn btn-info text-white">
-
+                <li class="nav-item">
+                    <a class="nav-link" href="technology.html">Technology</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="contact.html">Contact</a>
+                </li>
+                <li class="nav-item ms-lg-2">
+                    <a href="register.html" class="btn btn-info text-white">
                         <i class="fa-solid fa-camera"></i>
-
-                        Start Scan
-
+                        <span>Start Scan</span>
                     </a>
-
                 </li>
-
+                <li class="nav-item ms-lg-2" id="navAuthItem">
+                    <a href="login.html" class="btn btn-outline-info" id="navAuthBtn">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </a>
+                </li>
             </ul>
-
         </div>
-
     </div>
-
 </nav>
 
-
-<!-- ================= HERO ================= -->
-
+<!-- ================= HERO SECTION ================= -->
 <section class="hero-section">
-
-<div class="container">
-
-<div class="row align-items-center min-vh-100">
-
-<div class="col-lg-6">
-
-<span class="badge bg-info px-4 py-2 rounded-pill mb-4">
-
-Contact Iris AI
-
-</span>
-
-<h1 class="display-2 fw-bold mb-4">
-
-Let's Build
-
-<span class="text-info">
-
-AI Solutions
-
-</span>
-
-Together
-
-</h1>
-
-<p class="lead">
-
-Have questions about Iris AI?
-
-Need a demo or enterprise solution?
-
-Our team is ready to help.
-
-</p>
-
-<a href="#contactForm"
-
-class="btn btn-info btn-lg mt-3">
-
-<i class="fa-solid fa-paper-plane"></i>
-
-Send Message
-
-</a>
-
-</div>
-
-<div class="col-lg-6 text-center">
-
-<img src="images/contact.png"
-
-class="img-fluid hero-image">
-
-</div>
-
-</div>
-
-</div>
-
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="hero-badge">
+                    <i class="fa-solid fa-headset"></i> Contact Iris AI
+                </div>
+                <h1 class="hero-title mb-4">
+                    Deploy Precision <span class="text-info">Biometrics</span> In Your Enterprise
+                </h1>
+                <p class="lead mb-4">
+                    Have architectural questions about Iris AI? Need guidance on campus-wide or corporate deployment, hardware camera specifications, or API integration? Connect with our engineering specialists.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#contactFormSection" class="btn btn-info btn-lg">
+                        <i class="fa-solid fa-envelope me-1"></i> Send Inquiry
+                    </a>
+                    <a href="dashboard.html" class="btn btn-outline-secondary btn-lg text-white" style="border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06);">
+                        <i class="fa-solid fa-gauge-high me-1"></i> Staff Console
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-image-wrapper">
+                    <img src="images/contact.png" class="img-fluid hero-image" alt="Contact Iris AI" onerror="this.src='images/hero-eye.jpg'">
+                    <div class="floating-card card-one">
+                        <i class="fa-solid fa-clock text-info"></i>
+                        <span>24/7 Dedicated Support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
-<!-- ================= CONTACT INFO ================= -->
+<!-- ================= CONTACT INFO CARDS ================= -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon-wrapper mx-auto">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <h4>Headquarters</h4>
+                    <p class="text-secondary small mb-0">Pune, Maharashtra, India<br>Innovation &amp; AI Research Hub</p>
+                </div>
+            </div>
 
-<section class="py-5">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon-wrapper mx-auto">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <h4>Email Support</h4>
+                    <p class="text-secondary small mb-0">support@irisiq.internal<br>contact@irisiq.internal</p>
+                </div>
+            </div>
 
-<div class="container">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon-wrapper mx-auto">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <h4>Phone Line</h4>
+                    <p class="text-secondary small mb-0">+91 (020) 2450-8900<br>Mon-Fri, 9:00 AM - 6:00 PM IST</p>
+                </div>
+            </div>
 
-<div class="row g-4">
-
-<div class="col-md-3">
-
-<div class="feature-card">
-
-<i class="fa-solid fa-location-dot"></i>
-
-<h4 class="mt-3">
-
-Address
-
-</h4>
-
-<p>
-
-Pune,
-
-Maharashtra,
-
-India
-
-</p>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="feature-card">
-
-<i class="fa-solid fa-phone"></i>
-
-<h4 class="mt-3">
-
-Phone
-
-</h4>
-
-<p>
-
-+91 9876543210
-
-</p>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="feature-card">
-
-<i class="fa-solid fa-envelope"></i>
-
-<h4 class="mt-3">
-
-Email
-
-</h4>
-
-<p>
-
-support@irisai.com
-
-</p>
-
-</div>
-
-</div>
-
-<div class="col-md-3">
-
-<div class="feature-card">
-
-<i class="fa-solid fa-clock"></i>
-
-<h4 class="mt-3">
-
-Working Hours
-
-</h4>
-
-<p>
-
-Mon - Sat
-
-9:00 AM - 6:00 PM
-
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon-wrapper mx-auto">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4>Security Inquiries</h4>
+                    <p class="text-secondary small mb-0">security@irisiq.internal<br>Responsible Disclosure Program</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
-<!-- ================= CONTACT FORM ================= -->
-
-<section
-id="contactForm"
-class="py-5 bg-light">
-
-<div class="container">
-
-<div class="row">
-
-<div class="col-lg-7">
-
-<div class="contact-box">
-
-<h2 class="mb-4">
-
-Send us a Message
-
-</h2>
-
-<form>
-
-<div class="row">
-
-<div class="col-md-6 mb-3">
-
-<input
-type="text"
-
-class="form-control"
-
-placeholder="First Name">
-
-</div>
-
-<div class="col-md-6 mb-3">
-
-<input
-type="text"
-
-class="form-control"
-
-placeholder="Last Name">
-
-</div>
-
-</div>
-
-<input
-type="email"
-
-class="form-control mb-3"
-
-placeholder="Email Address">
-
-<input
-type="text"
-
-class="form-control mb-3"
-
-placeholder="Phone Number">
-
-<input
-type="text"
-
-class="form-control mb-3"
-
-placeholder="Subject">
-
-<textarea
-
-class="form-control mb-4"
-
-rows="6"
-
-placeholder="Write your message...">
-
-</textarea>
-
-<button
-
-class="btn btn-info btn-lg px-5">
-
-<i class="fa-solid fa-paper-plane"></i>
-
-Send Message
-
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-<div class="col-lg-5">
-
-<div class="contact-box h-100">
-
-<h3 class="mb-4">
-
-Why Contact Us?
-
-</h3>
-
-<ul class="list-group list-group-flush">
-
-<li class="list-group-item">
-
-✔ Live AI Demo
-
-</li>
-
-<li class="list-group-item">
-
-✔ Enterprise Integration
-
-</li>
-
-<li class="list-group-item">
-
-✔ Technical Support
-
-</li>
-
-<li class="list-group-item">
-
-✔ API Documentation
-
-</li>
-
-<li class="list-group-item">
-
-✔ Deployment Assistance
-
-</li>
-
-<li class="list-group-item">
-
-✔ AI Consultation
-
-</li>
-
-</ul>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-<!-- ================= MAP ================= -->
-
-<section class="py-5">
-
-<div class="container">
-
-<div class="text-center mb-5">
-
-<h2>
-
-Our Location
-
-</h2>
-
-</div>
-
-<iframe
-
-src="https://www.google.com/maps?q=Pune&output=embed"
-
-width="100%"
-
-height="450"
-
-style="border:0;border-radius:20px;"
-
-loading="lazy">
-
-</iframe>
-
-</div>
-
-</section>
-
-<!-- ================= FAQ ================= -->
-
-<section class="py-5 bg-light">
-
-<div class="container">
-
-<h2 class="text-center mb-5">
-
-Frequently Asked Questions
-
-</h2>
-
-<div class="accordion"
-
-id="faq">
-
-<div class="accordion-item">
-
-<h2 class="accordion-header">
-
-<button
-
-class="accordion-button"
-
-data-bs-toggle="collapse"
-
-data-bs-target="#q1">
-
-How accurate is Iris AI?
-
-</button>
-
-</h2>
-
-<div
-
-id="q1"
-
-class="accordion-collapse collapse show"
-
-data-bs-parent="#faq">
-
-<div class="accordion-body">
-
-Recognition accuracy up to 99.8%.
-
-</div>
-
-</div>
-
-</div>
-
-<div class="accordion-item">
-
-<h2 class="accordion-header">
-
-<button
-
-class="accordion-button collapsed"
-
-data-bs-toggle="collapse"
-
-data-bs-target="#q2">
-
-Does it support API integration?
-
-</button>
-
-</h2>
-
-<div
-
-id="q2"
-
-class="accordion-collapse collapse"
-
-data-bs-parent="#faq">
-
-<div class="accordion-body">
-
-Yes. REST APIs are available.
-
-</div>
-
-</div>
-
-</div>
-
-<div class="accordion-item">
-
-<h2 class="accordion-header">
-
-<button
-
-class="accordion-button collapsed"
-
-data-bs-toggle="collapse"
-
-data-bs-target="#q3">
-
-Is cloud deployment supported?
-
-</button>
-
-</h2>
-
-<div
-
-id="q3"
-
-class="accordion-collapse collapse"
-
-data-bs-parent="#faq">
-
-<div class="accordion-body">
-
-Yes. Cloud and on-premise deployment are supported.
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
+<!-- ================= CONTACT FORM SECTION ================= -->
+<section id="contactFormSection" class="py-5" style="background: var(--iris-slate-50); border-top: 1px solid var(--iris-border);">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card p-4 p-md-5 border-0 shadow-lg" style="border-radius: var(--iris-radius-2xl);">
+                    <div class="text-center mb-4">
+                        <span class="section-tag">
+                            <i class="fa-solid fa-paper-plane"></i> Get in Touch
+                        </span>
+                        <h2 class="section-title">Send a Message</h2>
+                        <p class="text-secondary small">Fill in the form below and an Iris AI systems engineer will respond within 24 hours.</p>
+                    </div>
+
+                    <form id="contactForm" onsubmit="event.preventDefault(); alert('Thank you for contacting Iris AI. Our engineering team will review your inquiry.');">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="contactName">Full Name</label>
+                                <input type="text" class="form-control" id="contactName" placeholder="Dr. Jane Doe" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="contactEmail">Work Email</label>
+                                <input type="email" class="form-control" id="contactEmail" placeholder="jane.doe@institution.edu" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="contactOrg">Organization / Institution</label>
+                                <input type="text" class="form-control" id="contactOrg" placeholder="Global Health &amp; Research">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="contactSubject">Inquiry Topic</label>
+                                <select class="form-select" id="contactSubject">
+                                    <option value="enterprise">Enterprise Deployment &amp; Licensing</option>
+                                    <option value="hardware">Optical Capture Hardware Consultation</option>
+                                    <option value="api">FastAPI &amp; System Integration</option>
+                                    <option value="security">Security &amp; Compliance Audit</option>
+                                    <option value="other">General Inquiry</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label" for="contactMessage">Message</label>
+                                <textarea class="form-control" id="contactMessage" rows="4" placeholder="Please describe your deployment requirements or technical questions..." required></textarea>
+                            </div>
+
+                            <div class="col-12 text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="fa-solid fa-paper-plane me-1"></i> Send Inquiry
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 <!-- ================= FOOTER ================= -->
-
-<footer class="bg-dark text-white py-5">
-
+<footer class="site-footer">
     <div class="container">
-
-        <div class="row">
-
+        <div class="row g-4">
             <div class="col-lg-4">
-
-                <h3>
-
-                    <i class="fa-solid fa-eye text-info"></i>
-
-                    Iris AI
-
-                </h3>
-
+                <a href="index.html" class="footer-brand">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>IRIS <span style="color: var(--iris-accent);">AI</span></span>
+                </a>
                 <p>
-
-                    AI Powered Biometric Authentication Platform.
-
+                    Enterprise-grade biometric authentication and student intelligence platform combining high-precision optical iris verification with validated developmental analytics.
                 </p>
-
+                <div class="d-flex align-items-center gap-2 mt-3 text-white small">
+                    <i class="fa-solid fa-circle-check text-success"></i>
+                    <span>All Systems Operational &bull; Version 2.0</span>
+                </div>
             </div>
 
-            <div class="col-lg-4">
-
-                <h5>
-
-                    Quick Links
-
-                </h5>
-
-                <ul class="list-unstyled">
-
-                    <li>
-
-                        <a href="#"
-                           class="text-white text-decoration-none">
-
-                            Home
-
-                        </a>
-
-                    </li>
-
-                    <li>
-
-                        <a href="#features"
-                           class="text-white text-decoration-none">
-
-                            Features
-
-                        </a>
-
-                    </li>
-
-                    <li>
-
-                        <a href="camera.html"
-                           class="text-white text-decoration-none">
-
-                            Live Demo
-
-                        </a>
-
-                    </li>
-
+            <div class="col-lg-2 col-6">
+                <h6 class="footer-heading">Navigation</h6>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="technology.html">Technology</a></li>
+                    <li><a href="contact.html">Contact</a></li>
                 </ul>
-
             </div>
 
-            <div class="col-lg-4">
-
-                <h5>
-
-                    Follow Us
-
-                </h5>
-
-                <i class="fa-brands fa-facebook fs-3 me-3"></i>
-
-                <i class="fa-brands fa-linkedin fs-3 me-3"></i>
-
-                <i class="fa-brands fa-github fs-3"></i>
-
+            <div class="col-lg-3 col-6">
+                <h6 class="footer-heading">Platform Systems</h6>
+                <ul class="footer-links">
+                    <li><a href="camera.html">Live Optical Scan</a></li>
+                    <li><a href="register.html">Employee Onboarding</a></li>
+                    <li><a href="dashboard.html">Admin Dashboard</a></li>
+                    <li><a href="students.html">Student Management</a></li>
+                    <li><a href="report.html">Biometric Reports</a></li>
+                </ul>
             </div>
 
+            <div class="col-lg-3">
+                <h6 class="footer-heading">Connect &amp; Security</h6>
+                <p class="small text-muted mb-3">Enterprise biometric data encrypted at rest and in transit adhering to modern privacy regulations.</p>
+                <div class="social-links">
+                    <a href="#" class="social-btn" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="social-btn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="#" class="social-btn" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
         </div>
 
-        <hr>
-
-        <div class="text-center">
-
-            © 2026 Iris AI Recognition System
-
+        <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div>
+                &copy; 2026 Iris AI Recognition System. All Rights Reserved.
+            </div>
+            <div class="d-flex gap-4">
+                <a href="#" class="text-muted small">Privacy Policy</a>
+                <a href="#" class="text-muted small">Terms of Service</a>
+                <a href="#" class="text-muted small">Scientific Provenance</a>
+            </div>
         </div>
-
     </div>
-
 </footer>
 
-<script src="animations.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="auth_client.js?v=20260928_3"></script>
+<script src="animations.js"></script>
 </body>
-
 </html>

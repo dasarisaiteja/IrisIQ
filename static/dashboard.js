@@ -15,9 +15,10 @@
     // -------------------------------------------------------------
     // 1. STATE & AUTH INITIALIZATION
     // -------------------------------------------------------------
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-    const username = localStorage.getItem("username") || "admin";
+    const userObj = (window.IrisAuth && window.IrisAuth.getUser()) || null;
+    const token = localStorage.getItem("token") || (window.IrisAuth && window.IrisAuth.getToken()) || localStorage.getItem("iris_access_token");
+    const role = localStorage.getItem("role") || (userObj && userObj.role) || (window.IrisAuth && window.IrisAuth.getRole()) || "";
+    const username = localStorage.getItem("username") || (userObj && (userObj.full_name || userObj.username)) || "admin";
 
     const authGuardOverlay = document.getElementById("authGuardOverlay");
     const currentSectionTitle = document.getElementById("currentSectionTitle");
@@ -28,7 +29,9 @@
     }
 
     function checkAuth() {
-        if (!token || (role !== "Admin" && role !== "admin")) {
+        const curToken = token || (window.IrisAuth && window.IrisAuth.getToken()) || localStorage.getItem("iris_access_token");
+        const curRole = role || (window.IrisAuth && window.IrisAuth.getRole()) || localStorage.getItem("role") || "";
+        if (!curToken || (curRole.toLowerCase() !== "admin")) {
             if (authGuardOverlay) authGuardOverlay.style.display = "flex";
             setTimeout(() => {
                 window.location.href = "login.html";
@@ -41,8 +44,9 @@
     if (!checkAuth()) return;
 
     function getAuthHeaders() {
+        const curToken = token || (window.IrisAuth && window.IrisAuth.getToken()) || localStorage.getItem("iris_access_token");
         return {
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${curToken}`,
             "Content-Type": "application/json"
         };
     }
@@ -774,9 +778,11 @@
 
     // Global Logout
     document.getElementById("logoutBtn")?.addEventListener("click", () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        localStorage.removeItem("username");
+        if (window.IrisAuth) {
+            window.IrisAuth.clearAuth();
+        } else {
+            localStorage.clear();
+        }
         window.location.href = "login.html";
     });
 

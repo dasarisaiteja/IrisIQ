@@ -5,13 +5,41 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Authentication & URL Query Extraction
-    if (typeof authClient === "undefined") {
-        console.error("authClient not loaded");
-        return;
-    }
+    const authClient = (typeof window !== "undefined" && (window.authClient || window.IrisAuth)) || {
+        getToken: () => {
+            try { return localStorage.getItem("iris_access_token") || localStorage.getItem("token"); } catch(e) { return null; }
+        },
+        getUser: () => {
+            try {
+                const raw = localStorage.getItem("iris_user_info");
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            try {
+                const token = localStorage.getItem("iris_access_token") || localStorage.getItem("token");
+                if (token && token.split(".").length === 3) {
+                    const payload = JSON.parse(atob(token.split(".")[1]));
+                    return {
+                        username: payload.sub,
+                        role: payload.role,
+                        full_name: payload.full_name || payload.sub
+                    };
+                }
+            } catch(e) {}
+            return null;
+        },
+        getAuthHeaders: () => {
+            const t = (typeof window !== "undefined" && window.IrisAuth && window.IrisAuth.getToken()) || localStorage.getItem("iris_access_token") || localStorage.getItem("token");
+            return t ? { "Authorization": `Bearer ${t}` } : {};
+        },
+        logout: () => {
+            if (typeof window !== "undefined" && window.IrisAuth) window.IrisAuth.clearAuth();
+            try { localStorage.clear(); } catch(e) {}
+            window.location.href = "login.html";
+        }
+    };
 
     const currentUser = authClient.getUser();
-    if (!currentUser) {
+    if (!currentUser || !authClient.getToken()) {
         window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
         return;
     }

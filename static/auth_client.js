@@ -189,6 +189,32 @@
         return response;
     };
 
+    // Helper to synchronize legacy localStorage keys for backward compatibility
+    function syncLegacyStorage(token, user) {
+        try {
+            if (token && user) {
+                localStorage.setItem("token", token);
+                localStorage.setItem("role", user.role || "");
+                localStorage.setItem("username", user.username || "");
+            } else {
+                localStorage.removeItem("token");
+                localStorage.removeItem("role");
+                localStorage.removeItem("username");
+            }
+        } catch (e) {}
+    }
+
+    // Determine target dashboard URL based on user role
+    function getDashboardUrl(role) {
+        if (role === "Student") {
+            return "student_dashboard.html";
+        }
+        if (role === "Counselor" || role === "Counsellor") {
+            return "counsellor_dashboard.html";
+        }
+        return "dashboard.html";
+    }
+
     // Public API exposed for explicit authentication and role queries
     window.IrisAuth = {
         getToken: getToken,
@@ -198,6 +224,15 @@
         isStaff: () => {
             const role = getRole();
             return role === "Admin" || role === "Counselor";
+        },
+        getDashboardUrl: () => getDashboardUrl(getRole()),
+        getAuthHeaders: () => {
+            const t = getToken();
+            return t ? { "Authorization": "Bearer " + t } : {};
+        },
+        logout: () => {
+            window.IrisAuth.clearAuth();
+            window.location.href = "login.html";
         },
         login: async (username, password) => {
             const loginEndpoint = (typeof window !== "undefined" && window.location && window.location.origin)
@@ -215,6 +250,7 @@
                 if (data.access_token) {
                     localStorage.setItem(TOKEN_KEY, data.access_token);
                     localStorage.setItem(USER_KEY, JSON.stringify(data));
+                    syncLegacyStorage(data.access_token, data);
                     updateNavAuthElements();
                     return data;
                 }
@@ -225,33 +261,61 @@
         clearAuth: () => {
             localStorage.removeItem(TOKEN_KEY);
             localStorage.removeItem(USER_KEY);
+            syncLegacyStorage(null, null);
             updateNavAuthElements();
         }
     };
+
+    // Compatibility alias for pages referencing authClient
+    window.authClient = window.IrisAuth;
 
     // Helper to automatically render navigation login/logout and user badges across pages
     function updateNavAuthElements() {
         if (typeof document === "undefined") return;
         const user = getUser();
-        const isAuthenticated = !!getToken();
+        const token = getToken();
+        const isAuthenticated = !!token;
+        syncLegacyStorage(token, user);
+
+        const currentPath = (typeof window !== "undefined" && window.location) ? window.location.pathname : "";
+        const isDashboardPage = currentPath.includes("dashboard.html");
+        const dashUrl = getDashboardUrl(user?.role);
+
+        // Update dedicated dashboard menu links if present
+        const menuDashItems = document.querySelectorAll("#navDashboardMenuItem, #navDashboardLink, #navDashboardMenuLink");
+        menuDashItems.forEach(item => {
+            if (isAuthenticated) {
+                item.style.display = "";
+                if (item.tagName === "A") item.href = dashUrl;
+                const innerLink = item.querySelector("a");
+                if (innerLink) innerLink.href = dashUrl;
+            } else {
+                item.style.display = "none";
+            }
+        });
 
         // 1. Elements with id "navAuthContainer" or "navAuthItem"
         const containers = document.querySelectorAll("#navAuthContainer, #navAuthItem");
         containers.forEach(el => {
             if (isAuthenticated && user) {
                 const badgeClass = user.role === "Admin" ? "bg-warning text-dark" : (user.role === "Counselor" ? "bg-success text-white" : "bg-info text-dark");
+                const dashBtnHtml = isDashboardPage ? "" : `
+                    <a href="${dashUrl}" class="btn btn-sm btn-info text-white fw-bold px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1" id="navDashboardBtn" title="Go to Dashboard">
+                        <i class="fa-solid fa-gauge-high"></i> Dashboard
+                    </a>
+                `;
                 el.innerHTML = `
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge ${badgeClass} py-2 px-3 fw-semibold">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        ${dashBtnHtml}
+                        <a href="${dashUrl}" class="badge ${badgeClass} py-2 px-3 fw-semibold text-decoration-none shadow-sm d-inline-flex align-items-center" title="Logged in as ${user.role} - Click to open Dashboard">
                             <i class="fa-solid fa-user-shield me-1"></i> ${user.role}: ${user.username}
-                        </span>
+                        </a>
                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="IrisAuth.clearAuth(); window.location.href='login.html';">
                             <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
                         </button>
                     </div>
                 `;
             } else {
-                const currentPath = (typeof window !== "undefined" && window.location) ? window.location.pathname : "";
                 const redirectParam = (currentPath && !currentPath.includes("login.html")) ? `?redirect=${encodeURIComponent(currentPath)}` : "";
                 el.innerHTML = `
                     <a href="login.html${redirectParam}" class="btn btn-outline-info btn-sm px-3" id="navAuthBtn">

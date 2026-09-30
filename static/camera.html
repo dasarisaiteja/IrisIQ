@@ -126,10 +126,13 @@
             <!-- Left Column: Camera Viewport & Capture Stage -->
             <div class="col-lg-7">
                 <div class="card border-0 shadow-lg scanner-card h-100">
-                    <div class="card-header bg-transparent border-bottom border-light border-opacity-10 py-3 px-4 d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-transparent border-bottom border-light border-opacity-10 py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="live-indicator"></span>
+                            <span class="live-indicator" id="cameraLiveIndicator"></span>
                             <span class="text-white fw-bold small text-uppercase letter-spacing-1">Live Biometric Camera</span>
+                            <span id="cameraStatusBadge" class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 px-2 py-1 small">
+                                <i class="fa-solid fa-spinner fa-spin me-1"></i> Requesting camera access...
+                            </span>
                         </div>
                         <div class="text-secondary small">
                             <i class="fa-solid fa-video me-1"></i> <span id="cameraResolution">Auto</span>
@@ -142,7 +145,7 @@
                             <video id="video" autoplay playsinline muted></video>
                             
                             <!-- Iris Targeting Reticle Overlay -->
-                            <div class="targeting-reticle position-absolute top-50 start-50 translate-middle pointer-events-none">
+                            <div class="targeting-reticle position-absolute top-50 start-50 translate-middle pointer-events-none" id="targetingReticle">
                                 <div class="reticle-circle">
                                     <div class="reticle-crosshair-h"></div>
                                     <div class="reticle-crosshair-v"></div>
@@ -151,14 +154,23 @@
                                 <div id="reticleLabel" class="reticle-label mt-2">Center Eye in Target Ring</div>
                             </div>
 
+                            <!-- Camera Loading / Permission Prompt Overlay -->
+                            <div id="cameraLoadingOverlay" class="camera-loading-overlay position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4">
+                                <div class="spinner-border text-primary mb-3" role="status" style="width: 2.75rem; height: 2.75rem;"></div>
+                                <h5 class="text-white fw-bold mb-1" id="cameraLoadingTitle">Requesting camera access...</h5>
+                                <p class="text-secondary small mb-0 text-center" style="max-width: 380px;" id="cameraLoadingDesc">
+                                    Please allow camera access when prompted by your browser to view the live biometric stream.
+                                </p>
+                            </div>
+
                             <!-- Camera Error Overlay (shown if permission denied or error) -->
                             <div id="cameraErrorOverlay" class="camera-error-overlay position-absolute top-0 start-0 w-100 h-100 d-none flex-column align-items-center justify-content-center p-4">
-                                <i class="fa-solid fa-video-slash text-danger display-4 mb-3"></i>
-                                <h5 class="text-white fw-bold mb-2">Camera Unavailable</h5>
-                                <p id="cameraErrorMessage" class="text-secondary small mb-3 text-center" style="max-width: 400px;">
+                                <i class="fa-solid fa-video-slash text-danger display-4 mb-3" id="cameraErrorIcon"></i>
+                                <h5 class="text-white fw-bold mb-2" id="cameraErrorTitle">Camera Unavailable</h5>
+                                <p id="cameraErrorMessage" class="text-secondary small mb-3 text-center" style="max-width: 420px;">
                                     Could not access your video input device. Please ensure camera permissions are granted.
                                 </p>
-                                <button type="button" id="retryCameraBtn" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                                <button type="button" id="retryCameraBtn" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-semibold">
                                     <i class="fa-solid fa-rotate me-1"></i> Request Camera Access
                                 </button>
                             </div>
@@ -414,8 +426,8 @@
     </div>
 </div>
 
-<script src="auth_client.js?v=20260928_3"></script>
-<script src="camera.js?v=20260929_1"></script>
+<script src="auth_client.js?v=20260930_c2"></script>
+<script src="camera.js?v=20260930_c2"></script>
 
 </body>
 </html>

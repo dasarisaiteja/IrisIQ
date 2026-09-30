@@ -10,6 +10,40 @@
  * Backend is strictly authoritative for scan completion state.
  */
 
+// Resilient Auth Client resolver
+const authClient = (typeof window !== "undefined" && (window.authClient || window.IrisAuth)) || {
+    getToken: () => {
+        try { return localStorage.getItem("iris_access_token") || localStorage.getItem("token"); } catch(e) { return null; }
+    },
+    getUser: () => {
+        try {
+            const raw = localStorage.getItem("iris_user_info");
+            if (raw) return JSON.parse(raw);
+        } catch(e) {}
+        try {
+            const token = localStorage.getItem("iris_access_token") || localStorage.getItem("token");
+            if (token && token.split(".").length === 3) {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                return {
+                    username: payload.sub,
+                    role: payload.role,
+                    full_name: payload.full_name || payload.sub
+                };
+            }
+        } catch(e) {}
+        return null;
+    },
+    getAuthHeaders: () => {
+        const t = (typeof window !== "undefined" && window.IrisAuth && window.IrisAuth.getToken()) || localStorage.getItem("iris_access_token") || localStorage.getItem("token");
+        return t ? { "Authorization": `Bearer ${t}` } : {};
+    },
+    logout: () => {
+        if (typeof window !== "undefined" && window.IrisAuth) window.IrisAuth.clearAuth();
+        try { localStorage.clear(); } catch(e) {}
+        window.location.href = "login.html";
+    }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     // URL Context & State
     const urlParams = new URLSearchParams(window.location.search);
@@ -36,7 +70,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("canvas");
     const cameraErrorOverlay = document.getElementById("cameraErrorOverlay");
     const cameraErrorMessage = document.getElementById("cameraErrorMessage");
+    const cameraErrorTitle = document.getElementById("cameraErrorTitle");
+    const cameraErrorIcon = document.getElementById("cameraErrorIcon");
     const retryCameraBtn = document.getElementById("retryCameraBtn");
+    const cameraLoadingOverlay = document.getElementById("cameraLoadingOverlay");
+    const cameraLoadingTitle = document.getElementById("cameraLoadingTitle");
+    const cameraLoadingDesc = document.getElementById("cameraLoadingDesc");
+    const cameraStatusBadge = document.getElementById("cameraStatusBadge");
+    const cameraLiveIndicator = document.getElementById("cameraLiveIndicator");
+    const targetingReticle = document.getElementById("targetingReticle");
     const cameraResolution = document.getElementById("cameraResolution");
     const activeEyeIndicator = document.getElementById("activeEyeIndicator");
     const reticleLabel = document.getElementById("reticleLabel");
@@ -140,50 +182,230 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 1. Initialize & Start Camera
-    async function startCamera() {
-        if (cameraErrorOverlay) cameraErrorOverlay.classList.add("d-none");
-
-        try {
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-            }
-
-            mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: { ideal: 1280, min: 640 },
-                    height: { ideal: 720, min: 480 },
-                    facingMode: "user"
-                },
-                audio: false
-            });
-
-            video.srcObject = mediaStream;
-            await video.play();
-
-            const track = mediaStream.getVideoTracks()[0];
-            const settings = track.getSettings();
-            if (settings.width && settings.height) {
-                cameraResolution.textContent = `${settings.width}x${settings.height}`;
+    // Helper: Set Unified Camera Status & Overlays
+    function setCameraStatus(statusText, detail = null, type = "info") {
+        if (cameraStatusBadge) {
+            let badgeClass = "badge px-2 py-1 small ";
+            let iconHtml = "";
+            if (type === "warning") {
+                badgeClass += "bg-warning-subtle text-warning border border-warning border-opacity-25";
+                iconHtml = '<i class="fa-solid fa-spinner fa-spin me-1"></i>';
+            } else if (type === "success") {
+                badgeClass += "bg-success-subtle text-success border border-success border-opacity-25";
+                iconHtml = '<i class="fa-solid fa-circle-check me-1"></i>';
             } else {
-                cameraResolution.textContent = "HD Active";
+                badgeClass += "bg-danger-subtle text-danger border border-danger border-opacity-25";
+                iconHtml = '<i class="fa-solid fa-circle-exclamation me-1"></i>';
             }
-        } catch (err) {
-            console.error("Camera access error:", err);
-            let userMessage = "Could not access video input device. Please check browser camera permissions.";
-            if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-                userMessage = "Camera permission was denied. Please allow camera access in your browser settings to proceed with eye scanning.";
-            } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
-                userMessage = "No camera found on your device. Please connect a webcam or enable your built-in camera.";
-            } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
-                userMessage = "Camera is currently in use by another application or tab. Please close other camera apps and retry.";
-            }
+            cameraStatusBadge.className = badgeClass;
+            cameraStatusBadge.innerHTML = `${iconHtml} ${statusText}`;
+        }
 
-            if (cameraErrorMessage) cameraErrorMessage.textContent = userMessage;
+        if (statusText === "Camera ready") {
+            if (cameraLiveIndicator) cameraLiveIndicator.classList.add("active");
+            if (cameraLoadingOverlay) cameraLoadingOverlay.classList.add("d-none");
+            if (cameraErrorOverlay) {
+                cameraErrorOverlay.classList.add("d-none");
+                cameraErrorOverlay.classList.remove("d-flex");
+            }
+            if (targetingReticle) targetingReticle.classList.remove("d-none");
+        } else if (statusText === "Requesting camera access...") {
+            if (cameraLiveIndicator) cameraLiveIndicator.classList.remove("active");
+            if (cameraLoadingOverlay) {
+                cameraLoadingOverlay.classList.remove("d-none");
+                cameraLoadingOverlay.classList.add("d-flex");
+            }
+            if (cameraErrorOverlay) {
+                cameraErrorOverlay.classList.add("d-none");
+                cameraErrorOverlay.classList.remove("d-flex");
+            }
+        } else {
+            // Error states
+            if (cameraLiveIndicator) cameraLiveIndicator.classList.remove("active");
+            if (cameraLoadingOverlay) cameraLoadingOverlay.classList.add("d-none");
             if (cameraErrorOverlay) {
                 cameraErrorOverlay.classList.remove("d-none");
                 cameraErrorOverlay.classList.add("d-flex");
             }
+            if (cameraErrorTitle) cameraErrorTitle.textContent = statusText;
+            if (cameraErrorMessage && detail) cameraErrorMessage.textContent = detail;
+            if (cameraErrorIcon) {
+                if (statusText === "Camera permission denied") {
+                    cameraErrorIcon.className = "fa-solid fa-shield-halved text-danger display-4 mb-3";
+                } else if (statusText === "No camera detected") {
+                    cameraErrorIcon.className = "fa-solid fa-video-slash text-danger display-4 mb-3";
+                } else if (statusText === "Camera already in use") {
+                    cameraErrorIcon.className = "fa-solid fa-lock text-warning display-4 mb-3";
+                } else {
+                    cameraErrorIcon.className = "fa-solid fa-triangle-exclamation text-danger display-4 mb-3";
+                }
+            }
+        }
+    }
+
+    function handleCameraError(err) {
+        console.error("Camera access failure:", err);
+        const errName = err ? (err.name || "") : "";
+        const errMsg = err ? (err.message || "") : "";
+
+        if (errName === "NotAllowedError" || errName === "PermissionDeniedError") {
+            setCameraStatus(
+                "Camera permission denied",
+                "Camera access was denied. Please click the lock or camera icon in your browser address bar, set Camera to 'Allow', and click 'Request Camera Access'.",
+                "danger"
+            );
+        } else if (errName === "NotFoundError" || errName === "DevicesNotFoundError") {
+            setCameraStatus(
+                "No camera detected",
+                "No webcam or camera device was detected on your system. Please connect an external camera or ensure your built-in camera is enabled.",
+                "danger"
+            );
+        } else if (errName === "NotReadableError" || errName === "TrackStartError") {
+            setCameraStatus(
+                "Camera already in use",
+                "The camera is currently held by another application, browser tab, or background process. Please close other camera apps and click 'Request Camera Access'.",
+                "danger"
+            );
+        } else if (errName === "OverconstrainedError") {
+            setCameraStatus(
+                "Unable to start camera",
+                `The camera could not satisfy requested video constraints (${err.constraint || 'resolution'}).`,
+                "danger"
+            );
+        } else if (errName === "SecurityError") {
+            setCameraStatus(
+                "Unable to start camera",
+                "Camera access was blocked by browser security policy or insecure origin.",
+                "danger"
+            );
+        } else {
+            setCameraStatus(
+                "Unable to start camera",
+                errMsg || "Could not access video input device. Please verify your camera settings.",
+                "danger"
+            );
+        }
+    }
+
+    // 1. Initialize & Start Camera
+    async function startCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            setCameraStatus(
+                "Unable to start camera",
+                "The MediaDevices Camera API is not supported by your browser or the current origin. Please access IrisIQ via http://localhost or HTTPS.",
+                "danger"
+            );
+            return;
+        }
+
+        setCameraStatus(
+            "Requesting camera access...",
+            "Please allow camera access when prompted by your browser to view the live biometric stream.",
+            "warning"
+        );
+
+        if (mediaStream) {
+            try {
+                mediaStream.getTracks().forEach(track => track.stop());
+            } catch (e) {}
+            mediaStream = null;
+        }
+
+        // Progressive constraint candidates: ideal 720p HD -> VGA -> unconstrained
+        const constraintCandidates = [
+            {
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: { ideal: "user" }
+                },
+                audio: false
+            },
+            {
+                video: {
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: { ideal: "user" }
+                },
+                audio: false
+            },
+            {
+                video: true,
+                audio: false
+            }
+        ];
+
+        let streamAcquired = null;
+        let lastError = null;
+
+        for (const constraints of constraintCandidates) {
+            try {
+                streamAcquired = await navigator.mediaDevices.getUserMedia(constraints);
+                if (streamAcquired) break;
+            } catch (err) {
+                lastError = err;
+                // If permission was denied or device missing or in use, relaxed constraints won't help
+                if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError" ||
+                    err.name === "NotReadableError" || err.name === "TrackStartError" ||
+                    err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+                    break;
+                }
+                console.warn("Retrying camera with relaxed constraints due to:", err);
+            }
+        }
+
+        if (!streamAcquired) {
+            handleCameraError(lastError);
+            return;
+        }
+
+        try {
+            mediaStream = streamAcquired;
+
+            // Strict HTML5 video element property configuration for reliable playback
+            video.muted = true;
+            video.defaultMuted = true;
+            video.playsInline = true;
+            video.setAttribute("playsinline", "");
+            video.setAttribute("muted", "");
+            video.srcObject = mediaStream;
+
+            // Wait for metadata ready before calling play
+            await new Promise((resolve) => {
+                if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+                    resolve();
+                } else {
+                    const onMeta = () => {
+                        video.removeEventListener("loadedmetadata", onMeta);
+                        resolve();
+                    };
+                    video.addEventListener("loadedmetadata", onMeta);
+                    setTimeout(resolve, 1500); // Safety timeout
+                }
+            });
+
+            // Start live playback
+            await video.play().catch(playErr => {
+                console.warn("video.play() warning:", playErr);
+            });
+
+            // Read live resolution
+            const track = mediaStream.getVideoTracks()[0];
+            const settings = track ? track.getSettings() : {};
+            const activeWidth = video.videoWidth || settings.width || 0;
+            const activeHeight = video.videoHeight || settings.height || 0;
+
+            if (activeWidth && activeHeight) {
+                cameraResolution.textContent = `${activeWidth}x${activeHeight}`;
+            } else {
+                cameraResolution.textContent = "Live Stream Active";
+            }
+
+            setCameraStatus("Camera ready", null, "success");
+
+        } catch (err) {
+            console.error("Video element playback error:", err);
+            handleCameraError(err);
         }
     }
 
@@ -210,14 +432,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const data = await response.json();
-            updateUIFromStatus(data);
+            await updateUIFromStatus(data);
         } catch (err) {
             console.error("Status refresh error:", err);
         }
     }
 
     // 3. Update UI strictly from Backend Authoritative Status
-    function updateUIFromStatus(data) {
+    async function updateUIFromStatus(data) {
         displayAssessmentId.textContent = data.assessment_id;
         displayStudentId.textContent = data.student_id;
         displayStudentName.textContent = data.student_name;
@@ -648,6 +870,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // Clean up tracks when navigating away
+    window.addEventListener("beforeunload", () => {
+        if (mediaStream) {
+            try {
+                mediaStream.getTracks().forEach(track => track.stop());
+            } catch (e) {}
+            mediaStream = null;
+        }
+    });
 
     // Initial Execution
     if (!assessmentId) {

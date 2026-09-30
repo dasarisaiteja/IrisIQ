@@ -215,10 +215,21 @@ body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #ef4444;
+    background: #eab308;
     display: inline-block;
-    box-shadow: 0 0 8px #ef4444;
+    box-shadow: 0 0 8px #eab308;
     animation: livePulse 1.4s infinite alternate;
+}
+
+.live-indicator.active {
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+}
+
+.camera-loading-overlay {
+    background: rgba(8, 17, 32, 0.92);
+    z-index: 8;
+    backdrop-filter: blur(8px);
 }
 
 @keyframes livePulse {

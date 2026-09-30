@@ -47,8 +47,21 @@ const authClient = (typeof window !== "undefined" && (window.authClient || windo
 document.addEventListener("DOMContentLoaded", () => {
     // URL Context & State
     const urlParams = new URLSearchParams(window.location.search);
-    const assessmentId = urlParams.get("assessment_id") || sessionStorage.getItem("iris_active_assessment_id");
-    const studentIdParam = urlParams.get("student_id") || sessionStorage.getItem("iris_active_student_id");
+    const assessmentId = (urlParams.get("assessment_id") || "").trim();
+    const studentIdParam = (urlParams.get("student_id") || "").trim();
+
+    // Dynamically adjust Dashboard navigation link according to authenticated role
+    const curUser = authClient.getUser();
+    const navBackDashboardBtn = document.getElementById("navBackDashboardBtn");
+    if (navBackDashboardBtn && curUser) {
+        if (curUser.role === "Student") {
+            navBackDashboardBtn.href = "student_dashboard.html";
+        } else if (curUser.role === "Counsellor" || curUser.role === "Counselor") {
+            navBackDashboardBtn.href = "counsellor_dashboard.html";
+        } else {
+            navBackDashboardBtn.href = "dashboard.html";
+        }
+    }
 
     // DOM Elements - Header & Metadata
     const displayAssessmentId = document.getElementById("displayAssessmentId");
@@ -411,6 +424,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (retryCameraBtn) {
         retryCameraBtn.addEventListener("click", () => {
+            if (!assessmentId) {
+                showGlobalAlert("No assessment context found. Please register or select an assessment.", "warning");
+                return;
+            }
             startCamera();
         });
     }
@@ -420,7 +437,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!assessmentId) return;
 
         try {
-            const response = await fetch(`/api/assessments/${encodeURIComponent(assessmentId)}/scan/status`);
+            const response = await fetch(`/api/assessments/${encodeURIComponent(assessmentId)}/scan/status`, {
+                headers: authClient.getAuthHeaders()
+            });
+            if (response.status === 401) {
+                showGlobalAlert("Authentication required. Please log in.", "danger");
+                return;
+            }
+            if (response.status === 403) {
+                showGlobalAlert("Access Denied: You are not authorized for this assessment.", "danger");
+                return;
+            }
             if (response.status === 404) {
                 showGlobalAlert(`Assessment '${assessmentId}' was not found. Please register or select an active assessment.`, "danger");
                 return;
@@ -478,6 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             captureLeftBtn.classList.add("d-none");
             retryLeftBtn.classList.remove("d-none");
+            retryLeftBtn.disabled = false;
 
             // Stepper Left Eye
             stepLeft.className = "step completed";
@@ -490,13 +518,16 @@ document.addEventListener("DOMContentLoaded", () => {
             leftScanDetails.classList.remove("d-none");
             leftErrorBox.classList.remove("d-none");
             leftErrorText.textContent = left.error_message || "Scan quality insufficient. Please retry.";
+            captureLeftBtn.classList.add("d-none");
             retryLeftBtn.classList.remove("d-none");
+            retryLeftBtn.disabled = false;
         } else {
             leftStatusBadge.className = "badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill small fw-semibold";
             leftStatusBadge.textContent = "Pending";
             leftEyeCard.classList.remove("completed-card");
             leftScanDetails.classList.add("d-none");
             captureLeftBtn.classList.remove("d-none");
+            captureLeftBtn.disabled = false;
             retryLeftBtn.classList.add("d-none");
         }
 
@@ -512,6 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             captureRightBtn.classList.add("d-none");
             retryRightBtn.classList.remove("d-none");
+            retryRightBtn.disabled = false;
 
             // Stepper Right Eye
             stepRight.className = "step completed";
@@ -523,13 +555,16 @@ document.addEventListener("DOMContentLoaded", () => {
             rightScanDetails.classList.remove("d-none");
             rightErrorBox.classList.remove("d-none");
             rightErrorText.textContent = right.error_message || "Scan quality insufficient. Please retry.";
+            captureRightBtn.classList.add("d-none");
             retryRightBtn.classList.remove("d-none");
+            retryRightBtn.disabled = false;
         } else {
             rightStatusBadge.className = "badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill small fw-semibold";
             rightStatusBadge.textContent = "Pending";
             rightEyeCard.classList.remove("completed-card");
             rightScanDetails.classList.add("d-none");
             captureRightBtn.classList.remove("d-none");
+            captureRightBtn.disabled = false;
             retryRightBtn.classList.add("d-none");
         }
 
@@ -614,6 +649,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const response = await fetch(endpoint, {
                 method: "POST",
+                headers: authClient.getAuthHeaders(),
                 body: formData
             });
 
@@ -881,12 +917,120 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Initial Execution
+    // 6. Initial Execution: Strict Assessment Context & Authorization Gate
     if (!assessmentId) {
-        showGlobalAlert("No active Assessment ID found. Please register a student or select an assessment from Dashboard.", "warning");
-    } else {
-        refreshScanStatus();
+        displayAssessmentId.textContent = "--";
+        displayStudentId.textContent = "--";
+        displayStudentName.textContent = "--";
+        displayWorkflowStatus.textContent = "NO CONTEXT";
+        displayWorkflowStatusBadge.className = "badge bg-secondary-subtle text-secondary border border-secondary border-opacity-25 px-3 py-2 fw-semibold small";
+        displayWorkflowStatusBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i> NO CONTEXT';
+        displayGatingStatus.textContent = "Assessment Context Required";
+        displayGatingStatus.className = "text-secondary fw-bold";
+
+        // Explicitly disable scan capture, retry, and advancement buttons
+        captureLeftBtn.disabled = true;
+        captureRightBtn.disabled = true;
+        retryLeftBtn.disabled = true;
+        retryRightBtn.disabled = true;
+        continueAnalysisBtn.disabled = true;
+
+        showGlobalAlert("No assessment context found. Please register or select an assessment.", "warning");
+        setCameraStatus("No assessment context", "Please select or register an assessment from your dashboard before starting camera.", "warning");
+        return;
     }
 
-    startCamera();
+    // Verify assessment exists and user is authorized before initializing camera
+    initializeAssessment();
+
+    async function initializeAssessment() {
+        displayAssessmentId.textContent = assessmentId;
+        displayWorkflowStatus.textContent = "VERIFYING...";
+        displayWorkflowStatusBadge.className = "badge bg-primary-subtle text-primary border border-primary border-opacity-25 px-3 py-2 fw-semibold small";
+        displayWorkflowStatusBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin-pulse me-1"></i> VERIFYING...';
+
+        captureLeftBtn.disabled = true;
+        captureRightBtn.disabled = true;
+        retryLeftBtn.disabled = true;
+        retryRightBtn.disabled = true;
+        continueAnalysisBtn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/assessments/${encodeURIComponent(assessmentId)}/scan/status`, {
+                headers: authClient.getAuthHeaders()
+            });
+
+            if (response.status === 401) {
+                displayAssessmentId.textContent = assessmentId;
+                displayStudentId.textContent = "--";
+                displayStudentName.textContent = "--";
+                displayWorkflowStatus.textContent = "UNAUTHORIZED";
+                displayWorkflowStatusBadge.className = "badge bg-danger-subtle text-danger border border-danger border-opacity-25 px-3 py-2 fw-semibold small";
+                displayWorkflowStatusBadge.innerHTML = '<i class="fa-solid fa-lock me-1"></i> UNAUTHORIZED';
+                showGlobalAlert("Authentication required. Please log in to access this assessment.", "danger");
+                setCameraStatus("Authentication required", "Please log in to access this assessment scanner.", "danger");
+                return;
+            }
+
+            if (response.status === 403) {
+                displayAssessmentId.textContent = assessmentId;
+                displayStudentId.textContent = "--";
+                displayStudentName.textContent = "--";
+                displayWorkflowStatus.textContent = "ACCESS DENIED";
+                displayWorkflowStatusBadge.className = "badge bg-danger-subtle text-danger border border-danger border-opacity-25 px-3 py-2 fw-semibold small";
+                displayWorkflowStatusBadge.innerHTML = '<i class="fa-solid fa-shield-halved me-1"></i> ACCESS DENIED';
+                const errData = await response.json().catch(() => ({}));
+                showGlobalAlert(errData.detail || "Access Denied: You are not authorized to view or scan for this assessment.", "danger");
+                setCameraStatus("Access denied", "You do not have permission to view or scan for this assessment.", "danger");
+                return;
+            }
+
+            if (response.status === 404) {
+                displayAssessmentId.textContent = assessmentId;
+                displayStudentId.textContent = "--";
+                displayStudentName.textContent = "--";
+                displayWorkflowStatus.textContent = "NOT FOUND";
+                displayWorkflowStatusBadge.className = "badge bg-danger-subtle text-danger border border-danger border-opacity-25 px-3 py-2 fw-semibold small";
+                displayWorkflowStatusBadge.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> NOT FOUND';
+                showGlobalAlert(`Assessment '${assessmentId}' was not found. Please register or select an active assessment.`, "danger");
+                setCameraStatus("Assessment not found", `Assessment '${assessmentId}' does not exist.`, "danger");
+                return;
+            }
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                displayAssessmentId.textContent = assessmentId;
+                displayWorkflowStatus.textContent = "ERROR";
+                showGlobalAlert(errData.detail || "Failed to load assessment status.", "danger");
+                setCameraStatus("Unable to load assessment", errData.detail || "Error connecting to server.", "danger");
+                return;
+            }
+
+            const data = await response.json();
+
+            // Validate student_id param against backend authoritative student_id if provided
+            if (studentIdParam && data.student_id && studentIdParam.toLowerCase() !== data.student_id.toLowerCase()) {
+                console.warn(`Query param student_id '${studentIdParam}' does not match authoritative backend student_id '${data.student_id}'. Authoritative data applied.`);
+            }
+
+            // Update UI strictly from backend authoritative data
+            await updateUIFromStatus(data);
+
+            // Persist valid context in sessionStorage for back/forward navigation within the same session
+            try {
+                sessionStorage.setItem("iris_active_assessment_id", data.assessment_id);
+                if (data.student_id) sessionStorage.setItem("iris_active_student_id", data.student_id);
+            } catch(e) {}
+
+            // Assessment verified and user authorized -> Initialize camera
+            await startCamera();
+
+        } catch (err) {
+            console.error("Assessment initialization error:", err);
+            displayAssessmentId.textContent = assessmentId;
+            displayWorkflowStatus.textContent = "ERROR";
+            showGlobalAlert(`Network error verifying assessment: ${err.message}`, "danger");
+            setCameraStatus("Unable to load assessment", "Network error connecting to IrisIQ API server.", "danger");
+        }
+    }
 });

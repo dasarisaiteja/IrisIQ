@@ -300,8 +300,29 @@
         const rightDone = (rightStatus === "Completed" || rightStatus === "COMPLETED");
         const bothDone = leftDone && rightDone;
 
+        // Make Scan Cards Clickable to Scanner
+        if (aid && aid !== "--") {
+            const leftScanBox = leftScanBadge?.closest(".scan-box");
+            if (leftScanBox) {
+                leftScanBox.style.cursor = "pointer";
+                leftScanBox.title = "Open Biometric Eye Scanner";
+                leftScanBox.onclick = () => { window.location.href = `camera.html?assessment_id=${encodeURIComponent(aid)}`; };
+            }
+            const rightScanBox = rightScanBadge?.closest(".scan-box");
+            if (rightScanBox) {
+                rightScanBox.style.cursor = "pointer";
+                rightScanBox.title = "Open Biometric Eye Scanner";
+                rightScanBox.onclick = () => { window.location.href = `camera.html?assessment_id=${encodeURIComponent(aid)}`; };
+            }
+        }
+
         // Workflow Step 2: Scan
         if (stepScan) {
+            if (aid && aid !== "--") {
+                stepScan.style.cursor = "pointer";
+                stepScan.title = "Open Biometric Eye Scanner";
+                stepScan.onclick = () => { window.location.href = `camera.html?assessment_id=${encodeURIComponent(aid)}`; };
+            }
             if (bothDone) {
                 stepScan.className = "workflow-step completed";
                 if (stepScanCircle) stepScanCircle.innerHTML = '<i class="fa-solid fa-check"></i>';

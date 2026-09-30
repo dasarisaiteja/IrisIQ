@@ -428,6 +428,11 @@
                                 </li>
                                 <li><hr class="dropdown-divider border-secondary border-opacity-20"></li>
                                 <li>
+                                    <a class="dropdown-item small" href="camera.html?assessment_id=${encodeURIComponent(asmId)}" target="_blank">
+                                        <i class="fa-solid fa-camera text-primary me-2"></i>Biometric Scanner
+                                    </a>
+                                </li>
+                                <li>
                                     <button class="dropdown-item small" onclick="window.irisCounsellor.viewStudentDetails('${escapeJs(stuId)}', '${escapeJs(asmId)}')">
                                         <i class="fa-solid fa-id-card-clip text-light me-2"></i>View Case Details
                                     </button>
@@ -781,7 +786,12 @@
 
                     <!-- Dual Eye Scan & Analysis Status -->
                     <div>
-                        <h6 class="text-white fw-bold mb-3"><i class="fa-solid fa-eye text-primary me-2"></i>Biometric Scans & Analysis</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-white fw-bold mb-0"><i class="fa-solid fa-eye text-primary me-2"></i>Biometric Scans & Analysis</h6>
+                            <a href="camera.html?assessment_id=${encodeURIComponent(asmId)}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1">
+                                <i class="fa-solid fa-camera me-1"></i> Open Scanner
+                            </a>
+                        </div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">

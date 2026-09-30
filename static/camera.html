@@ -21,7 +21,7 @@
         <!-- Top Navigation & Auth Bar -->
         <header class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-secondary border-opacity-25">
             <div class="d-flex align-items-center gap-2">
-                <a href="dashboard.html" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <a id="navBackDashboardBtn" href="dashboard.html" class="btn btn-outline-light btn-sm rounded-pill px-3">
                     <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
                 </a>
                 <a href="register.html" class="btn btn-outline-light btn-sm rounded-pill px-3">
@@ -52,11 +52,11 @@
                         <div class="d-inline-flex flex-wrap gap-2 justify-content-md-end">
                             <span class="badge bg-dark-subtle border border-secondary border-opacity-25 px-3 py-2 text-light font-monospace small">
                                 <i class="fa-solid fa-hashtag text-secondary me-1"></i>
-                                <span id="displayAssessmentId">ASM-LOADING...</span>
+                                <span id="displayAssessmentId">--</span>
                             </span>
-                            <span id="displayWorkflowStatusBadge" class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 px-3 py-2 fw-semibold small">
-                                <i class="fa-solid fa-spinner fa-spin-pulse me-1"></i>
-                                <span id="displayWorkflowStatus">INITIALIZING</span>
+                            <span id="displayWorkflowStatusBadge" class="badge bg-secondary-subtle text-secondary border border-secondary border-opacity-25 px-3 py-2 fw-semibold small">
+                                <i id="displayWorkflowStatusIcon" class="fa-solid fa-circle-exclamation me-1"></i>
+                                <span id="displayWorkflowStatus">NO CONTEXT</span>
                             </span>
                         </div>
                     </div>
@@ -236,7 +236,7 @@
 
                             <!-- Left Eye Action Buttons -->
                             <div class="d-flex gap-2">
-                                <button type="button" id="captureLeftBtn" class="btn btn-primary btn-lg rounded-pill px-4 flex-grow-1 fw-bold">
+                                <button type="button" id="captureLeftBtn" class="btn btn-primary btn-lg rounded-pill px-4 flex-grow-1 fw-bold" disabled>
                                     <span id="leftSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
                                     <i class="fa-solid fa-camera me-1"></i> Capture Left Eye
                                 </button>
@@ -287,7 +287,7 @@
 
                             <!-- Right Eye Action Buttons -->
                             <div class="d-flex gap-2">
-                                <button type="button" id="captureRightBtn" class="btn btn-outline-info btn-lg rounded-pill px-4 flex-grow-1 fw-bold">
+                                <button type="button" id="captureRightBtn" class="btn btn-outline-info btn-lg rounded-pill px-4 flex-grow-1 fw-bold" disabled>
                                     <span id="rightSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
                                     <i class="fa-solid fa-camera me-1"></i> Capture Right Eye
                                 </button>
@@ -426,8 +426,8 @@
     </div>
 </div>
 
-<script src="auth_client.js?v=20260930_c2"></script>
-<script src="camera.js?v=20260930_c2"></script>
+<script src="auth_client.js?v=20261001_1"></script>
+<script src="camera.js?v=20261001_1"></script>
 
 </body>
 </html>

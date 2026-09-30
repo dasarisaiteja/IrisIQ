@@ -394,6 +394,7 @@
                             <div class="small mb-1"><span class="text-secondary">LEFT Eye:</span> <span class="badge-status ${scans.LEFT?.status === 'Completed' ? 'status-ready' : 'status-pending'}">${escapeHtml(scans.LEFT?.status || 'Pending')}</span> (Q: ${(scans.LEFT?.quality_score || 0).toFixed(2)})</div>
                             <div class="small mb-1"><span class="text-secondary">RIGHT Eye:</span> <span class="badge-status ${scans.RIGHT?.status === 'Completed' ? 'status-ready' : 'status-pending'}">${escapeHtml(scans.RIGHT?.status || 'Pending')}</span> (Q: ${(scans.RIGHT?.quality_score || 0).toFixed(2)})</div>
                             <div class="small"><span class="text-secondary">AI Model Version:</span> ${escapeHtml(an.model_version || "Not Analyzed")}</div>
+                            <a href="camera.html?assessment_id=${encodeURIComponent(a.assessment_id)}" target="_blank" class="btn btn-sm btn-outline-primary mt-2 py-0 px-2"><i class="fa-solid fa-camera me-1"></i>Open Scanner</a>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -445,7 +446,11 @@
             tbody.innerHTML = data.scans.map(s => `
                 <tr>
                     <td class="mono small text-secondary">${escapeHtml(s.scan_id)}</td>
-                    <td class="mono fw-semibold text-primary">${escapeHtml(s.assessment_id)}</td>
+                    <td class="mono fw-semibold text-primary">
+                        <a href="camera.html?assessment_id=${encodeURIComponent(s.assessment_id)}" target="_blank" class="text-primary text-decoration-none" title="Open Scanner for ${escapeHtml(s.assessment_id)}">
+                            ${escapeHtml(s.assessment_id)} <i class="fa-solid fa-arrow-up-right-from-square xsmall ms-1"></i>
+                        </a>
+                    </td>
                     <td>${escapeHtml(s.student_name)}</td>
                     <td><span class="badge ${s.eye_side === 'LEFT' ? 'bg-primary' : 'bg-info'} text-white">${escapeHtml(s.eye_side)}</span></td>
                     <td><span class="badge-status ${s.status === 'Completed' ? 'status-ready' : 'status-failed'}">${escapeHtml(s.status)}</span></td>
